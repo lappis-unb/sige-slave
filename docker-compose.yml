@@ -1,0 +1,25 @@
+version: '3.2'
+services:
+
+  postgres:
+    restart: always
+    image: postgres:9.6
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=smi-slave-dev
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  slave-api:
+    restart: always
+    build: .
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/smi-slave
+    depends_on:
+      - postgres
+    entrypoint: ["FLASK_APP=hello.py flask run"]
