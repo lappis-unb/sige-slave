@@ -1,0 +1,1 @@
+flask\nflask-sqlalchemy\npsycopg2\nflask-migrate\nflask-script\nmarshmallow\nflask-bcrypt\npyjwt
