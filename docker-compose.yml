@@ -1,8 +1,6 @@
 version: '3.2'
 services:
-
   postgres:
-    restart: always
     image: postgres:9.6
     environment:
       - POSTGRES_USER=postgres
@@ -14,7 +12,6 @@ services:
       - 5432:5432
 
   slave-api:
-    restart: always
     build: .
     ports:
       - 5000:5000
@@ -22,4 +19,8 @@ services:
       - .:/smi-slave
     depends_on:
       - postgres
-    entrypoint: ["FLASK_APP=hello.py flask run"]
+    environment: 
+      - FLASK_ENV="docker"
+      - FLASK_DEBUG=1
+      - FLASK_APP=/smi-slave/src/app.py
+    command: flask run
