@@ -2,10 +2,7 @@ version: '3'
 services:
   postgres:
     image: postgres:9.6
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=smi-slave-dev
+    env_file: dev-env
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data
     ports:
@@ -19,8 +16,3 @@ services:
       - .:/smi-slave
     depends_on:
       - postgres
-    environment: 
-      - FLASK_ENV="docker"
-      - FLASK_DEBUG=1
-      - FLASK_APP=/smi-slave/src/app.py
-    command: flask run --host 0.0.0.0
