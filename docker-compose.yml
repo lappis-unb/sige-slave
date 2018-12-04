@@ -1,0 +1,19 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:9.6
+    env_file: dev-env
+    volumes:
+      - ./postgres-data/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  slave-api:
+    build: .
+    env_file: dev-env
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/smi-slave
+    depends_on:
+      - postgres
