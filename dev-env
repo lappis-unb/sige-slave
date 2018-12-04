@@ -1,3 +1,6 @@
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=smi-slave-dev
+FLASK_ENV="docker"
+FLASK_DEBUG=1
+FLASK_APP=/smi-slave/src/app.py

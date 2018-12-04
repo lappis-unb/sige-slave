@@ -10,6 +10,7 @@ services:
 
   slave-api:
     build: .
+    env_file: dev-env
     ports:
       - 5000:5000
     volumes:
