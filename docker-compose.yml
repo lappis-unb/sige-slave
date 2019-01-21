@@ -10,7 +10,7 @@ services:
     container_name: api
     build: .
     env_file: dev-env
-    command: ["sleep", "9999"]
+    command: ["python", "manage.py", "runserver"]
     ports:
       - 8000:8000
     volumes:
