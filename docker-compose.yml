@@ -3,6 +3,7 @@ services:
   db:
     container_name: postgres
     image: postgres:9.6
+    env_file: dev-env
     volumes:
       - pg-data:/var/lib/postgresql/data
 
@@ -10,7 +11,7 @@ services:
     container_name: api
     build: .
     env_file: dev-env
-    command: python manage.py runserver 0.0.0.0:8000
+    command: ["sh", "scripts/start.sh"]
     ports:
       - 8000:8000
     volumes:
