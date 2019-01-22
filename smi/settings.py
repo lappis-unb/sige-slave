@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'transductor_model',
+    'transductor',
     'rest_framework'
 ]
 
