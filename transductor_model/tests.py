@@ -4,19 +4,20 @@ from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.test import APIRequestFactory
 from django.db.utils import DataError
-
+import pytest
+from django.conf import settings
 
 class TransductorModelTestCase(TestCase):
 
     def setUp(self):
-        self.transductor_model_example = TransductorModel.objects.create(
+        self.first_transductor = TransductorModel.objects.create(
             name='TR4020',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',
             register_addresses=[[68, 0], [70, 1]],
         )
 
-        self.transductor_model_sec_example = TransductorModel.objects.create(
+        self.second_transductor = TransductorModel.objects.create(
             name='TR4030',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',
@@ -24,13 +25,14 @@ class TransductorModelTestCase(TestCase):
         )
 
     def test_create_transductor_model(self):
+
         transductor_model = TransductorModel()
         transductor_model.name = 'transductor_example_1'
         transductor_model.transport_protocol = 'UDP'
         transductor_model.serial_protocol = 'ModbusRTU'
         transductor_model.register_addresses = [[68, 0], [70, 1]]
 
-        self.assertFalse(transductor_model.save())
+        self.assertIsNone(transductor_model.save())
 
 
     def test_not_create_transductor_model(self):
@@ -47,7 +49,7 @@ class TransductorModelTestCase(TestCase):
         model_name = 'TR4020'
         t_model_retrieved = TransductorModel.objects.get(name=model_name)
 
-        self.assertEqual(self.transductor_model_example, t_model_retrieved)
+        self.assertEqual(self.first_transductor, t_model_retrieved)
 
 
     def test_not_retrieve_transductor_model(self):
