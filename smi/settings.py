@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'transductor_model',
     'transductor',
+    'measurement',
     'rest_framework'
 ]
 
