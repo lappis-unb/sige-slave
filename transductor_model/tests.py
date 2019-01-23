@@ -3,6 +3,7 @@ from .models import TransductorModel
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.test import APIRequestFactory
+from django.db.utils import DataError
 
 
 class TransductorModelTestCase(TestCase):
@@ -87,25 +88,30 @@ class TransductorModelTestCase(TestCase):
 
 
     def test_not_update_with_invalid_name(self):
-        transductor_model = TransductorModel.objects.filter(name='TR4030')
+        transductor_model = TransductorModel.objects.filter(name='TR4020')
 
-        self.assertTrue(transductor_model.update(name=''))
+        with self.assertRaises(DataError):
+            transductor_model.update(
+                name='123456789101112131415161718192021222324252627282930')
 
-    def test_not_update_with_invalid_transport_protocol(self):
-        pass
+
+    def test_update_with_valid_transport_protocol(self):
+        transductor_model = TransductorModel.objects.filter(name='TR4020')
+
+        self.assertTrue(transductor_model.update(transport_protocol='USB-C'))
 
 
     def test_not_update_with_invalid_serial_protocol(self):
-        pass
+        transductor_model = TransductorModel.objects.filter(name='TR4020')
 
-
-    def test_not_update_with_invalid_register_addresses(self):
-        pass
+        with self.assertRaises(DataError):
+            transductor_model.update(
+                transport_protocol=\
+                    '123456789101112131415161718192021222324252627282930')
 
 
     def test_delete_transductor_model(self):
         size = len(TransductorModel.objects.all())
-
         TransductorModel.objects.filter(name='TR4020').delete()
 
         self.assertEqual(size-1, len(TransductorModel.objects.all()))
@@ -122,6 +128,7 @@ class TransductorModelTestCase(TestCase):
 
         with self.assertRaises(TransductorModel.DoesNotExist):
             TransductorModel.objects.get(name=wrong_model_name).delete()
+
 
     def test_api_create_request(self):
         factory = APIRequestFactory()
