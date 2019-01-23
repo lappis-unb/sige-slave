@@ -2,6 +2,8 @@ from django.test import TestCase
 from .models import TransductorModel
 from django.db import IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.test import APIRequestFactory
+
 
 class TransductorModelTestCase(TestCase):
 
@@ -13,6 +15,7 @@ class TransductorModelTestCase(TestCase):
             register_addresses=[[68, 0], [70, 1]],
         )
 
+
     def test_create_transductor_model(self):
         transductor_model = TransductorModel()
         transductor_model.name = 'transductor_example_1'
@@ -21,6 +24,7 @@ class TransductorModelTestCase(TestCase):
         transductor_model.register_addresses = [[68, 0], [70, 1]]
 
         self.assertFalse(transductor_model.save())
+
 
     def test_not_create_transductor_model(self):
         transductor_model = TransductorModel()
@@ -31,17 +35,20 @@ class TransductorModelTestCase(TestCase):
 
         self.assertRaises(IntegrityError, transductor_model.save)
 
+
     def test_retrieve_transductor_model(self):
         model_name = 'TR4020'
         t_model_retrieved = TransductorModel.objects.get(name=model_name)
 
         self.assertEqual(self.transductor_model_example, t_model_retrieved)
 
+
     def test_not_retrieve_transductor_model(self):
         wrong_model_name = 'TR 4020'
 
         with self.assertRaises(TransductorModel.DoesNotExist):
             TransductorModel.objects.get(name=wrong_model_name)
+
 
     def test_update_transport_protocol_of_transductor_model(self):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
@@ -50,6 +57,7 @@ class TransductorModelTestCase(TestCase):
             transductor_model.update(transport_protocol='TCP')
         )
 
+
     def test_update_serial_protocol_of_transductor_model(self):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
 
@@ -57,25 +65,66 @@ class TransductorModelTestCase(TestCase):
             transductor_model.update(serial_protocol='I2C')
         )
 
+
     def test_update_register_address_of_transductor_model(self):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
 
         self.assertTrue(
-            transductor_model.update(register_addresses=[[54, 0],[60, 1]])
+            transductor_model.update(register_addresses=[[54, 0], [60, 1]])
         )
+
 
     def test_update_name_of_transductor_model(self):
         transductor_model = TransductorModel.objects.filter(name='TR4020')
 
         self.assertTrue(transductor_model.update(name='SP4000'))
 
+
     def test_not_update_transductor_model(self):
         pass
 
 
     def test_delete_transductor_model(self):
-        pass
+        objects = TransductorModel.objects.all()
+
+        obj_to_remove = TransductorModel.objects.get(pk=1)
+        obj_to_remove.delete()
+
+        self.assertEqual(len(objects) - 1, len(TransductorModel.objects.all()))
 
 
     def test_not_delete_transductor_model(self):
+        objects = TransductorModel.objects.all()
+
+        obj_to_remove = TransductorModel.objects.get(pk=1)
+        obj_to_remove.delete()      # no objects in transductor_model now
+
+        self.assertEqual(len(TransductorModel.objects.all()), 0)
+
+        self.assertRaises(
+            IntegrityError,
+            TransductorModel.objects.get(pk=1).delete()
+        )
+
+
+    def test_api_create_request(self):
+        factory = APIRequestFactory()
+        request = factory.post('/transductor-models', {
+            'name': '',
+            'transport_protocol': '',
+            'serial_protocol': '',
+            'register_addresses': '[[68,0],[70,1]]'
+        }, format='json')
+        pass
+
+
+    def test_api_retrieve_request(self):
+        pass
+
+
+    def test_api_delete_request(self):
+        pass
+
+
+    def test_api_edit_request(self):
         pass
