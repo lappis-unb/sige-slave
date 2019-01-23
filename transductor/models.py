@@ -1,7 +1,6 @@
 from django.db import models
 from datetime import datetime
 from django.core.validators import RegexValidator
-from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
 from boogie.rest import rest_api
@@ -18,7 +17,7 @@ class Transductor(models.Model):
         model (TransductorModel): The transductor model.
     """
     # TODO fix default value problem
-    serial_number = models.IntegerField(primary_key=True)
+    serial_number = models.CharField(max_length=8, primary_key=True)
     ip_address = models.CharField(max_length=15, unique=True, default="0.0.0.0", validators=[
         RegexValidator(
             regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
