@@ -15,6 +15,12 @@ class TransductorModelTestCase(TestCase):
             register_addresses=[[68, 0], [70, 1]],
         )
 
+        self.transductor_model_sec_example = TransductorModel.objects.create(
+            name='TR4030',
+            transport_protocol='UDP',
+            serial_protocol='ModbusRTU',
+            register_addresses=[[68, 0],[70, 1]]
+        )
 
     def test_create_transductor_model(self):
         transductor_model = TransductorModel()
@@ -80,32 +86,42 @@ class TransductorModelTestCase(TestCase):
         self.assertTrue(transductor_model.update(name='SP4000'))
 
 
-    def test_not_update_transductor_model(self):
+    def test_not_update_with_invalid_name(self):
+        transductor_model = TransductorModel.objects.filter(name='TR4030')
+
+        self.assertTrue(transductor_model.update(name=''))
+
+    def test_not_update_with_invalid_transport_protocol(self):
+        pass
+
+
+    def test_not_update_with_invalid_serial_protocol(self):
+        pass
+
+
+    def test_not_update_with_invalid_register_addresses(self):
         pass
 
 
     def test_delete_transductor_model(self):
-        objects = TransductorModel.objects.all()
+        size = len(TransductorModel.objects.all())
 
-        obj_to_remove = TransductorModel.objects.get(pk=1)
-        obj_to_remove.delete()
+        TransductorModel.objects.filter(name='TR4020').delete()
 
-        self.assertEqual(len(objects) - 1, len(TransductorModel.objects.all()))
+        self.assertEqual(size-1, len(TransductorModel.objects.all()))
 
 
     def test_not_delete_transductor_model(self):
-        objects = TransductorModel.objects.all()
+        original_size = len(TransductorModel.objects.all())
+        TransductorModel.objects.get(name='TR4030').delete()
+        new_size = len(TransductorModel.objects.all())
 
-        obj_to_remove = TransductorModel.objects.get(pk=1)
-        obj_to_remove.delete()      # no objects in transductor_model now
+        self.assertEqual(original_size-1, new_size)
 
-        self.assertEqual(len(TransductorModel.objects.all()), 0)
+        wrong_model_name = 'TR4030'
 
-        self.assertRaises(
-            IntegrityError,
-            TransductorModel.objects.get(pk=1).delete()
-        )
-
+        with self.assertRaises(TransductorModel.DoesNotExist):
+            TransductorModel.objects.get(name=wrong_model_name).delete()
 
     def test_api_create_request(self):
         factory = APIRequestFactory()
