@@ -128,26 +128,3 @@ class TransductorModelTestCase(TestCase):
 
         with self.assertRaises(TransductorModel.DoesNotExist):
             TransductorModel.objects.get(name=wrong_model_name).delete()
-
-
-    def test_api_create_request(self):
-        factory = APIRequestFactory()
-        request = factory.post('/transductor-models', {
-            'name': '',
-            'transport_protocol': '',
-            'serial_protocol': '',
-            'register_addresses': '[[68,0],[70,1]]'
-        }, format='json')
-        pass
-
-
-    def test_api_retrieve_request(self):
-        pass
-
-
-    def test_api_delete_request(self):
-        pass
-
-
-    def test_api_edit_request(self):
-        pass
