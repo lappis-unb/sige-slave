@@ -1,7 +1,6 @@
 from django.db import models
 from datetime import datetime
 from django.core.validators import RegexValidator
-from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
 from boogie.rest import rest_api
