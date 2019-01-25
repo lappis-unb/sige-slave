@@ -6,7 +6,7 @@
             "name": "TR 4020",
             "transport_protocol": "UdpProtocol",
             "serial_protocol": "ModbusRTU",
-            "measurements_type": "EnergyMeasurements",
+            "measurements_type": "EnergyMeasurement",
             "register_addresses": [
                 [66, 1],
                 [68, 1],

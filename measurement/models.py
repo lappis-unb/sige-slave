@@ -119,7 +119,7 @@ class EnergyMeasurement(Measurement):
     def __str__(self):
         return '%s' % self.collection_date
 
-    def save_measurements(self, values_list):
+    def save_measurements(values_list, transductor):
         """
         Method responsible to save measurements based on values
         list received.
@@ -131,38 +131,41 @@ class EnergyMeasurement(Measurement):
         Return:
             None
         """
-        self.frequency_a = value_list[0]
-        self.voltage_a = values_list[1]
-        self.voltage_b = values_list[2]
-        self.voltage_c = values_list[3]
-        self.current_a = values_list[4]
-        self.current_b = values_list[5]
-        self.current_c = values_list[6]
-        self.active_power_a = values_list[7]
-        self.active_power_b = values_list[8]
-        self.active_power_c = values_list[9]
-        self.total_active_power = values_list[10]
-        self.reactive_power_a = values_list[11]
-        self.reactive_power_b = values_list[12]
-        self.reactive_power_c = values_list[13]
-        self.total_reactive_power = values_list[14]
-        self.apparent_power_a = values_list[15]
-        self.apparent_power_b = values_list[16]
-        self.apparent_power_c = values_list[17]
-        self.total_apparent_power = values_list[18]
-        self.power_factor_a = values_list[19]
-        self.power_factor_b = values_list[20]
-        self.power_factor_c = values_list[21]
-        self.total_power_factor = values_list[22]
-        self.dht_voltage_a = values_list[23]
-        self.dht_voltage_b = values_list[24]
-        self.dht_voltage_c = values_list[25]
-        self.dht_current_a = values_list[26]
-        self.dht_current_b = values_list[27]
-        self.dht_current_c = values_list[28]
-        self.consumption_a = values_list[29]
-        self.consumption_b = values_list[30]
-        self.consumption_c = values_list[31]
-        self.total_consumption = values_list[32]
+        measurement = EnergyMeasurement()
+        measurement.transductor = transductor
 
-        self.save()
+        measurement.frequency_a = values_list[0]
+        measurement.voltage_a = values_list[1]
+        measurement.voltage_b = values_list[2]
+        measurement.voltage_c = values_list[3]
+        measurement.current_a = values_list[4]
+        measurement.current_b = values_list[5]
+        measurement.current_c = values_list[6]
+        measurement.active_power_a = values_list[7]
+        measurement.active_power_b = values_list[8]
+        measurement.active_power_c = values_list[9]
+        measurement.total_active_power = values_list[10]
+        measurement.reactive_power_a = values_list[11]
+        measurement.reactive_power_b = values_list[12]
+        measurement.reactive_power_c = values_list[13]
+        measurement.total_reactive_power = values_list[14]
+        measurement.apparent_power_a = values_list[15]
+        measurement.apparent_power_b = values_list[16]
+        measurement.apparent_power_c = values_list[17]
+        measurement.total_apparent_power = values_list[18]
+        measurement.power_factor_a = values_list[19]
+        measurement.power_factor_b = values_list[20]
+        measurement.power_factor_c = values_list[21]
+        measurement.total_power_factor = values_list[22]
+        measurement.dht_voltage_a = values_list[23]
+        measurement.dht_voltage_b = values_list[24]
+        measurement.dht_voltage_c = values_list[25]
+        measurement.dht_current_a = values_list[26]
+        measurement.dht_current_b = values_list[27]
+        measurement.dht_current_c = values_list[28]
+        measurement.consumption_a = values_list[29]
+        measurement.consumption_b = values_list[30]
+        measurement.consumption_c = values_list[31]
+        measurement.total_consumption = values_list[32]
+
+        measurement.save()
