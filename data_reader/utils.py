@@ -2,8 +2,6 @@ import importlib
 import socket
 import struct
 import sys
-from . import communication
-from . import transport
 
 from abc import ABCMeta, abstractmethod
 from threading import Thread
@@ -12,7 +10,12 @@ from .exceptions import NumberOfAttempsReachedException, \
     RegisterAddressException, \
     CRCInvalidException
 
-# importar Transductor e EnergyMeasurements model
+from .transport import *
+from .communication import *
+
+from transductor.models import *
+from transductor_model.models import *
+from measurement.models import *
 
 class DataCollector(object):
     """
@@ -25,7 +28,8 @@ class DataCollector(object):
     """
 
     def __init__(self):
-        self.transductors = Transductor.objects.filter(active=True)
+        # self.transductors = Transductor.objects.filter(active=True)
+        self.transductors = EnergyTransductor.objects.all()
 
     def single_data_collection(self, transductor):
         """
@@ -67,7 +71,7 @@ class DataCollector(object):
             )
 
         if transductor.model.name == "TR4020":
-            EnergyMeasurements.save_measurements(measurements)
+            EnergyMeasurement.save_measurements(measurements, transductor)
         else:
             pass
 
