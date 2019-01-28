@@ -1,0 +1,24 @@
+image: python:3.6
+
+services:
+  - postgres:9.6
+
+variables:
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: password
+  POSTGRES_DB: smi-slave-test
+  POSTGRES_PORT: 5432
+  POSTGRES_HOST: db
+
+before_script:
+  - pip install -r requirements.txt
+  - python3 manage.py makemigrations
+  - python3 manage.py migrate
+
+test:
+  script:
+    - pytest
+
+# stylesheet:
+#   script:
+#     - pycodestyle
