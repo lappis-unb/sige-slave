@@ -30,8 +30,10 @@ class Transductor(models.Model):
     active = models.BooleanField(default=True)
     model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
 
+
     class Meta:
         abstract = True
+
 
     def get_measurements(self):
         """
@@ -45,6 +47,7 @@ class Transductor(models.Model):
             list: List of all measurements
         """
         raise NotImplementedError
+
 
     def get_measurements(self, start_date, final_date):
         """
