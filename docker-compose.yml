@@ -1,19 +1,23 @@
-version: '3'
+version: '3.5'
 services:
-  postgres:
+  db:
+    container_name: postgres
     image: postgres:9.6
     env_file: dev-env
     volumes:
-      - ./postgres-data/postgres:/var/lib/postgresql/data
-    ports:
-      - 5432:5432
+      - pg-data:/var/lib/postgresql/data
 
-  slave-api:
+  api:
+    container_name: api
     build: .
     env_file: dev-env
+    command: ["sh", "scripts/start.sh"]
     ports:
-      - 5000:5000
+      - 8000:8000
     volumes:
       - .:/smi-slave
     depends_on:
-      - postgres
+      - db
+
+volumes:
+  pg-data: {}

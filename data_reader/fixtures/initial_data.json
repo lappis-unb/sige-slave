@@ -1,0 +1,123 @@
+[
+    {
+        "model": "transductor.TransductorModel",
+        "pk": 1,
+        "fields": {
+            "name": "TR4020",
+            "transport_protocol": "UdpProtocol",
+            "serial_protocol": "ModbusRTU",
+            "measurements_type": "EnergyMeasurement",
+            "register_addresses": [
+                [66, 1],
+                [68, 1],
+                [70, 1],
+                [72, 1],
+                [74, 1],
+                [76, 1],
+                [78, 1],
+                [80, 1],
+                [82, 1],
+                [84, 1],
+                [86, 1],
+                [88, 1],
+                [90, 1],
+                [92, 1],
+                [94, 1],
+                [96, 1],
+                [98, 1],
+                [100, 1],
+                [102, 1],
+                [104, 1],
+                [106, 1],
+                [108, 1],
+                [110, 1],
+                [112, 1],
+                [114, 1],
+                [116, 1],
+                [118, 1],
+                [120, 1],
+                [122, 1],
+                [132, 1],
+                [134, 1],
+                [136, 1],
+                [138, 1]
+            ]
+        }
+    },
+    {
+        "model": "campuses.AdministrativeRegion",
+        "pk": 1,
+        "fields": {
+            "name": "Asa Norte"
+        }
+    },
+    {
+        "model": "campuses.AdministrativeRegion",
+        "pk": 2,
+        "fields": {
+            "name": "Ceilândia"
+        }
+    },
+    {
+        "model": "campuses.AdministrativeRegion",
+        "pk": 3,
+        "fields": {
+            "name": "Gama"
+        }
+    },
+    {
+        "model": "campuses.AdministrativeRegion",
+        "pk": 4,
+        "fields": {
+            "name": "Planaltina"
+        }
+    },
+    {
+        "model": "campuses.Campus",
+        "pk": 1,
+        "fields": {
+            "administrative_region": 1,
+            "name": "Darcy Ribeiro",
+            "acronym": "Darcy Ribeiro",
+            "address": "Campus Universitário Darcy Ribeiro, Brasília - DF, 70910-900",
+            "phone": "(55 61) 3107-4100",
+            "url_param": "darcy_ribeiro"
+        }
+    },
+    {
+        "model": "campuses.Campus",
+        "pk": 2,
+        "fields": {
+            "administrative_region": 2,
+            "name": "Faculdade de Ceilândia",
+            "acronym": "FCE",
+            "address": "Centro Metropolitano, conjunto A, lote 01, Ceilândia Sul, Brasília - DF. 72220-275",
+            "phone": "(55 61) 3107-8427 / 8428",
+            "url_param": "fce"
+        }
+    },
+    {
+        "model": "campuses.Campus",
+        "pk": 3,
+        "fields": {
+            "administrative_region": 3,
+            "name": "Faculdade UnB Gama",
+            "acronym": "FGA",
+            "address": "St. Leste Projeção A - Gama Leste, Brasília - DF, 72444-240",
+            "phone": "(55 61) 3107-8901 / 8904",
+            "url_param": "fga"
+        }
+    },
+    {
+        "model": "campuses.Campus",
+        "pk": 4,
+        "fields": {
+            "administrative_region": 4,
+            "name": "Faculdade UnB Planaltina",
+            "acronym": "FUP",
+            "address": "Área Universitária, 01, Vila Nossa Senhora de Fátima - Planaltina, Brasília - DF, 73345-010",
+            "phone": "(55 61) 3107-8002 / 8007",
+            "url_param": "fup"
+        }
+    }
+]

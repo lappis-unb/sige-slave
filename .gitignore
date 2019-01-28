@@ -1,4 +1,4 @@
 venv/*
-src/__pycache__
-postgres-data
+__pycache__
 .vscode
+.pytest_cache
