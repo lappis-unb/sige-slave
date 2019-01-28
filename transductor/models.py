@@ -83,7 +83,7 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self,broken):
+    def set_broken(self, broken):
         self.broken = broken
         self.update()
 
