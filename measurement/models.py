@@ -3,6 +3,7 @@ from datetime import datetime
 from transductor.models import EnergyTransductor
 from boogie.rest import rest_api
 
+
 class Measurement(models.Model):
     """
     Abstract class responsible to create a base for measurements and optimize
@@ -77,7 +78,7 @@ class EnergyMeasurement(Measurement):
 
     """
     transductor = models.ForeignKey(
-        EnergyTransductor,related_name="measurements", on_delete=models.CASCADE
+        EnergyTransductor, related_name="measurements", on_delete=models.CASCADE
     )
 
     frequency_a = models.FloatField(default=None)
