@@ -78,8 +78,9 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def get_measurements(self, start_date, final_date):
-        return [start_date, final_date]
+    def set_broken(self,broken):
+        self.broken = broken
+        self.update()
 
     def get_measurements(self):
-        return True
+        return self.measurements.all()
