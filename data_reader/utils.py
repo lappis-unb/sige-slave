@@ -56,11 +56,11 @@ class DataCollector(object):
             messages = tranport_protocol_instance.start_communication()
         except (NumberOfAttempsReachedException, CRCInvalidException) as e:
             if not transductor.broken:
-                transductor.set_transductor_broken(True)
+                transductor.set_broken(True)
             return None
 
         if transductor.broken:
-            transductor.set_transductor_broken(False)
+            transductor.set_broken(False)
 
         measurements = []
 
