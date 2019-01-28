@@ -85,9 +85,9 @@ class EnergyTransductor(Transductor):
 
     def set_broken(self, broken):
         self.broken = broken
-        self.update()
+        self.save()
 
-    def get_measurements_by_date(self, start_date, final_date):
+    def get_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
         return self.measurements.filter(
             collection_date__range=[start_date, final_date]

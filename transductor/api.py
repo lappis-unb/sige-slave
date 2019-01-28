@@ -9,8 +9,8 @@ def measurements(energy_transductor):
 
 
 @rest_api.action('transductor.EnergyTransductor')
-def measurements_by_date(request, energy_transductor):
-    return energy_transductor.get_measurements_by_date(
+def measurements_by_datetime(request, energy_transductor):
+    return energy_transductor.get_measurements_by_datetime(
         request.data['start_date'],
         request.data['end_date']
     )
