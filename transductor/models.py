@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
 from boogie.rest import rest_api
 
+
 class Transductor(models.Model):
     """
     Base class responsible to create an abstraction of a transductor.
@@ -29,8 +30,10 @@ class Transductor(models.Model):
     active = models.BooleanField(default=True)
     model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
 
+
     class Meta:
         abstract = True
+
 
     def get_measurements(self):
         """
@@ -45,6 +48,7 @@ class Transductor(models.Model):
         """
         raise NotImplementedError
 
+
     def get_measurements(self, start_date, final_date):
         """
         Method responsible to retrieve all measurements from
@@ -58,6 +62,7 @@ class Transductor(models.Model):
             list: List of all measurements
         """
         raise NotImplementedError
+
 
 @rest_api()
 class EnergyTransductor(Transductor):
@@ -81,6 +86,12 @@ class EnergyTransductor(Transductor):
     def set_broken(self,broken):
         self.broken = broken
         self.update()
+
+    def get_measurements_by_date(self, start_date, final_date):
+        # dates must match 'yyyy-mm-dd'
+        return self.measurements.filter(
+            collection_date__range=[start_date, final_date]
+        )
 
     def get_measurements(self):
         return self.measurements.all()
