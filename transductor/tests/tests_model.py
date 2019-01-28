@@ -24,7 +24,7 @@ class TransductorTestCase(TestCase):
             ip_address='192.168.10.3',
             broken=False,
             active=True,
-            model='TR4020'
+            model=self.trans_model
         )
 
     def test_create_energy_transductor(self):
@@ -35,7 +35,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.ip_address = '1.1.1.1'
         energy_transductor.broken = False
         energy_transductor.active = True
-        energy_transductor.model = 'TR4020'
+        energy_transductor.model = self.trans_model
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size+1, len(EnergyTransductor.objects.all()))
@@ -48,7 +48,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = 'TR4020'
+        transductor.model = self.trans_model
 
         self.assertRaises(IntegrityError, transductor.save)
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -61,7 +61,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = 'TR4020'
+        transductor.model = self.trans_model
 
         self.assertRaises(IntegrityError, transductor.save)
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -74,7 +74,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.ip_address = '1111'
         energy_transductor.broken = False
         energy_transductor.active = True
-        energy_transductor.model = 'TR4020'
+        energy_transductor.model = self.trans_model
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -87,7 +87,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.ip_address = ''
         energy_transductor.broken = False
         energy_transductor.active = True
-        energy_transductor.model = 'TR4020'
+        energy_transductor.model = self.trans_model
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size, len(EnergyTransductor.objects.all()))
@@ -170,7 +170,7 @@ class TransductorTestCase(TestCase):
             ).delete()
 
     def test_get_all_transductor_measurements(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
@@ -184,7 +184,7 @@ class TransductorTestCase(TestCase):
         )
 
     def test_get_transductor_meassurements_by_date(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
@@ -206,7 +206,7 @@ class TransductorTestCase(TestCase):
         )
 
     def test_get_transductor_meassurements_by_time(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
@@ -250,5 +250,5 @@ class TransductorTestCase(TestCase):
         for date in datetimes:
             EnergyMeasurement.objects.create(
                 collection_date=date,
-                transductor=energy_transductor.serial_number
+                transductor=energy_transductor
             )
