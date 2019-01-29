@@ -50,8 +50,10 @@ class TransductorTestCase(TestCase):
         transductor.active = True
         transductor.model = self.trans_model
 
-        self.assertRaises(IntegrityError, transductor.save)
-        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+        with self.assertRaises(DataError):
+            transductor.save()
+
+        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
 
     def test_not_create_energy_transductor_empty_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -63,8 +65,12 @@ class TransductorTestCase(TestCase):
         transductor.active = True
         transductor.model = self.trans_model
 
-        self.assertRaises(IntegrityError, transductor.save)
-        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+        self.assertRaises(IntegrityError, transductor.save())
+
+        # final_size = EnergyTransductor.objects.all()
+        # print(final_size[1])
+
+        # self.assertEqual(size, final_size)
 
     def test_not_create_energy_transductor_wrong_ip_address(self):
         size = len(EnergyTransductor.objects.all())
@@ -76,21 +82,9 @@ class TransductorTestCase(TestCase):
         energy_transductor.active = True
         energy_transductor.model = self.trans_model
 
-        self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size, len(EnergyTransductor.objects.all()))
-
-    def test_not_create_energy_transductor_empty_ip_address(self):
-        size = len(EnergyTransductor.objects.all())
-
-        energy_transductor = EnergyTransductor()
-        energy_transductor.serial_number = '12345678'
-        energy_transductor.ip_address = ''
-        energy_transductor.broken = False
-        energy_transductor.active = True
-        energy_transductor.model = self.trans_model
-
-        self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+        with self.assertRaises(DataError):
+            energy_transductor.save()
+        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
 
     def test_not_create_energy_transductor_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
@@ -101,8 +95,10 @@ class TransductorTestCase(TestCase):
         energy_transductor.broken = False
         energy_transductor.active = True
 
-        self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size, len(EnergyTransductor.objects.all()))
+        with self.assertRaises(IntegrityError):
+            energy_transductor.save()
+
+        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
 
     def test_update_transductor_serial_number(self):
         energy_transductor = EnergyTransductor.objects.filter(
@@ -123,11 +119,11 @@ class TransductorTestCase(TestCase):
 
     def test_update_transductor_ip_address(self):
         energy_transductor = EnergyTransductor.objects.filter(
-            ip_address='87654321'
+            serial_number='87654321'
         )
 
         self.assertTrue(
-            energy_transductor.update(ip_address='10.10.10.10')
+            energy_transductor.update(ip_address='111.111.111.111')
         )
 
     def test_not_update_transductor_wrong_ip_address(self):
@@ -135,17 +131,21 @@ class TransductorTestCase(TestCase):
             serial_number='87654321'
         )
 
+        print(energy_transductor[0].ip_address)
+        energy_transductor.update(ip_address='1010101010')
+        print(energy_transductor[0].ip_address)
+
         with self.assertRaises(DataError):
-            energy_transductor.update(ip_address='10 10 10 10')
+            energy_transductor.update(ip_address='1010101010')
 
     def test_set_transductor_broken_status(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
         old_status = energy_transductor.broken
 
-        self.assertNone(energy_transductor.set_broken(not old_status))
+        self.assertEqual(None, energy_transductor.set_broken(not old_status))
         self.assertTrue(energy_transductor.broken != old_status)
 
     def test_delete_transductor(self):
@@ -158,14 +158,14 @@ class TransductorTestCase(TestCase):
         size = len(EnergyTransductor.objects.all())
         transductor_serial = '87654321'
 
-        EnergyTransductor.objects.filter(
+        EnergyTransductor.objects.get(
             serial_number=transductor_serial
         ).delete()
 
         self.assertEqual(size-1, len(EnergyTransductor.objects.all()))
 
         with self.assertRaises(EnergyTransductor.DoesNotExist):
-            EnergyTransductor.objects.filter(
+            EnergyTransductor.objects.get(
                 serial_number=transductor_serial
             ).delete()
 
@@ -180,7 +180,7 @@ class TransductorTestCase(TestCase):
         # measurements, created by _set_measurements
         self.assertEqual(
             12,
-            len(energy_transductor.get_measurements)
+            len(energy_transductor.get_measurements())
         )
 
     def test_get_transductor_meassurements_by_date(self):
