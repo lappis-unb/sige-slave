@@ -8,7 +8,7 @@ variables:
   POSTGRES_PASSWORD: password
   POSTGRES_DB: smi-slave-test
   POSTGRES_PORT: 5432
-  POSTGRES_HOST: db
+  POSTGRES_HOST: postgres
 
 before_script:
   - pip install -r requirements.txt
@@ -19,6 +19,6 @@ test:
   script:
     - pytest
 
-# stylesheet:
-#   script:
-#     - pycodestyle
+stylesheet:
+  script:
+    - pycodestyle *
