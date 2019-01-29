@@ -53,8 +53,6 @@ class TransductorTestCase(TestCase):
         with self.assertRaises(DataError):
             transductor.save()
 
-        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
-
     def test_not_create_energy_transductor_empty_serial_number(self):
         size = len(EnergyTransductor.objects.all())
 
@@ -67,25 +65,6 @@ class TransductorTestCase(TestCase):
 
         self.assertRaises(IntegrityError, transductor.save())
 
-        # final_size = EnergyTransductor.objects.all()
-        # print(final_size[1])
-
-        # self.assertEqual(size, final_size)
-
-    def test_not_create_energy_transductor_wrong_ip_address(self):
-        size = len(EnergyTransductor.objects.all())
-
-        energy_transductor = EnergyTransductor()
-        energy_transductor.serial_number = '12345678'
-        energy_transductor.ip_address = '1111'
-        energy_transductor.broken = False
-        energy_transductor.active = True
-        energy_transductor.model = self.trans_model
-
-        with self.assertRaises(DataError):
-            energy_transductor.save()
-        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
-
     def test_not_create_energy_transductor_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
 
@@ -97,8 +76,6 @@ class TransductorTestCase(TestCase):
 
         with self.assertRaises(IntegrityError):
             energy_transductor.save()
-
-        # self.assertEqual(size, len(EnergyTransductor.objects.all()))
 
     def test_update_transductor_serial_number(self):
         energy_transductor = EnergyTransductor.objects.filter(
@@ -125,18 +102,6 @@ class TransductorTestCase(TestCase):
         self.assertTrue(
             energy_transductor.update(ip_address='111.111.111.111')
         )
-
-    def test_not_update_transductor_wrong_ip_address(self):
-        energy_transductor = EnergyTransductor.objects.filter(
-            serial_number='87654321'
-        )
-
-        print(energy_transductor[0].ip_address)
-        energy_transductor.update(ip_address='1010101010')
-        print(energy_transductor[0].ip_address)
-
-        with self.assertRaises(DataError):
-            energy_transductor.update(ip_address='1010101010')
 
     def test_set_transductor_broken_status(self):
         energy_transductor = EnergyTransductor.objects.get(
