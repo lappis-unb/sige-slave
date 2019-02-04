@@ -21,7 +21,7 @@ class TransductorModelTestCase(TestCase):
             name='TR4030',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',
-            register_addresses=[[68, 0],[70, 1]]
+            register_addresses=[[68, 0],[70, 1]],
         )
 
     def test_create_transductor_model(self):
@@ -42,7 +42,8 @@ class TransductorModelTestCase(TestCase):
         transductor_model.serial_protocol = 'ModbusRTU'
         transductor_model.register_addresses = [[68, 0], [70, 1]]
 
-        self.assertRaises(IntegrityError, transductor_model.save)
+        with self.assertRaises(IntegrityError):
+            transductor_model.save()
 
 
     def test_retrieve_transductor_model(self):

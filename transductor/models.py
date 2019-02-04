@@ -16,10 +16,26 @@ class Transductor(models.Model):
         broken (bool): Tells if the transductor is working correctly.
         active (bool): Tells if the transductor can collect data.
         model (TransductorModel): The transductor model.
+        firmware_version (str): Tells the transductor's firmware version number.
+        installation_date (datetime): Tells the installation date of a transductor
+        physical_location (str): Tells where the transductor is located
+        geolocation_longitude (decimal): Tells geographic location for a transductor
+        geolocation_latitude (decimal): Tells geographic location for a transductor
+        last_clock_battery_change (datetime): Stores the latest update for the
+            transductor's internal clock.
     """
     # TODO fix default value problem
-    serial_number = models.CharField(max_length=8, unique=True, primary_key=True)
-    ip_address = models.CharField(max_length=15, unique=True, default="0.0.0.0", validators=[
+    model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
+    serial_number = models.CharField(
+        max_length=8,
+        unique=True,
+        primary_key=True
+    )
+    ip_address = models.CharField(
+        max_length=15,
+        unique=True,
+        default="0.0.0.0",
+        validators=[
         RegexValidator(
             regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
             message='Incorrect IP address format',
@@ -28,7 +44,15 @@ class Transductor(models.Model):
     ])
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
-    model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
+    firmware_version = models.CharField(max_length=20)
+    installation_date = models.DateTimeField(auto_now=True)
+    physical_location = models.CharField(max_length=30, default='')
+    geolocation_longitude = models.DecimalField(
+        max_digits=15,
+        decimal_places=10
+    )
+    geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
+    last_clock_battery_change = models.DateTimeField(auto_now=True)
 
 
     class Meta:

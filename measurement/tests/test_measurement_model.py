@@ -24,7 +24,11 @@ class EnergyMeasurementTestCase(TestCase):
             ip_address='111.111.111.11',
             broken=False,
             active=True,
-            model=self.trans_model
+            model=self.trans_model,
+            firmware_version='12.1.3215',
+            physical_location='predio 2 sala 44',
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996
         )
         self.measurement = EnergyMeasurement.objects.create(
             transductor=self.transductor,

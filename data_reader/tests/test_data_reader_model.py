@@ -25,7 +25,11 @@ class TestDataReaderModels(TestCase):
         self.transductor = EnergyTransductor.objects.create(
             model=self.t_model,
             serial_number="12345678",
-            ip_address=HOST
+            ip_address=HOST,
+            firmware_version='12.1.3215',
+            physical_location='predio 2 sala 44',
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996
         )
 
         self.modbus_rtu = ModbusRTU(self.transductor)
