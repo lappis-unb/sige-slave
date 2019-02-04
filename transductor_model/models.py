@@ -1,6 +1,7 @@
 from django.db import models
 from boogie.rest import rest_api
 from django.contrib.postgres.fields import ArrayField
+from .registers import registers
 
 
 @rest_api()

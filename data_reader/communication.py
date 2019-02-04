@@ -98,12 +98,12 @@ class ModbusRTU(SerialProtocol):
 
         address_value = 0
         address_type = 1
-
+        
         packaged_message = struct.pack(
             "2B", 0x01, 0x03
         ) + \
         struct.pack(
-            ">2H", register[address_value], (register[address_type] + 1)
+            ">2H", register[address_value], (register[address_type])
         )
 
         return packaged_message
