@@ -79,31 +79,39 @@ class EnergyMeasurement(Measurement):
 class MinutelyMeasurement(EnergyMeasurement):
 
     frequency_a = models.FloatField(default=None)
+
     voltage_a = models.FloatField(default=None)
     voltage_b = models.FloatField(default=None)
     voltage_c = models.FloatField(default=None)
+
     current_a = models.FloatField(default=None)
     current_b = models.FloatField(default=None)
     current_c = models.FloatField(default=None)
+
     active_power_a = models.FloatField(default=None)
     active_power_b = models.FloatField(default=None)
     active_power_c = models.FloatField(default=None)
     total_active_power = models.FloatField(default=None)
+
     reactive_power_a = models.FloatField(default=None)
     reactive_power_b = models.FloatField(default=None)
     reactive_power_c = models.FloatField(default=None)
     total_reactive_power_a = models.FloatField(default=None)
+
     apparent_power_a = models.FloatField(default=None)
     apparent_power_b = models.FloatField(default=None)
     apparent_power_c = models.FloatField(default=None)
     total_apparent_power = models.FloatField(default=None)
+
     power_factor_a = models.FloatField(default=None)
     power_factor_b = models.FloatField(default=None)
     power_factor_c = models.FloatField(default=None)
     total_power_factor = models.FloatField(default=None)
+
     dht_voltage_a = models.FloatField(default=None)
     dht_voltage_b = models.FloatField(default=None)
     dht_voltage_c = models.FloatField(default=None)
+
     dht_current_a = models.FloatField(default=None)
     dht_current_b = models.FloatField(default=None)
     dht_current_c = models.FloatField(default=None)
@@ -179,29 +187,41 @@ class QuarterlyMeasurement(EnergyMeasurement):
     capacitive_power_peak_time = models.FloatField(default=None)
     capacitive_power_off_peak_time = models.FloatField(default=None)
 
-    # def save_measurements(self, values_list, transductor):
-    # """
-    # Method responsible to save measurements based on values
-    # list received.
-    # Args:
-    #     values_list (list): The list with all important
-    #     measurements values.
-    # Return:
-    #     None
-    # """
-    # measurement = QuarterlyMeasurement()
-    # measurement.transductor = transductor
+    def save_measurements(self, values_list, transductor):
+        """
+        Method responsible to save measurements based on values
+        list received.
+        Args:
+            values_list (list): The list with all important
+            measurements values.
+        Return:
+            None
+        """
+        quartely_measurement = QuarterlyMeasurement()
+        quartely_measurement.transductor = transductor
 
-    # generated_energy_peak_time = values_list[]
-    # generated_energy_off_peak_time = values_list[]
-    # consumption_peak_time = values_list[]
-    # consumption_off_peak_time = values_list[]
-    # inductive_power_peak_time = values_list[]
-    # inductive_power_off_peak_time = values_list[]
-    # capacitive_power_peak_time = values_list[]
-    # capacitive_power_off_peak_time = values_list[]
+        quartely_measurement.collection_date = datetime(
+            values_list[0],
+            values_list[1],
+            values_list[2],
+            values_list[3],
+            values_list[4],
+            values_list[5]
+        )
 
-    # measurement.save()
+        quartely_measurement.generated_energy_peak_time = values_list[6]
+        quartely_measurement.generated_energy_off_peak_time = values_list[7]
+
+        quartely_measurement.consumption_peak_time = values_list[8]
+        quartely_measurement.consumption_off_peak_time = values_list[9]
+
+        quartely_measurement.inductive_power_peak_time = values_list[10]
+        quartely_measurement.inductive_power_off_peak_time = values_list[11]
+
+        quartely_measurement.capacitive_power_peak_time = values_list[12]
+        quartely_measurement.capacitive_power_off_peak_time = values_list[13]
+
+        quartely_measurement.save()
 
 
 class MonthlyMeasurement(EnergyMeasurement):
@@ -218,33 +238,50 @@ class MonthlyMeasurement(EnergyMeasurement):
     active_max_power_off_peak_time = models.FloatField(default=None)
     reactive_max_power_peak_time = models.FloatField(default=None)
     reactive_max_power_off_peak_time = models.FloatField(default=None)
+    active_max_power_peak_time_list = models.ArrayField(type=float)
 
-    # def save_measurements(self, values_list, transductor):
-    #     """
-    #     Method responsible to save measurements based on values
-    #     list received.
+    def save_measurements(self, values_list, transductor):
+        """
+        Method responsible to save measurements based on values
+        list received.
 
-    #     Args:
-    #         values_list (list): The list with all important
-    #         measurements values.
+        Args:
+            values_list (list): The list with all important
+            measurements values.
 
-    #     Return:
-    #         None
-    #     """
-    #     measurement = MonthlyMeasurement()
-    #     measurement.transductor = transductor
+        Return:
+            None
+        """
+        monthly_measurement = MonthlyMeasurement()
+        monthly_measurement.transductor = transductor
 
-    #     generated_energy_peak_time = values_list[]
-    #     generated_energy_off_peak_time = values_list[]
-    #     consumption_peak_time = values_list[]
-    #     consumption_off_peak_time = values_list[]
-    #     inductive_power_peak_time = values_list[]
-    #     inductive_power_off_peak_time = values_list[]
-    #     capacitive_power_peak_time = values_list[]
-    #     capacitive_power_off_peak_time = values_list[]
-    #     active_max_power_peak_time = values_list[]
-    #     active_max_power_off_peak_time = values_list[]
-    #     reactive_max_power_peak_time = values_list[]
-    #     reactive_max_power_off_peak_time = values_list[]
+        monthly_measurement.collection_date = datetime(
+            values_list[0],
+            values_list[1],
+            values_list[2],
+            values_list[3],
+            values_list[4],
+            values_list[5]
+        )
 
-    #     measurement.save()
+        monthly_measurement.generated_energy_peak_time = values_list[6]
+        monthly_measurement.generated_energy_off_peak_time = values_list[7]
+
+        monthly_measurement.consumption_peak_time = values_list[8]
+        monthly_measurement.consumption_off_peak_time = values_list[9]
+
+        monthly_measurement.inductive_power_peak_time = values_list[10]
+        monthly_measurement.inductive_power_off_peak_time = values_list[11]
+
+        monthly_measurement.capacitive_power_peak_time = values_list[12]
+        monthly_measurement.capacitive_power_off_peak_time = values_list[14]
+
+        monthly_measurement.active_max_power_peak_time = values_list[15]
+        monthly_measurement.active_max_power_off_peak_time = values_list[16]
+
+        monthly_measurement.reactive_max_power_peak_time = values_list[17]
+        monthly_measurement.reactive_max_power_off_peak_time = values_list[18]
+
+        monthly_measurement.active_max_power_peak_time_list = values_list[]
+
+        monthly_measurement.save()
