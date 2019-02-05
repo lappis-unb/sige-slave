@@ -71,10 +71,14 @@ class EnergyMeasurement(Measurement):
         dht_current_a (float): The DHT on current at phase A.
         dht_current_b (float): The DHT on current at phase B.
         dht_current_c (float): The DHT on current at phase C.
-        consumption_a (float): The total consumption on phase A. (since last reset)
-        consumption_b (float): The total consumption on phase B. (since last reset)
-        consumption_c (float): The total consumption on phase C. (since last reset)
-        total_consumption (float): The total consumption of transductor. (since last reset)
+        consumption_a (float): The total consumption on phase A.
+            (since last reset)
+        consumption_b (float): The total consumption on phase B.
+            (since last reset)
+        consumption_c (float): The total consumption on phase C.
+            (since last reset)
+        total_consumption (float): The total consumption of transductor.
+            (since last reset)
 
     """
     transductor = models.ForeignKey(

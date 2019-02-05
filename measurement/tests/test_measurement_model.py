@@ -20,7 +20,7 @@ class EnergyMeasurementTestCase(TestCase):
             register_addresses=[[68, 0], [70, 1]],
         )
         self.transductor = EnergyTransductor.objects.create(
-            serial_number= '87654321',
+            serial_number='87654321',
             ip_address='111.111.111.11',
             broken=False,
             active=True,
@@ -28,39 +28,39 @@ class EnergyMeasurementTestCase(TestCase):
         )
         self.measurement = EnergyMeasurement.objects.create(
             transductor=self.transductor,
-            frequency_a = 8,
-            voltage_a = 8,
-            voltage_b = 8,
-            voltage_c = 8,
-            current_a = 8,
-            current_b = 8,
-            current_c = 8,
-            active_power_a = 8,
-            active_power_b = 8,
-            active_power_c = 8,
-            total_active_power = 8,
-            reactive_power_a = 8,
-            reactive_power_b = 8,
-            reactive_power_c = 8,
-            total_reactive_power = 8,
-            apparent_power_a = 8,
-            apparent_power_b = 8,
-            apparent_power_c = 8,
-            total_apparent_power = 8,
-            power_factor_a = 8,
-            power_factor_b = 8,
-            power_factor_c = 8,
-            total_power_factor = 8,
-            dht_voltage_a = 8,
-            dht_voltage_b = 8,
-            dht_voltage_c = 8,
-            dht_current_a = 8,
-            dht_current_b = 8,
-            dht_current_c = 8,
-            consumption_a = 8,
-            consumption_b = 8,
-            consumption_c = 8,
-            total_consumption = 8,
+            frequency_a=8,
+            voltage_a=8,
+            voltage_b=8,
+            voltage_c=8,
+            current_a=8,
+            current_b=8,
+            current_c=8,
+            active_power_a=8,
+            active_power_b=8,
+            active_power_c=8,
+            total_active_power=8,
+            reactive_power_a=8,
+            reactive_power_b=8,
+            reactive_power_c=8,
+            total_reactive_power=8,
+            apparent_power_a=8,
+            apparent_power_b=8,
+            apparent_power_c=8,
+            total_apparent_power=8,
+            power_factor_a=8,
+            power_factor_b=8,
+            power_factor_c=8,
+            total_power_factor=8,
+            dht_voltage_a=8,
+            dht_voltage_b=8,
+            dht_voltage_c=8,
+            dht_current_a=8,
+            dht_current_b=8,
+            dht_current_c=8,
+            consumption_a=8,
+            consumption_b=8,
+            consumption_c=8,
+            total_consumption=8,
         )
 
     def test_create_energy_measurement_with_defaults(self):
@@ -70,7 +70,7 @@ class EnergyMeasurementTestCase(TestCase):
         en_measurement.transductor = self.transductor
 
         self.assertIsNone(en_measurement.save())
-        self.assertEqual(size+1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size + 1, len(EnergyMeasurement.objects.all()))
 
     def test_create_energy_measurement(self):
         size = len(EnergyMeasurement.objects.all())
@@ -112,7 +112,7 @@ class EnergyMeasurementTestCase(TestCase):
         en_measurement.total_consumption = 666
 
         self.assertIsNone(en_measurement.save())
-        self.assertEqual(size+1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size + 1, len(EnergyMeasurement.objects.all()))
 
     def test_not_create_energy_measurement_empty_transductor(self):
         size = len(EnergyTransductor.objects.all())
@@ -142,7 +142,7 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(EnergyMeasurement.objects.all())
         EnergyMeasurement.objects.filter(consumption_a='8').delete()
 
-        self.assertEqual(size-1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size - 1, len(EnergyMeasurement.objects.all()))
 
     def test_not_delete_nonexistent_transductor(self):
         size = len(EnergyMeasurement.objects.all())
@@ -152,7 +152,7 @@ class EnergyMeasurementTestCase(TestCase):
             total_consumption=8
         ).delete()
 
-        self.assertEqual(size-1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size - 1, len(EnergyMeasurement.objects.all()))
 
         with self.assertRaises(EnergyMeasurement.DoesNotExist):
             EnergyMeasurement.objects.get(

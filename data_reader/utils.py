@@ -17,6 +17,7 @@ from transductor.models import *
 from transductor_model.models import *
 from measurement.models import *
 
+
 class DataCollector(object):
     """
     Class responsible to handle all transductor measurements collect.

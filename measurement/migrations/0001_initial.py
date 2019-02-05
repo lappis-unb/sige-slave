@@ -15,8 +15,21 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='EnergyMeasurement',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('collection_date', models.DateTimeField(default=datetime.datetime.now)),
+                (
+                    'id',
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name='ID'
+                    )
+                ),
+                (
+                    'collection_date',
+                    models.DateTimeField(
+                        default=datetime.datetime.now
+                    )
+                ),
                 ('frequency_a', models.FloatField(default=None)),
                 ('voltage_a', models.FloatField(default=None)),
                 ('voltage_b', models.FloatField(default=None)),
