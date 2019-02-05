@@ -17,6 +17,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='energymeasurement',
             name='transductor',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='transductor.EnergyTransductor'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to='transductor.EnergyTransductor'
+            ),
         ),
     ]

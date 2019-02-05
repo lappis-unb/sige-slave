@@ -20,7 +20,7 @@ class TransductorTestCase(TestCase):
             register_addresses=[[68, 0], [70, 1]],
         )
         self.transductor = EnergyTransductor.objects.create(
-            serial_number= '87654321',
+            serial_number='87654321',
             ip_address='192.168.10.3',
             broken=False,
             active=True,
@@ -38,7 +38,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.model = self.trans_model
 
         self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size+1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -117,7 +117,7 @@ class TransductorTestCase(TestCase):
         size = len(EnergyTransductor.objects.all())
         EnergyTransductor.objects.filter(serial_number='87654321').delete()
 
-        self.assertEqual(size-1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size - 1, len(EnergyTransductor.objects.all()))
 
     def test_not_delete_nonexistent_transductor(self):
         size = len(EnergyTransductor.objects.all())
@@ -127,7 +127,7 @@ class TransductorTestCase(TestCase):
             serial_number=transductor_serial
         ).delete()
 
-        self.assertEqual(size-1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size - 1, len(EnergyTransductor.objects.all()))
 
         with self.assertRaises(EnergyTransductor.DoesNotExist):
             EnergyTransductor.objects.get(

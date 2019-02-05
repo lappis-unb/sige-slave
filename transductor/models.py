@@ -18,22 +18,32 @@ class Transductor(models.Model):
         model (TransductorModel): The transductor model.
     """
     # TODO fix default value problem
-    serial_number = models.CharField(max_length=8, unique=True, primary_key=True)
-    ip_address = models.CharField(max_length=15, unique=True, default="0.0.0.0", validators=[
-        RegexValidator(
-            regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-            message='Incorrect IP address format',
-            code='invalid_ip_address'
-        ),
-    ])
+    serial_number = models.CharField(
+        max_length=8,
+        unique=True,
+        primary_key=True
+    )
+    ip_address = models.CharField(
+        max_length=15,
+        unique=True,
+        default="0.0.0.0",
+        validators=[
+            RegexValidator(
+                regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
+                message='Incorrect IP address format',
+                code='invalid_ip_address'
+            ),
+        ]
+    )
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
-    model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
-
+    model = models.ForeignKey(
+        TransductorModel,
+        on_delete=models.DO_NOTHING
+    )
 
     class Meta:
         abstract = True
-
 
     def get_measurements(self):
         """
@@ -47,7 +57,6 @@ class Transductor(models.Model):
             list: List of all measurements
         """
         raise NotImplementedError
-
 
     def get_measurements(self, start_date, final_date):
         """
