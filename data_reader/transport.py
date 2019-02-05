@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from .exceptions import NumberOfAttempsReachedException, \
     CRCInvalidException
 
+
 class TransportProtocol(metaclass=ABCMeta):
     """
     Base class for transport protocols.
@@ -75,8 +76,9 @@ class UdpProtocol(TransportProtocol):
         received_messages = []
 
         while(
-            not received_messages
-            and self.receive_attempts < self.max_receive_attempts
+            not received_messages and (
+                self.receive_attempts < self.max_receive_attempts
+            )
         ):
             try:
                 received_messages = self.handle_messages_via_socket(

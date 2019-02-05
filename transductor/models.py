@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
 from boogie.rest import rest_api
 
+
 class Transductor(models.Model):
     """
     Base class responsible to create an abstraction of a transductor.
@@ -17,17 +18,29 @@ class Transductor(models.Model):
         model (TransductorModel): The transductor model.
     """
     # TODO fix default value problem
-    serial_number = models.CharField(max_length=8, primary_key=True)
-    ip_address = models.CharField(max_length=15, unique=True, default="0.0.0.0", validators=[
-        RegexValidator(
-            regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-            message='Incorrect IP address format',
-            code='invalid_ip_address'
-        ),
-    ])
+    serial_number = models.CharField(
+        max_length=8,
+        unique=True,
+        primary_key=True
+    )
+    ip_address = models.CharField(
+        max_length=15,
+        unique=True,
+        default="0.0.0.0",
+        validators=[
+            RegexValidator(
+                regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
+                message='Incorrect IP address format',
+                code='invalid_ip_address'
+            ),
+        ]
+    )
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
-    model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
+    model = models.ForeignKey(
+        TransductorModel,
+        on_delete=models.DO_NOTHING
+    )
 
     class Meta:
         abstract = True
@@ -59,6 +72,7 @@ class Transductor(models.Model):
         """
         raise NotImplementedError
 
+
 @rest_api()
 class EnergyTransductor(Transductor):
     """
@@ -78,9 +92,15 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self,broken):
+    def set_broken(self, broken):
         self.broken = broken
-        self.update()
+        self.save()
+
+    def get_measurements_by_datetime(self, start_date, final_date):
+        # dates must match 'yyyy-mm-dd'
+        return self.measurements.filter(
+            collection_date__range=[start_date, final_date]
+        )
 
     def get_measurements(self):
         return self.measurements.all()

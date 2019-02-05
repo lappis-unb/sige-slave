@@ -4,8 +4,8 @@ import sys
 
 from abc import ABCMeta, abstractmethod
 
-from .exceptions import RegisterAddressException, \
-                        CRCInvalidException
+from .exceptions import RegisterAddressException
+from .exceptions import CRCInvalidException
 
 
 class SerialProtocol(metaclass=ABCMeta):

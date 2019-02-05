@@ -3,6 +3,7 @@ from datetime import datetime
 from transductor.models import EnergyTransductor
 from boogie.rest import rest_api
 
+
 class Measurement(models.Model):
     """
     Abstract class responsible to create a base for measurements and optimize
@@ -70,51 +71,55 @@ class EnergyMeasurement(Measurement):
         dht_current_a (float): The DHT on current at phase A.
         dht_current_b (float): The DHT on current at phase B.
         dht_current_c (float): The DHT on current at phase C.
-        consumption_a (float): The total consumption on phase A. (since last reset)
-        consumption_b (float): The total consumption on phase B. (since last reset)
-        consumption_c (float): The total consumption on phase C. (since last reset)
-        total_consumption (float): The total consumption of transductor. (since last reset)
+        consumption_a (float): The total consumption on phase A.
+            (since last reset)
+        consumption_b (float): The total consumption on phase B.
+            (since last reset)
+        consumption_c (float): The total consumption on phase C.
+            (since last reset)
+        total_consumption (float): The total consumption of transductor.
+            (since last reset)
 
     """
     transductor = models.ForeignKey(
-        EnergyTransductor,related_name="measurements", on_delete=models.CASCADE
+        EnergyTransductor, related_name="measurements", on_delete=models.CASCADE
     )
 
-    frequency_a = models.FloatField(default=None)
-    # frequency_b = models.FloatField(default=None)
-    # frequency_c = models.FloatField(default=None)
-    voltage_a = models.FloatField(default=None)
-    voltage_b = models.FloatField(default=None)
-    voltage_c = models.FloatField(default=None)
-    current_a = models.FloatField(default=None)
-    current_b = models.FloatField(default=None)
-    current_c = models.FloatField(default=None)
-    active_power_a = models.FloatField(default=None)
-    active_power_b = models.FloatField(default=None)
-    active_power_c = models.FloatField(default=None)
-    total_active_power = models.FloatField(default=None)
-    reactive_power_a = models.FloatField(default=None)
-    reactive_power_b = models.FloatField(default=None)
-    reactive_power_c = models.FloatField(default=None)
-    total_reactive_power = models.FloatField(default=None)
-    apparent_power_a = models.FloatField(default=None)
-    apparent_power_b = models.FloatField(default=None)
-    apparent_power_c = models.FloatField(default=None)
-    total_apparent_power = models.FloatField(default=None)
-    power_factor_a = models.FloatField(default=None)
-    power_factor_b = models.FloatField(default=None)
-    power_factor_c = models.FloatField(default=None)
-    total_power_factor = models.FloatField(default=None)
-    dht_voltage_a = models.FloatField(default=None)
-    dht_voltage_b = models.FloatField(default=None)
-    dht_voltage_c = models.FloatField(default=None)
-    dht_current_a = models.FloatField(default=None)
-    dht_current_b = models.FloatField(default=None)
-    dht_current_c = models.FloatField(default=None)
-    consumption_a = models.FloatField(default=None)
-    consumption_b = models.FloatField(default=None)
-    consumption_c = models.FloatField(default=None)
-    total_consumption = models.FloatField(default=None)
+    frequency_a = models.FloatField(default=0)
+    # frequency_b = models.FloatField(default=0)
+    # frequency_c = models.FloatField(default=0)
+    voltage_a = models.FloatField(default=0)
+    voltage_b = models.FloatField(default=0)
+    voltage_c = models.FloatField(default=0)
+    current_a = models.FloatField(default=0)
+    current_b = models.FloatField(default=0)
+    current_c = models.FloatField(default=0)
+    active_power_a = models.FloatField(default=0)
+    active_power_b = models.FloatField(default=0)
+    active_power_c = models.FloatField(default=0)
+    total_active_power = models.FloatField(default=0)
+    reactive_power_a = models.FloatField(default=0)
+    reactive_power_b = models.FloatField(default=0)
+    reactive_power_c = models.FloatField(default=0)
+    total_reactive_power = models.FloatField(default=0)
+    apparent_power_a = models.FloatField(default=0)
+    apparent_power_b = models.FloatField(default=0)
+    apparent_power_c = models.FloatField(default=0)
+    total_apparent_power = models.FloatField(default=0)
+    power_factor_a = models.FloatField(default=0)
+    power_factor_b = models.FloatField(default=0)
+    power_factor_c = models.FloatField(default=0)
+    total_power_factor = models.FloatField(default=0)
+    dht_voltage_a = models.FloatField(default=0)
+    dht_voltage_b = models.FloatField(default=0)
+    dht_voltage_c = models.FloatField(default=0)
+    dht_current_a = models.FloatField(default=0)
+    dht_current_b = models.FloatField(default=0)
+    dht_current_c = models.FloatField(default=0)
+    consumption_a = models.FloatField(default=0)
+    consumption_b = models.FloatField(default=0)
+    consumption_c = models.FloatField(default=0)
+    total_consumption = models.FloatField(default=0)
 
     def __str__(self):
         return '%s' % self.collection_date
