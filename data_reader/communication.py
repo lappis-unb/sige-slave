@@ -84,7 +84,7 @@ class ModbusRTU(SerialProtocol):
         for register in registers:
             try:
                 packaged_message = self.create_get_message(register)
-            except:    
+            except IndexError:
                 raise RegisterAddressException("Wrong register address type.")
 
             crc = struct.pack("<H", self._computate_crc(packaged_message))
@@ -98,24 +98,23 @@ class ModbusRTU(SerialProtocol):
 
         address_value = 0
         address_type = 1
-        
+
         packaged_message = struct.pack(
             "2B", 0x01, 0x03
         ) + \
-        struct.pack(
-            ">2H", register[address_value], (register[address_type])
-        )
+            struct.pack(
+                ">2H", register[address_value], (register[address_type]))
 
         return packaged_message
 
     def create_date_send_message(self):
         """
-        This method creates a get message to update datetime informations. 
-        The attributes specifically updated are: year, month, year day, 
+        This method creates a get message to update datetime informations.
+        The attributes specifically updated are: year, month, year day,
         week day, day, hour, minute and second of an day.
 
         Returns:
-            message (list): Represents the package to send to 
+            message (list): Represents the package to send to
             the transductor
         """
 
@@ -126,8 +125,8 @@ class ModbusRTU(SerialProtocol):
         address_type = 1
 
         date = datetime.now()
-        
-        week_day = ((date.weekday())+1) % 6
+
+        week_day = ((date.weekday()) + 1) % 6
         year_day = date.timetuple().tm_yday
 
         date_infos = [
@@ -135,40 +134,36 @@ class ModbusRTU(SerialProtocol):
             date.month,
             year_day,
             week_day,
-            date.day,  
+            date.day,
             date.hour,
             date.minute,
             date.second
         ]
-    
-        data_registers = [[10,1],[11, 1],[14,1],[15,1],[16,1]]   
+
+        data_registers = [[10, 1], [11, 1], [14, 1], [15, 1], [16, 1]]
         message = []
 
         packaged_message = struct.pack(
-            "2B", 0x01, 0x10
-        ) + \
-        struct.pack(
-            ">2H", 10, 8
-        ) + \
-        struct.pack(
-            ">B", 0x10
-        ) + \
-        struct.pack(
-            ">8H", date_infos[0],
-                   date_infos[1],
-                   date_infos[2],
-                   date_infos[3],
-                   date_infos[4],
-                   date_infos[5],
-                   date_infos[6],
-                   date_infos[7]
-        )
+            "2B", 0x01, 0x10) + \
+            struct.pack(
+                ">2H", 10, 8) + \
+            struct.pack(
+                ">B", 0x10) + \
+            struct.pack(
+                ">8H", date_infos[0],
+                date_infos[1],
+                date_infos[2],
+                date_infos[3],
+                date_infos[4],
+                date_infos[5],
+                date_infos[6],
+                date_infos[7])
 
         crc = struct.pack("<H", self._computate_crc(packaged_message))
         packaged_message = packaged_message + crc
-        
+
         message.append(packaged_message)
-        
+
         return message
 
     def get_measurement_value_from_response(self, message_received_data):

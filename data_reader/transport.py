@@ -107,9 +107,11 @@ class UdpProtocol(TransportProtocol):
         messages_to_send = self.serial_protocol.create_date_send_message()
         received_messages = []
 
+        receive_attempts = self.receive_attempts
+        max_receive_attempts = self.max_receive_attempts
+
         while(
-            not received_messages
-            and self.receive_attempts < self.max_receive_attempts
+            not received_messages and receive_attempts < max_receive_attempts
         ):
             try:
                 received_messages = self.handle_messages_via_socket(
@@ -125,9 +127,6 @@ class UdpProtocol(TransportProtocol):
                 raise
         else:
             raise NumberOfAttempsReachedException("Maximum attempts reached!")
-
-
-
 
     def reset_receive_attempts(self):
         """
