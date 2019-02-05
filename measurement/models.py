@@ -238,7 +238,12 @@ class MonthlyMeasurement(EnergyMeasurement):
     active_max_power_off_peak_time = models.FloatField(default=None)
     reactive_max_power_peak_time = models.FloatField(default=None)
     reactive_max_power_off_peak_time = models.FloatField(default=None)
-    active_max_power_peak_time_list = models.ArrayField(type=float)
+
+    active_max_power_peak_time_list = models.ArrayField(
+        models.ArrayField(
+
+        ),
+    )
 
     def save_measurements(self, values_list, transductor):
         """
@@ -282,6 +287,18 @@ class MonthlyMeasurement(EnergyMeasurement):
         monthly_measurement.reactive_max_power_peak_time = values_list[17]
         monthly_measurement.reactive_max_power_off_peak_time = values_list[18]
 
-        monthly_measurement.active_max_power_peak_time_list = values_list[]
+        monthly_measurement.active_max_power_peak_time_list = [
+            [
+                datetime(
+                    "ano atual",
+                    values_list[20],
+                    values_list[21],
+                    values_list[22],
+                    values_list[23],
+                    "segundos"
+                ),
+                values_list[19]
+            ]
+        ]
 
         monthly_measurement.save()
