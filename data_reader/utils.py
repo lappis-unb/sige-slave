@@ -32,6 +32,8 @@ class DataCollector(object):
         # self.transductors = Transductor.objects.filter(active=True)
         self.transductors = EnergyTransductor.objects.all()
 
+    # isso vai virar 3 pra salvar cada classe la
+    #
     def single_data_collection(self, transductor):
         """
         Thread method responsible to handle all the communication used
@@ -72,6 +74,7 @@ class DataCollector(object):
             )
 
         if transductor.model.name == "TR4020":
+            # aqui mudar para o save da classe la
             EnergyMeasurement.save_measurements(measurements, transductor)
         else:
             pass
