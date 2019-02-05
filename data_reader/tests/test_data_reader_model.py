@@ -1,5 +1,6 @@
-import mock
 import socket
+
+from freezegun import freeze_time
 
 from django.test import TestCase
 from threading import Thread
@@ -19,7 +20,7 @@ class TestDataReaderModels(TestCase):
             name="TR4020",
             transport_protocol="UdpProtocol",
             serial_protocol="ModbusRTU",
-            register_addresses=[[4, 0], [68, 1]],
+            register_addresses=[[4, 1], [68, 2]],
         )
 
         self.transductor = EnergyTransductor.objects.create(
@@ -74,6 +75,18 @@ class TestDataReaderModels(TestCase):
 
         self.assertEqual(b'\x01\x03\x00\x04\x00\x01\xc5\xcb', int_message)
         self.assertEqual(b'\x01\x03\x00D\x00\x02\x84\x1e', float_message)
+
+    def test_create_date_send_message(self):
+
+        messsage_a = b'\x01\x10\x00\n\x00\x08\x10\x07'
+        messsage_b = b'\xe3\x00\x02\x00$\x00\x02\x00'
+        messsage_c = b'\x05\x00\x0e\x00\x00\x00\x00\xfc\x0e'
+
+        with freeze_time("2019-02-05 14:00:00"):
+            data_send = self.modbus_rtu.create_date_send_message()
+
+        correct_messsage = messsage_a + messsage_b + messsage_c
+        self.assertEqual(data_send[0], correct_messsage)
 
     def test_unpack_int_response(self):
         response = b'\x01\x03\x02\x00\xdc\xb9\xdd'[3:-2]
