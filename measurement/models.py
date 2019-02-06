@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import datetime
 from transductor.models import EnergyTransductor
+from django.contrib.postgres.fields import ArrayField, HStoreField
 from boogie.rest import rest_api
 
 
@@ -239,7 +240,7 @@ class MonthlyMeasurement(EnergyMeasurement):
     reactive_max_power_peak_time = models.FloatField(default=None)
     reactive_max_power_off_peak_time = models.FloatField(default=None)
 
-    active_max_power_list_peak_time = models.ArrayField(HStoreField())
+    active_max_power_list_peak_time = ArrayField(HStoreField())
 
     def save_measurements(self, values_list, transductor):
         """
@@ -283,9 +284,9 @@ class MonthlyMeasurement(EnergyMeasurement):
         measurement.reactive_max_power_peak_time = values_list[16]
         measurement.reactive_max_power_off_peak_time = values_list[17]
 
+        # Arguments refer to initial positions of values_list information
+        # Further information on transductor's Memory Map
         measurement.active_max_power_list_peak_time = \
-            # Arguments refer to initial positions of values_list information
-            # Further information on transductor's Memory Map
             self._get_list_data(18, 34, 38, values_list)
 
         measurement.active_max_power_list_off_peak_time = \

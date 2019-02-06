@@ -38,11 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.messages',
-    'django.contrib.postgres'
+    'django.contrib.postgres',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'measurement',
-    'rest_framework'
+    'rest_framework',
     'transductor_model',
     'transductor',
 ]
