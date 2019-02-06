@@ -1,5 +1,5 @@
-atomicwrites==1.2.1
 attrs==18.2.0
+atomicwrites==1.2.1
 coverage==4.5.2
 Django==2.1.5
 django-boogie==0.11.1
@@ -24,3 +24,4 @@ pytz==2018.9
 sidekick==0.4.2
 six==1.12.0
 toolz==0.9.0
+freezegun==0.3.11
