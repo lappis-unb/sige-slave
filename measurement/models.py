@@ -239,11 +239,7 @@ class MonthlyMeasurement(EnergyMeasurement):
     reactive_max_power_peak_time = models.FloatField(default=None)
     reactive_max_power_off_peak_time = models.FloatField(default=None)
 
-    active_max_power_peak_time_list = models.ArrayField(
-        models.ArrayField(
-
-        ),
-    )
+    active_max_power_list_peak_time = models.ArrayField(HStoreField())
 
     def save_measurements(self, values_list, transductor):
         """
@@ -257,10 +253,10 @@ class MonthlyMeasurement(EnergyMeasurement):
         Return:
             None
         """
-        monthly_measurement = MonthlyMeasurement()
-        monthly_measurement.transductor = transductor
+        measurement = MonthlyMeasurement()
+        measurement.transductor = transductor
 
-        monthly_measurement.collection_date = datetime(
+        measurement.collection_date = datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -269,36 +265,59 @@ class MonthlyMeasurement(EnergyMeasurement):
             values_list[5]
         )
 
-        monthly_measurement.generated_energy_peak_time = values_list[6]
-        monthly_measurement.generated_energy_off_peak_time = values_list[7]
+        measurement.generated_energy_peak_time = values_list[6]
+        measurement.generated_energy_off_peak_time = values_list[7]
 
-        monthly_measurement.consumption_peak_time = values_list[8]
-        monthly_measurement.consumption_off_peak_time = values_list[9]
+        measurement.consumption_peak_time = values_list[8]
+        measurement.consumption_off_peak_time = values_list[9]
 
-        monthly_measurement.inductive_power_peak_time = values_list[10]
-        monthly_measurement.inductive_power_off_peak_time = values_list[11]
+        measurement.inductive_power_peak_time = values_list[10]
+        measurement.inductive_power_off_peak_time = values_list[11]
 
-        monthly_measurement.capacitive_power_peak_time = values_list[12]
-        monthly_measurement.capacitive_power_off_peak_time = values_list[14]
+        measurement.capacitive_power_peak_time = values_list[12]
+        measurement.capacitive_power_off_peak_time = values_list[13]
 
-        monthly_measurement.active_max_power_peak_time = values_list[15]
-        monthly_measurement.active_max_power_off_peak_time = values_list[16]
+        measurement.active_max_power_peak_time = values_list[14]
+        measurement.active_max_power_off_peak_time = values_list[15]
 
-        monthly_measurement.reactive_max_power_peak_time = values_list[17]
-        monthly_measurement.reactive_max_power_off_peak_time = values_list[18]
+        measurement.reactive_max_power_peak_time = values_list[16]
+        measurement.reactive_max_power_off_peak_time = values_list[17]
 
-        monthly_measurement.active_max_power_peak_time_list = [
-            [
-                datetime(
-                    "ano atual",
-                    values_list[20],
-                    values_list[21],
-                    values_list[22],
-                    values_list[23],
-                    "segundos"
-                ),
-                values_list[19]
-            ]
-        ]
+        measurement.active_max_power_list_peak_time = \
+            # Arguments refer to initial positions of values_list information
+            # Further information on transductor's Memory Map
+            self._get_list_data(18, 34, 38, values_list)
 
-        monthly_measurement.save()
+        measurement.active_max_power_list_off_peak_time = \
+            self._get_list_data(22, 42, 46)
+
+        measurement.reactive_max_power_list_peak_time = \
+            self._get_list_data(26, 50, 54)
+
+        measurement.reactive_max_power_list_off_peak_time = \
+            self._get_list_data(30, 58, 62)
+
+
+        measurement.save()
+
+    def _get_year(self, year, month):
+        return (year - 1) if (month == 1) else year
+
+    def _get_list_data(self, value, date, hour, values_list):
+        max_power_list = []
+
+        current_year = values_list[0]
+        current_month = values_list[1]
+
+        for i in range(4):
+            dict = {
+                # 'date': self._format_date(
+                #     self._get_year(current_year, current_month),
+                #     values_list[date + i],
+                #     values_list[hour + i]
+                # ),
+                'value': values_list[value + i]
+            }
+            max_power_list.append(dict)
+
+        return max_power_list
