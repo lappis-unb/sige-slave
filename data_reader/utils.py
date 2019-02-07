@@ -32,21 +32,20 @@ class DataCollector(object):
     def __init__(self):
         # self.transductors = Transductor.objects.filter(active=True)
         self.transductors = EnergyTransductor.objects.all()
-        self.functions_dict = build_functions_dict()
-        self.communications_dict = build_communications_dict()
+        self.functions_dict = self.build_functions_dict()
 
-    def build_functions_map(self):
+    def build_functions_dict(self):
         return {
-            "Minutely": minutely_data_collection,
-            "Quarterly": quartely_data_collection,
-            "Monthly": monthly_data_collection
+            "Minutely": self.minutely_data_collection,
+            "Quarterly": self.quarterly_data_collection,
+            "Monthly": self.monthly_data_collection
         }
 
-    def build_communication_dict(self):
+    def build_registers(self, transductor):
         return {
-            "Minutely": minutely_communication,
-            "Quarterly": quartely_communication,
-            "Monthly": monthly_communication
+            "Minutely": transductor.model.minutely_register_addresses,
+            "Quarterly": transductor.model.quarterly_register_addresses,
+            "Monthly": transductor.model.monthly_register_addresses
         }
 
     def single_data_collection(self, transductor, collection_type):
@@ -62,11 +61,12 @@ class DataCollector(object):
         """
 
         serial_protocol_instance, \
-        transport_protocol_instance = get_protocols(transductor)
+        transport_protocol_instance = self.get_protocols(transductor)
 
-        messages, transductor = self.communications_dict[collection_type](
+        messages, transductor = self.create_communication(
             (serial_protocol_instance, transport_protocol_instance),
-            transductor
+            transductor,
+            collection_type
         )
 
         measurements = []
@@ -92,7 +92,9 @@ class DataCollector(object):
             pass
 
     def monthly_data_collection(self, measurements, transductor):
+
         if transductor.model.name == "TR4020":
+            print(transductor)
             MonthlyMeasurement.save_measurements(measurements, transductor)
         else:
             pass
@@ -109,18 +111,18 @@ class DataCollector(object):
 
         return (serial_protocol_instance, transport_protocol_instance)
 
-    def minutely_communication(self, protocols, transductor):
+    def create_communication(self, protocols, transductor, collection_type):
 
         serial_protocol_instance, \
         transport_protocol_instance = protocols
 
-        registers = transductor.model.minutely_register_address
+        registers = self.build_registers(transductor)[collection_type]
 
         messages = []
 
         try:
             messages = \
-                tranport_protocol_instance.start_communication(
+                transport_protocol_instance.start_communication(
                     registers
                 )
         except (NumberOfAttempsReachedException, CRCInvalidException) as e:
@@ -145,7 +147,8 @@ class DataCollector(object):
 
         for transductor in self.transductors:
             collection_thread = Thread(
-                target=self.single_data_collection, args=(transductor, collection_type)
+                target=self.single_data_collection,
+                args=(transductor, collection_type)
             )
 
             collection_thread.start()
@@ -183,7 +186,7 @@ class DataCollector(object):
         serial_protocol_instance = globals()[
             transductor.model.serial_protocol
         ](transductor)
-        tranport_protocol_instance = globals()[
+        transport_protocol_instance = globals()[
             transductor.model.transport_protocol
         ](serial_protocol_instance)
 

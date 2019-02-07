@@ -79,43 +79,43 @@ class EnergyMeasurement(Measurement):
 
 class MinutelyMeasurement(EnergyMeasurement):
 
-    frequency_a = models.FloatField(default=None)
+    frequency_a = models.FloatField(default=0)
 
-    voltage_a = models.FloatField(default=None)
-    voltage_b = models.FloatField(default=None)
-    voltage_c = models.FloatField(default=None)
+    voltage_a = models.FloatField(default=0)
+    voltage_b = models.FloatField(default=0)
+    voltage_c = models.FloatField(default=0)
 
-    current_a = models.FloatField(default=None)
-    current_b = models.FloatField(default=None)
-    current_c = models.FloatField(default=None)
+    current_a = models.FloatField(default=0)
+    current_b = models.FloatField(default=0)
+    current_c = models.FloatField(default=0)
 
-    active_power_a = models.FloatField(default=None)
-    active_power_b = models.FloatField(default=None)
-    active_power_c = models.FloatField(default=None)
-    total_active_power = models.FloatField(default=None)
+    active_power_a = models.FloatField(default=0)
+    active_power_b = models.FloatField(default=0)
+    active_power_c = models.FloatField(default=0)
+    total_active_power = models.FloatField(default=0)
 
-    reactive_power_a = models.FloatField(default=None)
-    reactive_power_b = models.FloatField(default=None)
-    reactive_power_c = models.FloatField(default=None)
-    total_reactive_power_a = models.FloatField(default=None)
+    reactive_power_a = models.FloatField(default=0)
+    reactive_power_b = models.FloatField(default=0)
+    reactive_power_c = models.FloatField(default=0)
+    total_reactive_power = models.FloatField(default=0)
 
-    apparent_power_a = models.FloatField(default=None)
-    apparent_power_b = models.FloatField(default=None)
-    apparent_power_c = models.FloatField(default=None)
-    total_apparent_power = models.FloatField(default=None)
+    apparent_power_a = models.FloatField(default=0)
+    apparent_power_b = models.FloatField(default=0)
+    apparent_power_c = models.FloatField(default=0)
+    total_apparent_power = models.FloatField(default=0)
 
-    power_factor_a = models.FloatField(default=None)
-    power_factor_b = models.FloatField(default=None)
-    power_factor_c = models.FloatField(default=None)
-    total_power_factor = models.FloatField(default=None)
+    power_factor_a = models.FloatField(default=0)
+    power_factor_b = models.FloatField(default=0)
+    power_factor_c = models.FloatField(default=0)
+    total_power_factor = models.FloatField(default=0)
 
-    dht_voltage_a = models.FloatField(default=None)
-    dht_voltage_b = models.FloatField(default=None)
-    dht_voltage_c = models.FloatField(default=None)
+    dht_voltage_a = models.FloatField(default=0)
+    dht_voltage_b = models.FloatField(default=0)
+    dht_voltage_c = models.FloatField(default=0)
 
-    dht_current_a = models.FloatField(default=None)
-    dht_current_b = models.FloatField(default=None)
-    dht_current_c = models.FloatField(default=None)
+    dht_current_a = models.FloatField(default=0)
+    dht_current_b = models.FloatField(default=0)
+    dht_current_c = models.FloatField(default=0)
 
     def save_measurements(values_list, transductor):
         """
@@ -179,16 +179,16 @@ class MinutelyMeasurement(EnergyMeasurement):
 
 class QuarterlyMeasurement(EnergyMeasurement):
 
-    generated_energy_peak_time = models.FloatField(default=None)
-    generated_energy_off_peak_time = models.FloatField(default=None)
-    consumption_peak_time = models.FloatField(default=None)
-    consumption_off_peak_time = models.FloatField(default=None)
-    inductive_power_peak_time = models.FloatField(default=None)
-    inductive_power_off_peak_time = models.FloatField(default=None)
-    capacitive_power_peak_time = models.FloatField(default=None)
-    capacitive_power_off_peak_time = models.FloatField(default=None)
+    generated_energy_peak_time = models.FloatField(default=0)
+    generated_energy_off_peak_time = models.FloatField(default=0)
+    consumption_peak_time = models.FloatField(default=0)
+    consumption_off_peak_time = models.FloatField(default=0)
+    inductive_power_peak_time = models.FloatField(default=0)
+    inductive_power_off_peak_time = models.FloatField(default=0)
+    capacitive_power_peak_time = models.FloatField(default=0)
+    capacitive_power_off_peak_time = models.FloatField(default=0)
 
-    def save_measurements(self, values_list, transductor):
+    def save_measurements(values_list, transductor):
         """
         Method responsible to save measurements based on values
         list received.
@@ -227,22 +227,22 @@ class QuarterlyMeasurement(EnergyMeasurement):
 
 class MonthlyMeasurement(EnergyMeasurement):
 
-    generated_energy_peak_time = models.FloatField(default=None)
-    generated_energy_off_peak_time = models.FloatField(default=None)
-    consumption_peak_time = models.FloatField(default=None)
-    consumption_off_peak_time = models.FloatField(default=None)
-    inductive_power_peak_time = models.FloatField(default=None)
-    inductive_power_off_peak_time = models.FloatField(default=None)
-    capacitive_power_peak_time = models.FloatField(default=None)
-    capacitive_power_off_peak_time = models.FloatField(default=None)
-    active_max_power_peak_time = models.FloatField(default=None)
-    active_max_power_off_peak_time = models.FloatField(default=None)
-    reactive_max_power_peak_time = models.FloatField(default=None)
-    reactive_max_power_off_peak_time = models.FloatField(default=None)
+    generated_energy_peak_time = models.FloatField(default=0)
+    generated_energy_off_peak_time = models.FloatField(default=0)
+    consumption_peak_time = models.FloatField(default=0)
+    consumption_off_peak_time = models.FloatField(default=0)
+    inductive_power_peak_time = models.FloatField(default=0)
+    inductive_power_off_peak_time = models.FloatField(default=0)
+    capacitive_power_peak_time = models.FloatField(default=0)
+    capacitive_power_off_peak_time = models.FloatField(default=0)
+    active_max_power_peak_time = models.FloatField(default=0)
+    active_max_power_off_peak_time = models.FloatField(default=0)
+    reactive_max_power_peak_time = models.FloatField(default=0)
+    reactive_max_power_off_peak_time = models.FloatField(default=0)
 
     active_max_power_list_peak_time = ArrayField(HStoreField())
 
-    def save_measurements(self, values_list, transductor):
+    def save_measurements(values_list, transductor):
         """
         Method responsible to save measurements based on values
         list received.
@@ -287,16 +287,16 @@ class MonthlyMeasurement(EnergyMeasurement):
         # Arguments refer to initial positions of values_list information
         # Further information on transductor's Memory Map
         measurement.active_max_power_list_peak_time = \
-            self._get_list_data(18, 34, 38, values_list)
+            measurement._get_list_data(18, 34, 38, values_list)
 
         measurement.active_max_power_list_off_peak_time = \
-            self._get_list_data(22, 42, 46)
+            measurement._get_list_data(22, 42, 46, values_list)
 
         measurement.reactive_max_power_list_peak_time = \
-            self._get_list_data(26, 50, 54)
+            measurement._get_list_data(26, 50, 54, values_list)
 
         measurement.reactive_max_power_list_off_peak_time = \
-            self._get_list_data(30, 58, 62)
+            measurement._get_list_data(30, 58, 62, values_list)
 
 
         measurement.save()
