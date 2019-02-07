@@ -43,10 +43,14 @@ class EnergyMeasurement(Measurement):
         transductor (EnergyTransductor): The transductor which conducted
         measurements.
 
-        consumption_a (float): The total consumption on phase A. (since last reset)
-        consumption_b (float): The total consumption on phase B. (since last reset)
-        consumption_c (float): The total consumption on phase C. (since last reset)
-        total_consumption (float): The total consumption of transductor. (since last reset)
+        consumption_a (float): The total consumption on phase A.
+        (since last reset)
+        consumption_b (float): The total consumption on phase B.
+        (since last reset)
+        consumption_c (float): The total consumption on phase C.
+        (since last reset)
+        total_consumption (float): The total consumption of transductor.
+        (since last reset)
     """
     transductor = models.ForeignKey(
         EnergyTransductor, related_name="measurements", on_delete=models.CASCADE
@@ -297,7 +301,6 @@ class MonthlyMeasurement(EnergyMeasurement):
 
         measurement.reactive_max_power_list_off_peak_time = \
             measurement._get_list_data(30, 58, 62, values_list)
-
 
         measurement.save()
 

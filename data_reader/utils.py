@@ -61,7 +61,7 @@ class DataCollector(object):
         """
 
         serial_protocol_instance, \
-        transport_protocol_instance = self.get_protocols(transductor)
+            transport_protocol_instance = self.get_protocols(transductor)
 
         messages, transductor = self.create_communication(
             (serial_protocol_instance, transport_protocol_instance),
@@ -114,7 +114,7 @@ class DataCollector(object):
     def create_communication(self, protocols, transductor, collection_type):
 
         serial_protocol_instance, \
-        transport_protocol_instance = protocols
+            transport_protocol_instance = protocols
 
         registers = self.build_registers(transductor)[collection_type]
 
