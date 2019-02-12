@@ -6,6 +6,9 @@ from django.db.utils import DataError
 from transductor_model.models import TransductorModel
 from transductor.models import EnergyTransductor
 from measurement.models import EnergyMeasurement
+from measurement.models import MinutelyMeasurement
+from measurement.models import QuarterlyMeasurement
+from measurement.models import MonthlyMeasurement
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 
@@ -17,7 +20,30 @@ class EnergyMeasurementTestCase(TestCase):
             name='TR4020',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',
-            register_addresses=[[68, 0], [70, 1]],
+            minutely_register_addresses=[
+                [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [66,2],
+                [68,2], [70,2], [72,2], [74,2], [76,2], [78,2], [80,2],
+                [82,2], [84,2], [86,2], [88,2], [90,2], [92,2], [94,2],
+                [96,2], [98,2], [100,2], [102,2], [104,2], [106,2], [108,2],
+                [110,2], [112,2], [114,2], [116,2], [118,2], [120,2], [122,2],
+                [132,2], [134,2], [136,2], [138,2]
+            ],
+            quarterly_register_addresses=[
+              [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [264,2], [266,2],
+              [270,2], [272,2], [276,2], [278,2], [282,2], [284,2]
+            ],
+            monthly_register_addresses=[
+              [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [156,2], [158,2],
+              [162,2], [164,2], [168,2], [170,2], [174,2], [176,2], [180,2],
+              [182,2], [186,2], [188,2], [420,2], [422,2], [424,2], [426,2],
+              [428,2], [430,2], [432,2], [434,2], [444,2], [446,2], [448,2],
+              [450,2], [452,2], [454,2], [456,2], [458,2], [516,1], [517,1],
+              [518,1], [519,1], [520,1], [521,1], [522,1], [523,1], [524,1],
+              [525,1], [526,1], [527,1], [528,1], [529,1], [530,1], [531,1],
+              [540,1], [541,1], [542,1], [543,1], [544,1], [545,1], [546,1],
+              [547,1], [548,1], [549,1], [550,1], [551,1], [552,1], [553,1],
+              [554,1], [555,1]
+            ]
         )
         self.transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
@@ -26,7 +52,7 @@ class EnergyMeasurementTestCase(TestCase):
             active=True,
             model=self.trans_model
         )
-        self.measurement = EnergyMeasurement.objects.create(
+        self.energy_measurement = MinutelyMeasurement.objects.create(
             transductor=self.transductor,
             frequency_a=8,
             voltage_a=8,
@@ -57,64 +83,60 @@ class EnergyMeasurementTestCase(TestCase):
             dht_current_a=8,
             dht_current_b=8,
             dht_current_c=8,
-            consumption_a=8,
-            consumption_b=8,
-            consumption_c=8,
-            total_consumption=8,
         )
 
-    def test_create_energy_measurement_with_defaults(self):
-        size = len(EnergyMeasurement.objects.all())
+    '''
+    MinutelyMeasurementTests
+    '''
 
-        en_measurement = EnergyMeasurement()
-        en_measurement.transductor = self.transductor
+    def test_create_minutely_energy_measurement_with_defaults(self):
+        size = len(MinutelyMeasurement.objects.all())
 
-        self.assertIsNone(en_measurement.save())
-        self.assertEqual(size + 1, len(EnergyMeasurement.objects.all()))
+        minutely_en_measurement = MinutelyMeasurement()
+        minutely_en_measurement.transductor = self.transductor
 
-    def test_create_energy_measurement(self):
-        size = len(EnergyMeasurement.objects.all())
+        self.assertIsNone(minutely_en_measurement.save())
+        self.assertEqual(size + 1, len(MinutelyMeasurement.objects.all()))
 
-        en_measurement = EnergyMeasurement()
-        en_measurement.transductor = self.transductor
-        en_measurement.frequency_a = 666
-        en_measurement.voltage_a = 666
-        en_measurement.voltage_b = 666
-        en_measurement.voltage_c = 666
-        en_measurement.current_a = 666
-        en_measurement.current_b = 666
-        en_measurement.current_c = 666
-        en_measurement.active_power_a = 666
-        en_measurement.active_power_b = 666
-        en_measurement.active_power_c = 666
-        en_measurement.total_active_power = 666
-        en_measurement.reactive_power_a = 666
-        en_measurement.reactive_power_b = 666
-        en_measurement.reactive_power_c = 666
-        en_measurement.total_reactive_power = 666
-        en_measurement.apparent_power_a = 666
-        en_measurement.apparent_power_b = 666
-        en_measurement.apparent_power_c = 666
-        en_measurement.total_apparent_power = 666
-        en_measurement.power_factor_a = 666
-        en_measurement.power_factor_b = 666
-        en_measurement.power_factor_c = 666
-        en_measurement.total_power_factor = 666
-        en_measurement.dht_voltage_a = 666
-        en_measurement.dht_voltage_b = 666
-        en_measurement.dht_voltage_c = 666
-        en_measurement.dht_current_a = 666
-        en_measurement.dht_current_b = 666
-        en_measurement.dht_current_c = 666
-        en_measurement.consumption_a = 666
-        en_measurement.consumption_b = 666
-        en_measurement.consumption_c = 666
-        en_measurement.total_consumption = 666
+    def test_create_minutely_energy_measurement(self):
+        size = len(MinutelyMeasurement.objects.all())
 
-        self.assertIsNone(en_measurement.save())
-        self.assertEqual(size + 1, len(EnergyMeasurement.objects.all()))
+        minutely_en_measurement = MinutelyMeasurement()
+        minutely_en_measurement.transductor = self.transductor
+        minutely_en_measurement.frequency_a = 666
+        minutely_en_measurement.voltage_a = 666
+        minutely_en_measurement.voltage_b = 666
+        minutely_en_measurement.voltage_c = 666
+        minutely_en_measurement.current_a = 666
+        minutely_en_measurement.current_b = 666
+        minutely_en_measurement.current_c = 666
+        minutely_en_measurement.active_power_a = 666
+        minutely_en_measurement.active_power_b = 666
+        minutely_en_measurement.active_power_c = 666
+        minutely_en_measurement.total_active_power = 666
+        minutely_en_measurement.reactive_power_a = 666
+        minutely_en_measurement.reactive_power_b = 666
+        minutely_en_measurement.reactive_power_c = 666
+        minutely_en_measurement.total_reactive_power = 666
+        minutely_en_measurement.apparent_power_a = 666
+        minutely_en_measurement.apparent_power_b = 666
+        minutely_en_measurement.apparent_power_c = 666
+        minutely_en_measurement.total_apparent_power = 666
+        minutely_en_measurement.power_factor_a = 666
+        minutely_en_measurement.power_factor_b = 666
+        minutely_en_measurement.power_factor_c = 666
+        minutely_en_measurement.total_power_factor = 666
+        minutely_en_measurement.dht_voltage_a = 666
+        minutely_en_measurement.dht_voltage_b = 666
+        minutely_en_measurement.dht_voltage_c = 666
+        minutely_en_measurement.dht_current_a = 666
+        minutely_en_measurement.dht_current_b = 666
+        minutely_en_measurement.dht_current_c = 666
 
-    def test_not_create_energy_measurement_empty_transductor(self):
+        self.assertIsNone(minutely_en_measurement.save())
+        self.assertEqual(size + 1, len(MinutelyMeasurement.objects.all()))
+
+    def test_not_create_minutely_energy_measurement_empty_transductor(self):
         size = len(EnergyTransductor.objects.all())
 
         en_measurement = EnergyMeasurement()
@@ -122,39 +144,42 @@ class EnergyMeasurementTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             en_measurement.save()
 
-    def test_update_energy_measurement(self):
-        energy_measurement = EnergyMeasurement()
-        energy_measurement.transductor = EnergyTransductor.objects.get(
-            serial_number=87654321
-        )
-        energy_measurement.save()
+    def test_update_minutely_energy_measurement(self):
+        minutely_energy_measurement = MinutelyMeasurement()
+        minutely_energy_measurement.transductor = \
+            EnergyTransductor.objects.get(
+                serial_number=87654321
+            )
+        minutely_energy_measurement.save()
 
-        energy_measurement.total_consumption = 100
+        minutely_energy_measurement.total_power_factor = 100
 
         self.assertEquals(
             None,
-            energy_measurement.save(update_fields=['total_consumption'])
+            minutely_energy_measurement.save(
+                update_fields=['total_power_factor']
+            )
         )
 
-        self.assertTrue(100, energy_measurement.total_consumption)
+        self.assertTrue(100, minutely_energy_measurement.total_power_factor)
 
-    def test_delete_measurement(self):
-        size = len(EnergyMeasurement.objects.all())
-        EnergyMeasurement.objects.filter(consumption_a='8').delete()
+    def test_delete_minutely_measurement(self):
+        size = len(MinutelyMeasurement.objects.all())
+        MinutelyMeasurement.objects.filter(total_power_factor='8').delete()
 
-        self.assertEqual(size - 1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size - 1, len(MinutelyMeasurement.objects.all()))
 
-    def test_not_delete_nonexistent_transductor(self):
-        size = len(EnergyMeasurement.objects.all())
+    def test_not_delete_inexistent_transductor_minutely_measures(self):
+        size = len(MinutelyMeasurement.objects.all())
         value = '8'
 
-        EnergyMeasurement.objects.get(
-            total_consumption=8
+        MinutelyMeasurement.objects.get(
+            total_power_factor=8
         ).delete()
 
-        self.assertEqual(size - 1, len(EnergyMeasurement.objects.all()))
+        self.assertEqual(size - 1, len(MinutelyMeasurement.objects.all()))
 
-        with self.assertRaises(EnergyMeasurement.DoesNotExist):
-            EnergyMeasurement.objects.get(
-                total_consumption=8
+        with self.assertRaises(MinutelyMeasurement.DoesNotExist):
+            MinutelyMeasurement.objects.get(
+                total_power_factor=8
             ).delete()
