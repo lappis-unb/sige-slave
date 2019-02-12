@@ -71,10 +71,14 @@ class EnergyMeasurement(Measurement):
         dht_current_a (float): The DHT on current at phase A.
         dht_current_b (float): The DHT on current at phase B.
         dht_current_c (float): The DHT on current at phase C.
-        consumption_a (float): The total consumption on phase A. (since last reset)
-        consumption_b (float): The total consumption on phase B. (since last reset)
-        consumption_c (float): The total consumption on phase C. (since last reset)
-        total_consumption (float): The total consumption of transductor. (since last reset)
+        consumption_a (float): The total consumption on phase A.
+            (since last reset)
+        consumption_b (float): The total consumption on phase B.
+            (since last reset)
+        consumption_c (float): The total consumption on phase C.
+            (since last reset)
+        total_consumption (float): The total consumption of transductor.
+            (since last reset)
 
     """
     transductor = models.ForeignKey(
@@ -135,38 +139,43 @@ class EnergyMeasurement(Measurement):
         measurement = EnergyMeasurement()
         measurement.transductor = transductor
 
-        measurement.frequency_a = values_list[0]
-        measurement.voltage_a = values_list[1]
-        measurement.voltage_b = values_list[2]
-        measurement.voltage_c = values_list[3]
-        measurement.current_a = values_list[4]
-        measurement.current_b = values_list[5]
-        measurement.current_c = values_list[6]
-        measurement.active_power_a = values_list[7]
-        measurement.active_power_b = values_list[8]
-        measurement.active_power_c = values_list[9]
-        measurement.total_active_power = values_list[10]
-        measurement.reactive_power_a = values_list[11]
-        measurement.reactive_power_b = values_list[12]
-        measurement.reactive_power_c = values_list[13]
-        measurement.total_reactive_power = values_list[14]
-        measurement.apparent_power_a = values_list[15]
-        measurement.apparent_power_b = values_list[16]
-        measurement.apparent_power_c = values_list[17]
-        measurement.total_apparent_power = values_list[18]
-        measurement.power_factor_a = values_list[19]
-        measurement.power_factor_b = values_list[20]
-        measurement.power_factor_c = values_list[21]
-        measurement.total_power_factor = values_list[22]
-        measurement.dht_voltage_a = values_list[23]
-        measurement.dht_voltage_b = values_list[24]
-        measurement.dht_voltage_c = values_list[25]
-        measurement.dht_current_a = values_list[26]
-        measurement.dht_current_b = values_list[27]
-        measurement.dht_current_c = values_list[28]
-        measurement.consumption_a = values_list[29]
-        measurement.consumption_b = values_list[30]
-        measurement.consumption_c = values_list[31]
-        measurement.total_consumption = values_list[32]
+        measurement.collection_date = datetime(
+            values_list[0], values_list[1], values_list[2],
+            values_list[3], values_list[4], values_list[5]
+        )
+
+        measurement.frequency_a = values_list[6]
+        measurement.voltage_a = values_list[7]
+        measurement.voltage_b = values_list[8]
+        measurement.voltage_c = values_list[9]
+        measurement.current_a = values_list[10]
+        measurement.current_b = values_list[11]
+        measurement.current_c = values_list[12]
+        measurement.active_power_a = values_list[13]
+        measurement.active_power_b = values_list[14]
+        measurement.active_power_c = values_list[15]
+        measurement.total_active_power = values_list[16]
+        measurement.reactive_power_a = values_list[17]
+        measurement.reactive_power_b = values_list[18]
+        measurement.reactive_power_c = values_list[19]
+        measurement.total_reactive_power = values_list[20]
+        measurement.apparent_power_a = values_list[21]
+        measurement.apparent_power_b = values_list[22]
+        measurement.apparent_power_c = values_list[23]
+        measurement.total_apparent_power = values_list[24]
+        measurement.power_factor_a = values_list[25]
+        measurement.power_factor_b = values_list[26]
+        measurement.power_factor_c = values_list[27]
+        measurement.total_power_factor = values_list[28]
+        measurement.dht_voltage_a = values_list[29]
+        measurement.dht_voltage_b = values_list[30]
+        measurement.dht_voltage_c = values_list[31]
+        measurement.dht_current_a = values_list[32]
+        measurement.dht_current_b = values_list[33]
+        measurement.dht_current_c = values_list[34]
+        measurement.consumption_a = values_list[35]
+        measurement.consumption_b = values_list[36]
+        measurement.consumption_c = values_list[37]
+        measurement.total_consumption = values_list[38]
 
         measurement.save()

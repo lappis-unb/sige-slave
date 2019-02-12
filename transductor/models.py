@@ -16,11 +16,15 @@ class Transductor(models.Model):
         broken (bool): Tells if the transductor is working correctly.
         active (bool): Tells if the transductor can collect data.
         model (TransductorModel): The transductor model.
-        firmware_version (str): Tells the transductor's firmware version number.
-        installation_date (datetime): Tells the installation date of a transductor
+        firmware_version (str): Tells the transductor's firmware
+            version number.
+        installation_date (datetime): Tells the installation date
+            of a transductor
         physical_location (str): Tells where the transductor is located
-        geolocation_longitude (decimal): Tells geographic location for a transductor
-        geolocation_latitude (decimal): Tells geographic location for a transductor
+        geolocation_longitude (decimal): Tells geographic location
+            for a transductor
+        geolocation_latitude (decimal): Tells geographic location
+            for a transductor
         last_clock_battery_change (datetime): Stores the latest update for the
             transductor's internal clock.
     """
@@ -36,12 +40,12 @@ class Transductor(models.Model):
         unique=True,
         default="0.0.0.0",
         validators=[
-        RegexValidator(
-            regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
-            message='Incorrect IP address format',
-            code='invalid_ip_address'
-        ),
-    ])
+            RegexValidator(
+                regex='^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$',
+                message='Incorrect IP address format',
+                code='invalid_ip_address'
+            ),
+        ])
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
@@ -54,10 +58,8 @@ class Transductor(models.Model):
     geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
     last_clock_battery_change = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         abstract = True
-
 
     def get_measurements(self):
         """
@@ -71,7 +73,6 @@ class Transductor(models.Model):
             list: List of all measurements
         """
         raise NotImplementedError
-
 
     def get_measurements(self, start_date, final_date):
         """

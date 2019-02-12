@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from .exceptions import NumberOfAttempsReachedException, \
     CRCInvalidException
 
+
 class TransportProtocol(metaclass=ABCMeta):
     """
     Base class for transport protocols.
@@ -55,6 +56,7 @@ class UdpProtocol(TransportProtocol):
         self.receive_attempts = 0
         self.max_receive_attempts = 3
 
+    # TODO change the name of this method to be more significant
     def start_communication(self):
         """
         Method responsible to try receive message from transductor
@@ -75,8 +77,9 @@ class UdpProtocol(TransportProtocol):
         received_messages = []
 
         while(
-            not received_messages
-            and self.receive_attempts < self.max_receive_attempts
+            not received_messages and (
+                self.receive_attempts < self.max_receive_attempts
+            )
         ):
             try:
                 received_messages = self.handle_messages_via_socket(
@@ -97,6 +100,33 @@ class UdpProtocol(TransportProtocol):
             raise NumberOfAttempsReachedException("Maximum attempts reached!")
 
         return received_messages
+
+    def data_sender(self):
+        self.reset_receive_attempts()
+
+        messages_to_send = self.serial_protocol.create_date_send_message()
+        received_messages = []
+
+        receive_attempts = self.receive_attempts
+        max_receive_attempts = self.max_receive_attempts
+
+        while(
+            not received_messages and receive_attempts < max_receive_attempts
+        ):
+            try:
+                received_messages = self.handle_messages_via_socket(
+                    messages_to_send
+                )
+            except socket.timeout:
+                pass
+        if received_messages:
+            try:
+                self.serial_protocol \
+                    .check_all_messages_crc(received_messages)
+            except CRCInvalidException:
+                raise
+        else:
+            raise NumberOfAttempsReachedException("Maximum attempts reached!")
 
     def reset_receive_attempts(self):
         """
