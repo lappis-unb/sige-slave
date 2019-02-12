@@ -42,7 +42,8 @@ class TransductorModelTestCase(TestCase):
         transductor_model.serial_protocol = 'ModbusRTU'
         transductor_model.register_addresses = [[68, 0], [70, 1]]
 
-        self.assertRaises(IntegrityError, transductor_model.save)
+        with self.assertRaises(IntegrityError):
+            transductor_model.save()
 
     def test_retrieve_transductor_model(self):
         model_name = 'TR4020'
