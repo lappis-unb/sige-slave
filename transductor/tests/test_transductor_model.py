@@ -50,7 +50,6 @@ class TransductorTestCase(TestCase):
             broken=False,
             active=True,
             model=self.trans_model,
-            firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
             geolocation_latitude=-24.45996,
@@ -65,29 +64,12 @@ class TransductorTestCase(TestCase):
         energy_transductor.broken = False
         energy_transductor.active = True
         energy_transductor.model = self.trans_model
-        energy_transductor.firmware_version = '12.1.3215'
         energy_transductor.physical_location = 'predio 2 sala 44'
         energy_transductor.geolocation_longitude = -24.4556
         energy_transductor.geolocation_latitude = -24.45996
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
-
-    def test_not_create_energy_transductor_no_firmware(self):
-        size = len(EnergyTransductor.objects.all())
-
-        transductor = EnergyTransductor()
-        transductor.serial_number = '123456789'
-        transductor.ip_address = '1.1.1.1'
-        transductor.broken = False
-        transductor.active = True
-        transductor.model = self.trans_model
-        transductor.physical_location = 'predio 2 sala 44'
-        transductor.geolocation_longitude = -24.4556
-        transductor.geolocation_latitude = -24.45996
-
-        with self.assertRaises(DataError):
-            transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_latitude(self):
         size = len(EnergyTransductor.objects.all())
@@ -98,7 +80,6 @@ class TransductorTestCase(TestCase):
         transductor.broken = False
         transductor.active = True
         transductor.model = self.trans_model
-        transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_longitude = -24.4556
 
@@ -114,7 +95,6 @@ class TransductorTestCase(TestCase):
         transductor.broken = False
         transductor.active = True
         transductor.model = self.trans_model
-        transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_latitude = -24.4556
 
