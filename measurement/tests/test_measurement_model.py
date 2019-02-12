@@ -145,7 +145,7 @@ class EnergyMeasurementTestCase(TestCase):
     def test_not_create_minutely_energy_measurement_empty_transductor(self):
         size = len(EnergyTransductor.objects.all())
 
-        en_measurement = EnergyMeasurement()
+        en_measurement = MinutelyMeasurement()
 
         with self.assertRaises(IntegrityError):
             en_measurement.save()
@@ -190,20 +190,20 @@ class EnergyMeasurementTestCase(TestCase):
                 total_power_factor=8
             ).delete()
 
-    def test_save_measurements(self):
-        before_count = EnergyMeasurement.objects.all().__len__()
+    def test_save_minutely_measurements(self):
+        before_count = MinutelyMeasurement.objects.all().__len__()
 
         values_list = [2019, 2, 5, 14, 0, 0, 6, 7, 8, 9, 10, 11, 12, 13, 14,
                        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
                        29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
 
-        EnergyMeasurement.save_measurements(values_list, self.transductor)
+        MinutelyMeasurement.save_measurements(values_list, self.transductor)
 
-        after_count = EnergyMeasurement.objects.all().__len__()
+        after_count = MinutelyMeasurement.objects.all().__len__()
 
         self.assertEqual(after_count - 1, before_count)
 
-        measurement = EnergyMeasurement.objects.last()
+        measurement = MinutelyMeasurement.objects.last()
 
         hour_with_timezone = values_list[3] + 2
 
@@ -242,7 +242,3 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertEqual(measurement.dht_current_a, values_list[32])
         self.assertEqual(measurement.dht_current_b, values_list[33])
         self.assertEqual(measurement.dht_current_c, values_list[34])
-        self.assertEqual(measurement.consumption_a, values_list[35])
-        self.assertEqual(measurement.consumption_b, values_list[36])
-        self.assertEqual(measurement.consumption_c, values_list[37])
-        self.assertEqual(measurement.total_consumption, values_list[38])
