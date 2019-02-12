@@ -79,7 +79,6 @@ class ModbusRTU(SerialProtocol):
 
         messages_to_send = []
 
-        # TODO Chenge adress type value to 1 when is a short and 2 for float
         for register in registers:
             try:
                 packaged_message = self.create_get_message(register)

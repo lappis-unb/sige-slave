@@ -52,7 +52,11 @@ class EnergyMeasurementTestCase(TestCase):
             ip_address='111.111.111.11',
             broken=False,
             active=True,
-            model=self.trans_model
+            model=self.trans_model,
+            firmware_version='12.1.3215',
+            physical_location='predio 2 sala 44',
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996
         )
         self.energy_measurement = MinutelyMeasurement.objects.create(
             transductor=self.transductor,
@@ -185,3 +189,60 @@ class EnergyMeasurementTestCase(TestCase):
             MinutelyMeasurement.objects.get(
                 total_power_factor=8
             ).delete()
+
+    def test_save_measurements(self):
+        before_count = EnergyMeasurement.objects.all().__len__()
+
+        values_list = [2019, 2, 5, 14, 0, 0, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+                       15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28,
+                       29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
+
+        EnergyMeasurement.save_measurements(values_list, self.transductor)
+
+        after_count = EnergyMeasurement.objects.all().__len__()
+
+        self.assertEqual(after_count - 1, before_count)
+
+        measurement = EnergyMeasurement.objects.last()
+
+        hour_with_timezone = values_list[3] + 2
+
+        self.assertEqual(measurement.collection_date.year, values_list[0])
+        self.assertEqual(measurement.collection_date.month, values_list[1])
+        self.assertEqual(measurement.collection_date.day, values_list[2])
+        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.minute, values_list[4])
+        self.assertEqual(measurement.collection_date.second, values_list[5])
+        self.assertEqual(measurement.frequency_a, values_list[6])
+        self.assertEqual(measurement.voltage_a, values_list[7])
+        self.assertEqual(measurement.voltage_b, values_list[8])
+        self.assertEqual(measurement.voltage_c, values_list[9])
+        self.assertEqual(measurement.current_a, values_list[10])
+        self.assertEqual(measurement.current_b, values_list[11])
+        self.assertEqual(measurement.current_c, values_list[12])
+        self.assertEqual(measurement.active_power_a, values_list[13])
+        self.assertEqual(measurement.active_power_b, values_list[14])
+        self.assertEqual(measurement.active_power_c, values_list[15])
+        self.assertEqual(measurement.total_active_power, values_list[16])
+        self.assertEqual(measurement.reactive_power_a, values_list[17])
+        self.assertEqual(measurement.reactive_power_b, values_list[18])
+        self.assertEqual(measurement.reactive_power_c, values_list[19])
+        self.assertEqual(measurement.total_reactive_power, values_list[20])
+        self.assertEqual(measurement.apparent_power_a, values_list[21])
+        self.assertEqual(measurement.apparent_power_b, values_list[22])
+        self.assertEqual(measurement.apparent_power_c, values_list[23])
+        self.assertEqual(measurement.total_apparent_power, values_list[24])
+        self.assertEqual(measurement.power_factor_a, values_list[25])
+        self.assertEqual(measurement.power_factor_b, values_list[26])
+        self.assertEqual(measurement.power_factor_c, values_list[27])
+        self.assertEqual(measurement.total_power_factor, values_list[28])
+        self.assertEqual(measurement.dht_voltage_a, values_list[29])
+        self.assertEqual(measurement.dht_voltage_b, values_list[30])
+        self.assertEqual(measurement.dht_voltage_c, values_list[31])
+        self.assertEqual(measurement.dht_current_a, values_list[32])
+        self.assertEqual(measurement.dht_current_b, values_list[33])
+        self.assertEqual(measurement.dht_current_c, values_list[34])
+        self.assertEqual(measurement.consumption_a, values_list[35])
+        self.assertEqual(measurement.consumption_b, values_list[36])
+        self.assertEqual(measurement.consumption_c, values_list[37])
+        self.assertEqual(measurement.total_consumption, values_list[38])

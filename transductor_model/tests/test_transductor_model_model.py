@@ -142,7 +142,8 @@ class TransductorModelTestCase(TestCase):
             [550, 1], [551, 1], [552, 1], [553, 1], [554, 1], [555, 1]
         ]
 
-        self.assertRaises(IntegrityError, transductor_model.save)
+        with self.assertRaises(IntegrityError):
+            transductor_model.save()
 
     def test_retrieve_transductor_model(self):
         model_name = 'TR4020'
