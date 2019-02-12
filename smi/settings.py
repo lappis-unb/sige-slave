@@ -37,13 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.postgres',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'measurement',
+    'rest_framework',
     'transductor_model',
     'transductor',
-    'measurement',
-    'rest_framework'
 ]
 
 MIDDLEWARE = [

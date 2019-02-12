@@ -63,7 +63,7 @@ class ModbusRTU(SerialProtocol):
     def __init__(self, transductor):
         super(ModbusRTU, self).__init__(transductor)
 
-    def create_messages(self):
+    def create_messages(self, registers):
         """
         This method creates all messages based on transductor
         model register address that will be sent to a transductor
@@ -76,7 +76,6 @@ class ModbusRTU(SerialProtocol):
             RegisterAddressException: raised if the register
             address from transductor model is in a wrong format.
         """
-        registers = self.transductor.model.register_addresses
 
         messages_to_send = []
 
