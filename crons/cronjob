@@ -1,0 +1,2 @@
+* * * * * export $(cat /root/env | xargs) &&python /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyCollectCronJob >> /home/out_log.log 2>&1
+# Necessary line at end of file to make cron valid

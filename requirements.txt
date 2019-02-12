@@ -24,3 +24,4 @@ pytz==2018.9
 sidekick==0.4.2
 six==1.12.0
 toolz==0.9.0
+django_cron==0.5.1

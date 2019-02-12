@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'transductor_model',
     'transductor',
     'measurement',
-    'rest_framework'
+    'rest_framework',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,11 @@ TEMPLATES = [
         },
     },
 ]
+
+CRON_CLASSES = [
+    "data_reader.cronjob.MinutelyCollectCronJob",
+]
+
 
 WSGI_APPLICATION = 'smi.wsgi.application'
 
