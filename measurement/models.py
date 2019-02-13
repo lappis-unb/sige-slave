@@ -245,6 +245,9 @@ class MonthlyMeasurement(EnergyMeasurement):
     reactive_max_power_off_peak_time = models.FloatField(default=0)
 
     active_max_power_list_peak_time = ArrayField(HStoreField())
+    active_max_power_list_off_peak_time = ArrayField(HStoreField())
+    reactive_max_power_list_peak_time = ArrayField(HStoreField())
+    reactive_max_power_list_off_peak_time = ArrayField(HStoreField())
 
     def save_measurements(values_list, transductor):
         """
