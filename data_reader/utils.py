@@ -94,7 +94,6 @@ class DataCollector(object):
     def monthly_data_collection(self, measurements, transductor):
 
         if transductor.model.name == "TR4020":
-            print(transductor)
             MonthlyMeasurement.save_measurements(measurements, transductor)
         else:
             pass

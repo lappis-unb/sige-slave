@@ -182,8 +182,20 @@ class ModbusRTU(SerialProtocol):
 
         if n_bytes == 2:
             return self._unpack_int_response(n_bytes, msg)
+        elif n_bytes == 8:
+            return self.unpack_date_time_response(n_bytes, msg)
         else:
             return self._unpack_float_response(n_bytes, msg)
+
+    def unpack_date_time_response(sef, n_bytes, msg):
+        value = []
+        for i in range(0, n_bytes, 1):
+            if sys.byteorder == "little":
+                new_message = bytearray()
+                new_message.append(msg[i])
+                value.append(struct.unpack("1B", new_message)[0])
+
+        return value
 
     def _unpack_int_response(self, n_bytes, msg):
         """
