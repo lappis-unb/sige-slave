@@ -3,7 +3,8 @@ from datetime import datetime
 from transductor.models import EnergyTransductor
 from django.contrib.postgres.fields import ArrayField, HStoreField
 from boogie.rest import rest_api
-
+import json
+from django.core import serializers
 
 class Measurement(models.Model):
     """
@@ -32,7 +33,6 @@ class Measurement(models.Model):
         """
         raise NotImplementedError
 
-
 @rest_api()
 class EnergyMeasurement(Measurement):
     """
@@ -59,13 +59,14 @@ class EnergyMeasurement(Measurement):
     def __str__(self):
         return '%s' % self.collection_date
 
-    def get_time_measurements():
-        measures = [
-            MinuteMeasurement.objects.all(),
-            HourMeasurement.objects.all(),
-            QuarterMeasurement.objects.all()
-        ]
-        return measures
+    def get_minutely_measurements(self):
+        a = MinutelyMeasurement.objects.all()
+        c = []
+        for b in a:
+            c.append(json.loads(serializers.serialize('json', [b])))
+        return c
+        # return json.loads(serializers.serialize('json', [a]))
+
 
     def save_measurements(self, values_list, transductor):
         """
@@ -79,7 +80,6 @@ class EnergyMeasurement(Measurement):
             None
         """
         raise NotImplementedError
-
 
 class MinutelyMeasurement(EnergyMeasurement):
 
@@ -179,7 +179,6 @@ class MinutelyMeasurement(EnergyMeasurement):
         minutely_measurement.total_consumption = values_list[38]
 
         minutely_measurement.save()
-
 
 class QuarterlyMeasurement(EnergyMeasurement):
 
