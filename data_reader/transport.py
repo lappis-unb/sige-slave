@@ -56,8 +56,7 @@ class UdpProtocol(TransportProtocol):
         self.receive_attempts = 0
         self.max_receive_attempts = 3
 
-    # TODO change the name of this method to be more significant
-    def start_communication(self):
+    def start_communication(self, registers):
         """
         Method responsible to try receive message from transductor
         (via socket) based on maximum receive attempts.
@@ -73,7 +72,7 @@ class UdpProtocol(TransportProtocol):
         """
         self.reset_receive_attempts()
 
-        messages_to_send = self.serial_protocol.create_messages()
+        messages_to_send = self.serial_protocol.create_messages(registers)
         received_messages = []
 
         while(

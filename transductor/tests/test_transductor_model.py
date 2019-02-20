@@ -17,14 +17,43 @@ class TransductorTestCase(TestCase):
             name='TR4020',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',
-            register_addresses=[[68, 0], [70, 1]],
+            minutely_register_addresses=[
+                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
+                [68, 2], [70, 2], [72, 2], [74, 2], [76, 2], [78, 2], [80, 2],
+                [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [92, 2], [94, 2],
+                [96, 2], [98, 2], [100, 2], [102, 2], [104, 2], [106, 2],
+                [108, 2], [110, 2], [112, 2], [114, 2], [116, 2], [118, 2],
+                [120, 2], [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
+            ],
+            quarterly_register_addresses=[
+                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
+                [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
+                [284, 2]
+            ],
+            monthly_register_addresses=[
+                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1],
+                [156, 2], [158, 2], [162, 2], [164, 2], [168, 2], [170, 2],
+                [174, 2], [176, 2], [180, 2], [182, 2], [186, 2], [188, 2],
+                [420, 2], [422, 2], [424, 2], [426, 2], [428, 2], [430, 2],
+                [432, 2], [434, 2], [444, 2], [446, 2], [448, 2], [450, 2],
+                [452, 2], [454, 2], [456, 2], [458, 2], [516, 1], [517, 1],
+                [518, 1], [519, 1], [520, 1], [521, 1], [522, 1], [523, 1],
+                [524, 1], [525, 1], [526, 1], [527, 1], [528, 1], [529, 1],
+                [530, 1], [531, 1], [540, 1], [541, 1], [542, 1], [543, 1],
+                [544, 1], [545, 1], [546, 1], [547, 1], [548, 1], [549, 1],
+                [550, 1], [551, 1], [552, 1], [553, 1], [554, 1], [555, 1]
+            ]
         )
         self.transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.10.3',
             broken=False,
             active=True,
-            model=self.trans_model
+            model=self.trans_model,
+            firmware_version='12.1.3215',
+            physical_location='predio 2 sala 44',
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996,
         )
 
     def test_create_energy_transductor(self):
@@ -36,9 +65,61 @@ class TransductorTestCase(TestCase):
         energy_transductor.broken = False
         energy_transductor.active = True
         energy_transductor.model = self.trans_model
+        energy_transductor.firmware_version = '12.1.3215'
+        energy_transductor.physical_location = 'predio 2 sala 44'
+        energy_transductor.geolocation_longitude = -24.4556
+        energy_transductor.geolocation_latitude = -24.45996
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
+
+    def test_not_create_energy_transductor_no_firmware(self):
+        size = len(EnergyTransductor.objects.all())
+
+        transductor = EnergyTransductor()
+        transductor.serial_number = '123456789'
+        transductor.ip_address = '1.1.1.1'
+        transductor.broken = False
+        transductor.active = True
+        transductor.model = self.trans_model
+        transductor.physical_location = 'predio 2 sala 44'
+        transductor.geolocation_longitude = -24.4556
+        transductor.geolocation_latitude = -24.45996
+
+        with self.assertRaises(DataError):
+            transductor.save()
+
+    def test_not_create_energy_transductor_no_geolocation_latitude(self):
+        size = len(EnergyTransductor.objects.all())
+
+        transductor = EnergyTransductor()
+        transductor.serial_number = '123456789'
+        transductor.ip_address = '1.1.1.1'
+        transductor.broken = False
+        transductor.active = True
+        transductor.model = self.trans_model
+        transductor.firmware_version = '12.1.3215'
+        transductor.physical_location = 'predio 2 sala 44'
+        transductor.geolocation_longitude = -24.4556
+
+        with self.assertRaises(DataError):
+            transductor.save()
+
+    def test_not_create_energy_transductor_no_geolocation_longitude(self):
+        size = len(EnergyTransductor.objects.all())
+
+        transductor = EnergyTransductor()
+        transductor.serial_number = '123456789'
+        transductor.ip_address = '1.1.1.1'
+        transductor.broken = False
+        transductor.active = True
+        transductor.model = self.trans_model
+        transductor.firmware_version = '12.1.3215'
+        transductor.physical_location = 'predio 2 sala 44'
+        transductor.geolocation_latitude = -24.4556
+
+        with self.assertRaises(DataError):
+            transductor.save()
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -63,7 +144,8 @@ class TransductorTestCase(TestCase):
         transductor.active = True
         transductor.model = self.trans_model
 
-        self.assertRaises(IntegrityError, transductor.save())
+        with self.assertRaises(IntegrityError):
+            transductor.save()
 
     def test_not_create_energy_transductor_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
@@ -140,9 +222,6 @@ class TransductorTestCase(TestCase):
         )
 
         self._set_measurements(energy_transductor)
-
-        # Asserts if energy_transductor has the correct number of
-        # measurements, created by _set_measurements
         self.assertEqual(
             12,
             len(energy_transductor.get_measurements())
@@ -157,9 +236,6 @@ class TransductorTestCase(TestCase):
         final_date = datetime(2019, 1, 2, 00, 00, 00, 188939)
 
         self._set_measurements(energy_transductor)
-
-        # Asserts if energy_transductor has the correct number of measurements
-        # in a specific date range, created by _set_measurements
         self.assertEqual(
             4,
             len(
@@ -179,9 +255,6 @@ class TransductorTestCase(TestCase):
         final_date = datetime(2019, 1, 1, 14, 00, 00, 188939)
 
         self._set_measurements(energy_transductor)
-
-        # Asserts if energy_transductor has the correct number of measurements
-        # in a specific datetime range, created by _set_measurements
         self.assertEqual(
             3,
             len(
