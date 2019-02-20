@@ -16,5 +16,7 @@ python3 manage.py makemigrations
 echo '======= RUNNING MIGRATIONS'
 python3 manage.py migrate
 echo '======= RUNNING SERVER'
-cron
+
+cron -f
+
 python3 manage.py runserver 0.0.0.0:8000
