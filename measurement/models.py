@@ -39,7 +39,9 @@ class Measurement(models.Model):
 class MinutelyMeasurement(Measurement):
 
     transductor = models.ForeignKey(
-        EnergyTransductor, related_name="minutely_measurements", on_delete=models.CASCADE
+        EnergyTransductor,
+        related_name="minutely_measurements",
+        on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -143,11 +145,14 @@ class MinutelyMeasurement(Measurement):
 
         minutely_measurement.save()
 
+
 @rest_api()
 class QuarterlyMeasurement(Measurement):
 
     transductor = models.ForeignKey(
-        EnergyTransductor, related_name="quartely_measurements", on_delete=models.CASCADE
+        EnergyTransductor,
+        related_name="quartely_measurements",
+        on_delete=models.CASCADE
     )
 
     def __str__(self):
@@ -198,11 +203,14 @@ class QuarterlyMeasurement(Measurement):
 
         quartely_measurement.save()
 
+
 @rest_api()
 class MonthlyMeasurement(Measurement):
 
     transductor = models.ForeignKey(
-        EnergyTransductor, related_name="monthly_measurements", on_delete=models.CASCADE
+        EnergyTransductor,
+        related_name="monthly_measurements",
+        on_delete=models.CASCADE
     )
 
     def __str__(self):

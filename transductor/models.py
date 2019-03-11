@@ -140,4 +140,3 @@ class EnergyTransductor(Transductor):
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()
-        
