@@ -380,7 +380,6 @@ class MonthlyMeasurement(EnergyMeasurement):
         max_power_list = []
 
         current_year = values_list[0]
-        current_month = values_list[1]
 
         count = 0
 

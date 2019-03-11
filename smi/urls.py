@@ -18,8 +18,11 @@ from django.urls import path
 from django.conf.urls import include
 from boogie.rest import rest_api
 
+from rest_framework.documentation import include_docs_urls
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(rest_api.urls)),
+    path('', include_docs_urls(title="SMI - Slave API")),
 ]
