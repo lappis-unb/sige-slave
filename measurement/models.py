@@ -245,6 +245,9 @@ class MonthlyMeasurement(EnergyMeasurement):
     reactive_max_power_off_peak_time = models.FloatField(default=0)
 
     active_max_power_list_peak_time = ArrayField(HStoreField())
+    active_max_power_list_off_peak_time = ArrayField(HStoreField())
+    reactive_max_power_list_peak_time = ArrayField(HStoreField())
+    reactive_max_power_list_off_peak_time = ArrayField(HStoreField())
 
     def save_measurements(values_list, transductor):
         """
@@ -291,37 +294,50 @@ class MonthlyMeasurement(EnergyMeasurement):
         # Arguments refer to initial positions of values_list information
         # Further information on transductor's Memory Map
         measurement.active_max_power_list_peak_time = \
-            measurement._get_list_data(18, 34, 38, values_list)
+            measurement._get_list_data(18, 34, values_list)
 
         measurement.active_max_power_list_off_peak_time = \
-            measurement._get_list_data(22, 42, 46, values_list)
+            measurement._get_list_data(22, 36, values_list)
 
         measurement.reactive_max_power_list_peak_time = \
-            measurement._get_list_data(26, 50, 54, values_list)
+            measurement._get_list_data(26, 38, values_list)
 
         measurement.reactive_max_power_list_off_peak_time = \
-            measurement._get_list_data(30, 58, 62, values_list)
+            measurement._get_list_data(30, 40, values_list)
 
         measurement.save()
 
     def _get_year(self, year, month):
         return (year - 1) if (month == 1) else year
 
-    def _get_list_data(self, value, date, hour, values_list):
+    def _get_list_data(self, value, initial_date_position, values_list):
         max_power_list = []
 
         current_year = values_list[0]
-        current_month = values_list[1]
 
-        for i in range(4):
+        count = 0
+
+        for i in range(0, 8, 2):
+
+            if values_list[initial_date_position][0 + i] != 0:
+                value_result = values_list[value + count]
+                timestamp = \
+                    datetime(
+                        current_year,
+                        values_list[initial_date_position][0 + i],
+                        values_list[initial_date_position][1 + i],
+                        values_list[initial_date_position + 1][0 + i],
+                        values_list[initial_date_position + 1][1 + i]
+                    )
+            else:
+                value_result = values_list[value + count]
+                timestamp = None
+
             dict = {
-                # 'date': self._format_date(
-                #     self._get_year(current_year, current_month),
-                #     values_list[date + i],
-                #     values_list[hour + i]
-                # ),
-                'value': values_list[value + i]
+                'value': value_result,
+                'timestamp': timestamp
             }
-            max_power_list.append(dict)
 
+            count += 1
+            max_power_list.append(dict)
         return max_power_list

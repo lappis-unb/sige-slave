@@ -210,6 +210,9 @@ class Migration(migrations.Migration):
                 ('reactive_max_power_peak_time', models.FloatField(default=0)),
                 ('reactive_max_power_off_peak_time', models.FloatField(default=0)),
                 ('active_max_power_list_peak_time', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.hstore.HStoreField(), size=None)),
+                ('active_max_power_list_off_peak_time', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.hstore.HStoreField(), size=None)),
+                ('reactive_max_power_list_peak_time', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.hstore.HStoreField(), size=None)),
+                ('reactive_max_power_list_off_peak_time', django.contrib.postgres.fields.ArrayField(base_field=django.contrib.postgres.fields.hstore.HStoreField(), size=None))
             ],
             options={
                 'abstract': False,
