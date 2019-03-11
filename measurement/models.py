@@ -151,7 +151,7 @@ class QuarterlyMeasurement(Measurement):
 
     transductor = models.ForeignKey(
         EnergyTransductor,
-        related_name="quartely_measurements",
+        related_name="quarterly_measurements",
         on_delete=models.CASCADE
     )
 
@@ -177,10 +177,10 @@ class QuarterlyMeasurement(Measurement):
         Return:
             None
         """
-        quartely_measurement = QuarterlyMeasurement()
-        quartely_measurement.transductor = transductor
+        quarterly_measurement = QuarterlyMeasurement()
+        quarterly_measurement.transductor = transductor
 
-        quartely_measurement.collection_date = datetime(
+        quarterly_measurement.collection_date = datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -189,19 +189,19 @@ class QuarterlyMeasurement(Measurement):
             values_list[5]
         )
 
-        quartely_measurement.generated_energy_peak_time = values_list[6]
-        quartely_measurement.generated_energy_off_peak_time = values_list[7]
+        quarterly_measurement.generated_energy_peak_time = values_list[6]
+        quarterly_measurement.generated_energy_off_peak_time = values_list[7]
 
-        quartely_measurement.consumption_peak_time = values_list[8]
-        quartely_measurement.consumption_off_peak_time = values_list[9]
+        quarterly_measurement.consumption_peak_time = values_list[8]
+        quarterly_measurement.consumption_off_peak_time = values_list[9]
 
-        quartely_measurement.inductive_power_peak_time = values_list[10]
-        quartely_measurement.inductive_power_off_peak_time = values_list[11]
+        quarterly_measurement.inductive_power_peak_time = values_list[10]
+        quarterly_measurement.inductive_power_off_peak_time = values_list[11]
 
-        quartely_measurement.capacitive_power_peak_time = values_list[12]
-        quartely_measurement.capacitive_power_off_peak_time = values_list[13]
+        quarterly_measurement.capacitive_power_peak_time = values_list[12]
+        quarterly_measurement.capacitive_power_off_peak_time = values_list[13]
 
-        quartely_measurement.save()
+        quarterly_measurement.save()
 
 
 @rest_api()

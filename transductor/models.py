@@ -135,7 +135,7 @@ class EnergyTransductor(Transductor):
     def get_minutely_measurements(self):
         return self.minutely_measurements.all()
     
-    def get_quartely_measurements(self):
+    def get_quarterly_measurements(self):
         return self.quartely_measurements.all()
 
     def get_monthly_measurements(self):
