@@ -36,107 +36,14 @@ class Measurement(models.Model):
 
 
 @rest_api()
-class EnergyMeasurement(Measurement):
-    """
-    Class responsible to store energy measurements,
-    considering a three-phase energy system.
+class MinutelyMeasurement(Measurement):
 
-    Attributes:
-        transductor (EnergyTransductor): The transductor which conducted
-        measurements.
-
-        consumption_a (float): The total consumption on phase A.
-        (since last reset)
-        consumption_b (float): The total consumption on phase B.
-        (since last reset)
-        consumption_c (float): The total consumption on phase C.
-        (since last reset)
-        total_consumption (float): The total consumption of transductor.
-        (since last reset)
-    """
     transductor = models.ForeignKey(
-        EnergyTransductor, related_name="measurements", on_delete=models.CASCADE
+        EnergyTransductor, related_name="minutely_measurements", on_delete=models.CASCADE
     )
 
     def __str__(self):
         return '%s' % self.collection_date
-
-    def get_minutely_measurements(self):
-        all_measurements = MinutelyMeasurement.objects.all()
-        serialized_measurements = []
-        for measurement in all_measurements:
-            serialized_measurements.append(
-                json.loads(serializers.serialize('json', [measurement]))
-            )
-
-        return serialized_measurements
-
-    def get_quartely_measurements(self):
-        all_measurements = QuarterlyMeasurement.objects.all()
-        serialized_measurements = []
-        for measurement in all_measurements:
-            serialized_measurements.append(
-                json.loads(serializers.serialize('json', [measurement]))
-            )
-
-        return serialized_measurements
-
-    def get_monthly_measurements(self):
-        all_measurements = MonthlyMeasurement.objects.all()
-        serialized_measurements = []
-        for measurement in all_measurements:
-            values = json.loads(serializers.serialize('json', [measurement]))
-
-            methods_names = [
-                'active_max_power_list_peak_time', 
-                'active_max_power_list_off_peak_time',
-                'reactive_max_power_list_peak_time', 
-                'reactive_max_power_list_off_peak_time'
-            ]
-
-            for method_name in methods_names:
-                max_power_attr = getattr(measurement, method_name)
-                correct_max_power_list = self.get_correct_max_power_list(
-                    measurement, max_power_attr
-                )
-                self.set_correct_value_to_max_power_list(
-                    correct_max_power_list, method_name, values
-                )
-
-            serialized_measurements.append(values)
-        return serialized_measurements
-
-    def get_correct_max_power_list(self, measurement, max_power_list):
-        correct_max_power_list = max_power_list
-        for values in correct_max_power_list:
-            if len(values) == 2:
-                values['value'] = json.loads(values['value'])
-                values['date'] = json.loads(values['date'])
-            else:
-                values['value'] = json.loads(values['value'])
-
-        return correct_max_power_list
-
-    def set_correct_value_to_max_power_list(
-        self, correct_max_power_list, field_name, values
-    ):
-        values[0]['fields'][field_name] = correct_max_power_list
-
-    def save_measurements(self, values_list, transductor):
-        """
-        Method responsible to save measurements based on values
-        list received.
-        Args:
-            values_list (list): The list with all important
-                measurements values.
-            transductor (Transductor): Related transductor object
-        Return:
-            None
-        """
-        raise NotImplementedError
-
-
-class MinutelyMeasurement(EnergyMeasurement):
 
     frequency_a = models.FloatField(default=0)
 
@@ -186,6 +93,7 @@ class MinutelyMeasurement(EnergyMeasurement):
         Return:
             None
         """
+
         minutely_measurement = MinutelyMeasurement()
         minutely_measurement.transductor = transductor
 
@@ -235,8 +143,15 @@ class MinutelyMeasurement(EnergyMeasurement):
 
         minutely_measurement.save()
 
+@rest_api()
+class QuarterlyMeasurement(Measurement):
 
-class QuarterlyMeasurement(EnergyMeasurement):
+    transductor = models.ForeignKey(
+        EnergyTransductor, related_name="quartely_measurements", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '%s' % self.collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
@@ -283,8 +198,15 @@ class QuarterlyMeasurement(EnergyMeasurement):
 
         quartely_measurement.save()
 
+@rest_api()
+class MonthlyMeasurement(Measurement):
 
-class MonthlyMeasurement(EnergyMeasurement):
+    transductor = models.ForeignKey(
+        EnergyTransductor, related_name="monthly_measurements", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '%s' % self.collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
@@ -397,7 +319,7 @@ class MonthlyMeasurement(EnergyMeasurement):
                     )
             else:
                 value_result = values_list[value + count]
-                timestamp = None
+                timestamp = datetime(1900, 1, 1, 1, 1)
 
             dict = {
                 'value': value_result,

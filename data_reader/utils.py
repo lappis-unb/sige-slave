@@ -190,7 +190,7 @@ class DataCollector(object):
         ](serial_protocol_instance)
 
         try:
-            messages = tranport_protocol_instance.data_sender()
+            messages = transport_protocol_instance.data_sender()
         except (NumberOfAttempsReachedException, CRCInvalidException) as e:
             if not transductor.broken:
                 transductor.set_broken(True)
