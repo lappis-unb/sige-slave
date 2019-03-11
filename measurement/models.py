@@ -6,6 +6,7 @@ from boogie.rest import rest_api
 import json
 from django.core import serializers
 
+
 class Measurement(models.Model):
     """
     Abstract class responsible to create a base for measurements and optimize
@@ -32,6 +33,7 @@ class Measurement(models.Model):
             None
         """
         raise NotImplementedError
+
 
 @rest_api()
 class EnergyMeasurement(Measurement):
@@ -63,14 +65,20 @@ class EnergyMeasurement(Measurement):
         all_measurements = MinutelyMeasurement.objects.all()
         serialized_measurements = []
         for measurement in all_measurements:
-            serialized_measurements.append(json.loads(serializers.serialize('json', [measurement])))
+            serialized_measurements.append(
+                json.loads(serializers.serialize('json', [measurement]))
+            )
+
         return serialized_measurements
 
     def get_quartely_measurements(self):
         all_measurements = QuarterlyMeasurement.objects.all()
         serialized_measurements = []
         for measurement in all_measurements:
-            serialized_measurements.append(json.loads(serializers.serialize('json', [measurement])))
+            serialized_measurements.append(
+                json.loads(serializers.serialize('json', [measurement]))
+            )
+
         return serialized_measurements
 
     def get_monthly_measurements(self):
@@ -79,14 +87,21 @@ class EnergyMeasurement(Measurement):
         for measurement in all_measurements:
             values = json.loads(serializers.serialize('json', [measurement]))
 
-            methods_names = ['active_max_power_list_peak_time', 'active_max_power_list_off_peak_time',
-                             'reactive_max_power_list_peak_time', 'reactive_max_power_list_off_peak_time'
-                            ]
+            methods_names = [
+                'active_max_power_list_peak_time', 
+                'active_max_power_list_off_peak_time',
+                'reactive_max_power_list_peak_time', 
+                'reactive_max_power_list_off_peak_time'
+            ]
 
             for method_name in methods_names:
                 max_power_attr = getattr(measurement, method_name)
-                correct_max_power_list = self.get_correct_max_power_list(measurement, max_power_attr)
-                self.set_correct_value_to_max_power_list(correct_max_power_list, method_name, values)
+                correct_max_power_list = self.get_correct_max_power_list(
+                    measurement, max_power_attr
+                )
+                self.set_correct_value_to_max_power_list(
+                    correct_max_power_list, method_name, values
+                )
 
             serialized_measurements.append(values)
         return serialized_measurements
@@ -102,9 +117,10 @@ class EnergyMeasurement(Measurement):
 
         return correct_max_power_list
 
-    def set_correct_value_to_max_power_list(self, correct_max_power_list, field_name, values):
+    def set_correct_value_to_max_power_list(
+        self, correct_max_power_list, field_name, values
+    ):
         values[0]['fields'][field_name] = correct_max_power_list
-
 
     def save_measurements(self, values_list, transductor):
         """
@@ -118,6 +134,7 @@ class EnergyMeasurement(Measurement):
             None
         """
         raise NotImplementedError
+
 
 class MinutelyMeasurement(EnergyMeasurement):
 
@@ -218,6 +235,7 @@ class MinutelyMeasurement(EnergyMeasurement):
 
         minutely_measurement.save()
 
+
 class QuarterlyMeasurement(EnergyMeasurement):
 
     generated_energy_peak_time = models.FloatField(default=0)
@@ -279,12 +297,22 @@ class MonthlyMeasurement(EnergyMeasurement):
     active_max_power_peak_time = models.FloatField(default=0)
     active_max_power_off_peak_time = models.FloatField(default=0)
     reactive_max_power_peak_time = models.FloatField(default=0)
-    reactive_max_power_off_peak_time = models.FloatField(default=0)
+    reactive_max_power_off_peak_time = models.FloatField(
+        default=0
+    )
 
-    active_max_power_list_peak_time = ArrayField(HStoreField(), default=None)
-    active_max_power_list_off_peak_time = ArrayField(HStoreField(), default=None)
-    reactive_max_power_list_peak_time = ArrayField(HStoreField(), default=None)
-    reactive_max_power_list_off_peak_time = ArrayField(HStoreField(), default=None)
+    active_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    active_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    reactive_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    reactive_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
 
     def save_measurements(values_list, transductor):
         """
@@ -316,18 +344,12 @@ class MonthlyMeasurement(EnergyMeasurement):
         measurement.consumption_peak_time = values_list[8]
         measurement.consumption_off_peak_time = values_list[9]
 
-        # if(float('-inf') < float(values_list[12]) < float('inf')):
+        # FIXME - This 2 measurements comming as NaN from the transductor  
         measurement.inductive_power_peak_time = 0
         measurement.inductive_power_off_peak_time = 0
 
         measurement.capacitive_power_peak_time = 0
         measurement.capacitive_power_off_peak_time = 0
-        # else:
-            # measurement.inductive_power_peak_time = values_list[10]
-            # measurement.inductive_power_off_peak_time = values_list[11]
-
-            # measurement.capacitive_power_peak_time = values_list[12]
-            # measurement.capacitive_power_off_peak_time = values_list[13]
 
         measurement.active_max_power_peak_time = values_list[14]
         measurement.active_max_power_off_peak_time = values_list[15]
@@ -379,16 +401,9 @@ class MonthlyMeasurement(EnergyMeasurement):
                 timestamp = None
 
             dict = {
-                # 'date': self._format_date(
-                #     self._get_year(current_year, current_month),
-                #     values_list[date + i],
-                #     values_list[hour + i]
-                # ),
                 'value': value_result,
-                # 'timestamp': timestamp
+                'timestamp': timestamp
             }
             count += 1
             max_power_list.append(dict)
         return max_power_list
-
-    
