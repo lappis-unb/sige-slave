@@ -3,6 +3,8 @@ from datetime import datetime
 from transductor.models import EnergyTransductor
 from django.contrib.postgres.fields import ArrayField, HStoreField
 from boogie.rest import rest_api
+import json
+from django.core import serializers
 
 
 class Measurement(models.Model):
@@ -34,54 +36,16 @@ class Measurement(models.Model):
 
 
 @rest_api()
-class EnergyMeasurement(Measurement):
-    """
-    Class responsible to store energy measurements,
-    considering a three-phase energy system.
+class MinutelyMeasurement(Measurement):
 
-    Attributes:
-        transductor (EnergyTransductor): The transductor which conducted
-        measurements.
-
-        consumption_a (float): The total consumption on phase A.
-        (since last reset)
-        consumption_b (float): The total consumption on phase B.
-        (since last reset)
-        consumption_c (float): The total consumption on phase C.
-        (since last reset)
-        total_consumption (float): The total consumption of transductor.
-        (since last reset)
-    """
     transductor = models.ForeignKey(
-        EnergyTransductor, related_name="measurements", on_delete=models.CASCADE
+        EnergyTransductor,
+        related_name="minutely_measurements",
+        on_delete=models.CASCADE
     )
 
     def __str__(self):
         return '%s' % self.collection_date
-
-    def get_time_measurements():
-        measures = [
-            MinuteMeasurement.objects.all(),
-            HourMeasurement.objects.all(),
-            QuarterMeasurement.objects.all()
-        ]
-        return measures
-
-    def save_measurements(self, values_list, transductor):
-        """
-        Method responsible to save measurements based on values
-        list received.
-        Args:
-            values_list (list): The list with all important
-                measurements values.
-            transductor (Transductor): Related transductor object
-        Return:
-            None
-        """
-        raise NotImplementedError
-
-
-class MinutelyMeasurement(EnergyMeasurement):
 
     frequency_a = models.FloatField(default=0)
 
@@ -131,6 +95,7 @@ class MinutelyMeasurement(EnergyMeasurement):
         Return:
             None
         """
+
         minutely_measurement = MinutelyMeasurement()
         minutely_measurement.transductor = transductor
 
@@ -181,7 +146,17 @@ class MinutelyMeasurement(EnergyMeasurement):
         minutely_measurement.save()
 
 
-class QuarterlyMeasurement(EnergyMeasurement):
+@rest_api()
+class QuarterlyMeasurement(Measurement):
+
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        related_name="quarterly_measurements",
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '%s' % self.collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
@@ -202,10 +177,10 @@ class QuarterlyMeasurement(EnergyMeasurement):
         Return:
             None
         """
-        quartely_measurement = QuarterlyMeasurement()
-        quartely_measurement.transductor = transductor
+        quarterly_measurement = QuarterlyMeasurement()
+        quarterly_measurement.transductor = transductor
 
-        quartely_measurement.collection_date = datetime(
+        quarterly_measurement.collection_date = datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -214,22 +189,32 @@ class QuarterlyMeasurement(EnergyMeasurement):
             values_list[5]
         )
 
-        quartely_measurement.generated_energy_peak_time = values_list[6]
-        quartely_measurement.generated_energy_off_peak_time = values_list[7]
+        quarterly_measurement.generated_energy_peak_time = values_list[6]
+        quarterly_measurement.generated_energy_off_peak_time = values_list[7]
 
-        quartely_measurement.consumption_peak_time = values_list[8]
-        quartely_measurement.consumption_off_peak_time = values_list[9]
+        quarterly_measurement.consumption_peak_time = values_list[8]
+        quarterly_measurement.consumption_off_peak_time = values_list[9]
 
-        quartely_measurement.inductive_power_peak_time = values_list[10]
-        quartely_measurement.inductive_power_off_peak_time = values_list[11]
+        quarterly_measurement.inductive_power_peak_time = values_list[10]
+        quarterly_measurement.inductive_power_off_peak_time = values_list[11]
 
-        quartely_measurement.capacitive_power_peak_time = values_list[12]
-        quartely_measurement.capacitive_power_off_peak_time = values_list[13]
+        quarterly_measurement.capacitive_power_peak_time = values_list[12]
+        quarterly_measurement.capacitive_power_off_peak_time = values_list[13]
 
-        quartely_measurement.save()
+        quarterly_measurement.save()
 
 
-class MonthlyMeasurement(EnergyMeasurement):
+@rest_api()
+class MonthlyMeasurement(Measurement):
+
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        related_name="monthly_measurements",
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return '%s' % self.collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
@@ -242,12 +227,22 @@ class MonthlyMeasurement(EnergyMeasurement):
     active_max_power_peak_time = models.FloatField(default=0)
     active_max_power_off_peak_time = models.FloatField(default=0)
     reactive_max_power_peak_time = models.FloatField(default=0)
-    reactive_max_power_off_peak_time = models.FloatField(default=0)
+    reactive_max_power_off_peak_time = models.FloatField(
+        default=0
+    )
 
-    active_max_power_list_peak_time = ArrayField(HStoreField())
-    active_max_power_list_off_peak_time = ArrayField(HStoreField())
-    reactive_max_power_list_peak_time = ArrayField(HStoreField())
-    reactive_max_power_list_off_peak_time = ArrayField(HStoreField())
+    active_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    active_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    reactive_max_power_list_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
+    reactive_max_power_list_off_peak_time = ArrayField(
+        HStoreField(), default=None
+    )
 
     def save_measurements(values_list, transductor):
         """
@@ -279,11 +274,12 @@ class MonthlyMeasurement(EnergyMeasurement):
         measurement.consumption_peak_time = values_list[8]
         measurement.consumption_off_peak_time = values_list[9]
 
-        measurement.inductive_power_peak_time = values_list[10]
-        measurement.inductive_power_off_peak_time = values_list[11]
+        # FIXME - This 2 measurements comming as NaN from the transductor  
+        measurement.inductive_power_peak_time = 0
+        measurement.inductive_power_off_peak_time = 0
 
-        measurement.capacitive_power_peak_time = values_list[12]
-        measurement.capacitive_power_off_peak_time = values_list[13]
+        measurement.capacitive_power_peak_time = 0
+        measurement.capacitive_power_off_peak_time = 0
 
         measurement.active_max_power_peak_time = values_list[14]
         measurement.active_max_power_off_peak_time = values_list[15]
@@ -331,13 +327,12 @@ class MonthlyMeasurement(EnergyMeasurement):
                     )
             else:
                 value_result = values_list[value + count]
-                timestamp = None
+                timestamp = datetime(1900, 1, 1, 1, 1)
 
             dict = {
                 'value': value_result,
                 'timestamp': timestamp
             }
-
             count += 1
             max_power_list.append(dict)
         return max_power_list
