@@ -120,9 +120,9 @@ class EnergyTransductor(Transductor):
             collection_date__range=[start_date, final_date]
         )
 
-    def get_quartely_measurements_by_datetime(self, start_date, final_date):
+    def get_quarterly_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
-        return self.quartely_measurements.filter(
+        return self.quarterly_measurements.filter(
             collection_date__range=[start_date, final_date]
         )
     
@@ -136,7 +136,7 @@ class EnergyTransductor(Transductor):
         return self.minutely_measurements.all()
     
     def get_quarterly_measurements(self):
-        return self.quartely_measurements.all()
+        return self.quarterly_measurements.all()
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()

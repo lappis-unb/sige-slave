@@ -5,7 +5,6 @@ from django.db import IntegrityError
 from django.db.utils import DataError
 from transductor_model.models import TransductorModel
 from transductor.models import EnergyTransductor
-from measurement.models import EnergyMeasurement
 from measurement.models import MinutelyMeasurement
 from measurement.models import QuarterlyMeasurement
 from measurement.models import MonthlyMeasurement
@@ -58,7 +57,7 @@ class EnergyMeasurementTestCase(TestCase):
             geolocation_longitude=-24.4556,
             geolocation_latitude=-24.45996
         )
-        self.energy_measurement = MinutelyMeasurement.objects.create(
+        self.minutely_measurement = MinutelyMeasurement.objects.create(
             transductor=self.transductor,
             frequency_a=8,
             voltage_a=8,
@@ -89,6 +88,38 @@ class EnergyMeasurementTestCase(TestCase):
             dht_current_a=8,
             dht_current_b=8,
             dht_current_c=8,
+        )
+
+        self.quarterly_measurement = QuarterlyMeasurement.objects.create(
+            transductor=self.transductor,
+            generated_energy_peak_time=8,
+            generated_energy_off_peak_time=8,
+            consumption_peak_time=8,
+            consumption_off_peak_time=8,
+            inductive_power_peak_time=8,
+            inductive_power_off_peak_time=8,
+            capacitive_power_peak_time=8,
+            capacitive_power_off_peak_time=8
+        )
+
+        self.monthly_measurement = MonthlyMeasurement.objects.create(
+            transductor=self.transductor,
+            generated_energy_peak_time=8, 
+            generated_energy_off_peak_time=8, 
+            consumption_peak_time=8, 
+            consumption_off_peak_time=8, 
+            inductive_power_peak_time=8, 
+            inductive_power_off_peak_time=8, 
+            capacitive_power_peak_time=8, 
+            capacitive_power_off_peak_time=8, 
+            active_max_power_peak_time=8, 
+            active_max_power_off_peak_time=8, 
+            reactive_max_power_peak_time=8, 
+            reactive_max_power_off_peak_time=8, 
+            active_max_power_list_peak_time=[],
+            active_max_power_list_off_peak_time=[],
+            reactive_max_power_list_peak_time=[],
+            reactive_max_power_list_off_peak_time=[]
         )
 
     '''
@@ -143,8 +174,6 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertEqual(size + 1, len(MinutelyMeasurement.objects.all()))
 
     def test_not_create_minutely_energy_measurement_empty_transductor(self):
-        size = len(EnergyTransductor.objects.all())
-
         en_measurement = MinutelyMeasurement()
 
         with self.assertRaises(IntegrityError):
@@ -242,3 +271,318 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertEqual(measurement.dht_current_a, values_list[32])
         self.assertEqual(measurement.dht_current_b, values_list[33])
         self.assertEqual(measurement.dht_current_c, values_list[34])
+
+    '''
+    QuarterlyMeasurementTests
+    '''
+
+    def test_create_quarterly_energy_measurement_with_defaults(self):
+        size = len(QuarterlyMeasurement.objects.all())
+
+        quarterly_en_measurement = QuarterlyMeasurement()
+        quarterly_en_measurement.transductor = self.transductor
+
+        self.assertIsNone(quarterly_en_measurement.save())
+        self.assertEqual(size + 1, len(QuarterlyMeasurement.objects.all()))
+
+    def test_create_quarterly_energy_measurement(self):
+        size = len(QuarterlyMeasurement.objects.all())
+
+        quarterly_en_measurement = QuarterlyMeasurement()
+        quarterly_en_measurement.transductor = self.transductor
+        quarterly_en_measurement.generated_energy_peak_time = 31
+        quarterly_en_measurement.generated_energy_off_peak_time = 31
+        quarterly_en_measurement.consumption_peak_time = 31
+        quarterly_en_measurement.consumption_off_peak_time = 31
+        quarterly_en_measurement.inductive_power_peak_time = 31
+        quarterly_en_measurement.inductive_power_off_peak_time = 31
+        quarterly_en_measurement.capacitive_power_peak_time = 31
+        quarterly_en_measurement.capacitive_power_off_peak_time = 31
+        quarterly_en_measurement.active_max_power_peak_time = 31
+        quarterly_en_measurement.active_max_power_off_peak_time = 31
+        quarterly_en_measurement.reactive_max_power_peak_time = 31
+        quarterly_en_measurement.reactive_max_power_off_peak_time = 31
+        
+        self.assertIsNone(quarterly_en_measurement.save())
+        self.assertEqual(size + 1, len(QuarterlyMeasurement.objects.all()))
+
+    def test_not_create_quarterly_energy_measurement_empty_transductor(self):
+        en_measurement = QuarterlyMeasurement()
+
+        with self.assertRaises(IntegrityError):
+            en_measurement.save()
+
+    def test_update_quarterly_energy_measurement(self):
+        quarterly_energy_measurement = QuarterlyMeasurement()
+        quarterly_energy_measurement.transductor = \
+            EnergyTransductor.objects.get(
+                serial_number=87654321
+            )
+        quarterly_energy_measurement.save()
+
+        quarterly_energy_measurement.generated_energy_peak_time = 9
+
+        self.assertEquals(
+            None,
+            quarterly_energy_measurement.save(
+                update_fields=['generated_energy_peak_time']
+            )
+        )
+
+        self.assertTrue(
+            9, quarterly_energy_measurement.generated_energy_peak_time
+        )
+
+    def test_delete_quarterly_measurement(self):
+        size = len(QuarterlyMeasurement.objects.all())
+        QuarterlyMeasurement.objects.filter(
+            generated_energy_peak_time='8'
+        ).delete()
+
+        self.assertEqual(size - 1, len(QuarterlyMeasurement.objects.all()))
+
+    def test_not_delete_inexistent_transductor_quarterly_measures(self):
+        size = len(QuarterlyMeasurement.objects.all())
+        value = '8'
+
+        QuarterlyMeasurement.objects.get(
+            generated_energy_peak_time=8
+        ).delete()
+
+        self.assertEqual(size - 1, len(QuarterlyMeasurement.objects.all()))
+
+        with self.assertRaises(QuarterlyMeasurement.DoesNotExist):
+            QuarterlyMeasurement.objects.get(
+                generated_energy_peak_time=8
+            ).delete()
+
+    def test_save_quarterly_measurements(self):
+        before_count = QuarterlyMeasurement.objects.all().__len__()
+
+        values_list = [2019, 2, 5, 14, 0, 0, 6, 7, 8, 9, 10, 11, 12, 13]
+
+        QuarterlyMeasurement.save_measurements(values_list, self.transductor)
+
+        after_count = QuarterlyMeasurement.objects.all().__len__()
+
+        self.assertEqual(after_count - 1, before_count)
+
+        measurement = QuarterlyMeasurement.objects.last()
+
+        hour_with_timezone = values_list[3] + 2
+
+        self.assertEqual(measurement.collection_date.year, values_list[0])
+        self.assertEqual(measurement.collection_date.month, values_list[1])
+        self.assertEqual(measurement.collection_date.day, values_list[2])
+        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.minute, values_list[4])
+        self.assertEqual(measurement.collection_date.second, values_list[5])
+        self.assertEqual(measurement.generated_energy_peak_time, values_list[6])
+        self.assertEqual(
+            measurement.generated_energy_off_peak_time, values_list[7]
+        )
+        self.assertEqual(measurement.consumption_peak_time, values_list[8])
+        self.assertEqual(
+            measurement.consumption_off_peak_time, values_list[9]
+        )
+        self.assertEqual(
+            measurement.inductive_power_peak_time, values_list[10]
+        )
+        self.assertEqual(
+            measurement.inductive_power_off_peak_time, values_list[11]
+        )
+        self.assertEqual(
+            measurement.capacitive_power_peak_time, values_list[12]
+        )
+        self.assertEqual(
+            measurement.capacitive_power_off_peak_time, values_list[13]
+        )
+
+    '''
+    MonthlyMeasurementTests
+    '''
+    
+    def test_create_monthly_energy_measurement_with_defaults(self):
+        size = len(MonthlyMeasurement.objects.all())
+
+        monthly_en_measurement = MonthlyMeasurement()
+        monthly_en_measurement.transductor = self.transductor
+        monthly_en_measurement.active_max_power_list_peak_time = []
+        monthly_en_measurement.active_max_power_list_off_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_off_peak_time = []
+
+        self.assertIsNone(monthly_en_measurement.save())
+        self.assertEqual(size + 1, len(MonthlyMeasurement.objects.all()))
+
+    def test_create_monthly_energy_measurement(self):
+        size = len(MonthlyMeasurement.objects.all())
+
+        monthly_en_measurement = MonthlyMeasurement()
+        monthly_en_measurement.transductor = self.transductor
+        monthly_en_measurement.generated_energy_peak_time = 9 
+        monthly_en_measurement.generated_energy_off_peak_time = 9 
+        monthly_en_measurement.consumption_peak_time = 9 
+        monthly_en_measurement.consumption_off_peak_time = 9 
+        monthly_en_measurement.inductive_power_peak_time = 9 
+        monthly_en_measurement.inductive_power_off_peak_time = 9 
+        monthly_en_measurement.capacitive_power_peak_time = 9 
+        monthly_en_measurement.capacitive_power_off_peak_time = 9 
+        monthly_en_measurement.active_max_power_peak_time = 9 
+        monthly_en_measurement.active_max_power_off_peak_time = 9 
+        monthly_en_measurement.reactive_max_power_peak_time = 9 
+        monthly_en_measurement.reactive_max_power_off_peak_time = 9 
+        monthly_en_measurement.active_max_power_list_peak_time = []
+        monthly_en_measurement.active_max_power_list_off_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_off_peak_time = []
+        
+        self.assertIsNone(monthly_en_measurement.save())
+        self.assertEqual(size + 1, len(MonthlyMeasurement.objects.all()))
+
+    def test_not_create_monthly_energy_measurement_empty_transductor(self):
+        en_measurement = MonthlyMeasurement()
+
+        with self.assertRaises(IntegrityError):
+            en_measurement.save()
+
+    def test_update_monthly_energy_measurement(self):
+        monthly_energy_measurement = MonthlyMeasurement()
+        monthly_energy_measurement.transductor = \
+            EnergyTransductor.objects.get(
+                serial_number=87654321
+            )
+        monthly_energy_measurement.active_max_power_list_peak_time = []
+        monthly_energy_measurement.active_max_power_list_off_peak_time = []
+        monthly_energy_measurement.reactive_max_power_list_peak_time = []
+        monthly_energy_measurement.reactive_max_power_list_off_peak_time = []
+        monthly_energy_measurement.save()
+
+        monthly_energy_measurement.generated_energy_peak_time = 9
+
+        self.assertEquals(
+            None,
+            monthly_energy_measurement.save(
+                update_fields=['generated_energy_peak_time']
+            )
+        )
+
+        self.assertTrue(
+            9, monthly_energy_measurement.generated_energy_peak_time
+        )
+
+    def test_delete_monthly_measurement(self):
+        size = len(MonthlyMeasurement.objects.all())
+        MonthlyMeasurement.objects.filter(
+            generated_energy_peak_time='8'
+        ).delete()
+
+        self.assertEqual(size - 1, len(MonthlyMeasurement.objects.all()))
+
+    def test_not_delete_inexistent_transductor_monthly_measures(self):
+        size = len(MonthlyMeasurement.objects.all())
+        value = '8'
+
+        MonthlyMeasurement.objects.get(
+            generated_energy_peak_time=8
+        ).delete()
+
+        self.assertEqual(size - 1, len(MonthlyMeasurement.objects.all()))
+
+        with self.assertRaises(MonthlyMeasurement.DoesNotExist):
+            MonthlyMeasurement.objects.get(
+                generated_energy_peak_time=8
+            ).delete()
+
+    def test_save_monthly_measurements(self):
+        before_count = MonthlyMeasurement.objects.all().__len__()
+
+        values_list = [2019, 3, 12, 11, 50, 1, 0, 0, 1,
+                       1, 0, 0, 0, 0, 0, 0, 1,
+                       1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                       0, 0, 0, 0, 0, 0, 0,
+                       [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0],
+                       [0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0]]
+
+        MonthlyMeasurement.save_measurements(values_list, self.transductor)
+
+        after_count = MonthlyMeasurement.objects.all().__len__()
+
+        self.assertEqual(after_count - 1, before_count)
+
+        measurement = MonthlyMeasurement.objects.last()
+
+        hour_with_timezone = values_list[3] + 3
+
+        self.assertEqual(measurement.collection_date.year, values_list[0])
+        self.assertEqual(measurement.collection_date.month, values_list[1])
+        self.assertEqual(measurement.collection_date.day, values_list[2])
+        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.minute, values_list[4])
+        self.assertEqual(measurement.collection_date.second, values_list[5])        
+        self.assertEqual(
+            measurement.generated_energy_peak_time, values_list[6]
+        )
+        self.assertEqual(
+            measurement.generated_energy_off_peak_time, values_list[7]
+        )
+        self.assertEqual(
+            measurement.consumption_peak_time, values_list[8]
+        )
+        self.assertEqual(measurement.consumption_off_peak_time, values_list[9])
+        self.assertEqual(measurement.inductive_power_peak_time, values_list[10])
+        self.assertEqual(
+            measurement.inductive_power_off_peak_time, values_list[11]
+        )
+        self.assertEqual(
+            measurement.capacitive_power_peak_time, values_list[12]
+        )
+        self.assertEqual(
+            measurement.capacitive_power_off_peak_time, values_list[13]
+        )
+        self.assertEqual(
+            measurement.active_max_power_peak_time, values_list[14]
+        )
+        self.assertEqual(
+            measurement.active_max_power_off_peak_time, values_list[15]
+        )
+        self.assertEqual(
+            measurement.reactive_max_power_peak_time, values_list[16]
+        )
+        self.assertEqual(
+            measurement.reactive_max_power_off_peak_time, values_list[17]
+        )
+        self.assertEqual(
+            int(measurement.active_max_power_list_peak_time[0]["value"]), 0
+        )
+        self.assertEqual(
+            measurement.active_max_power_list_peak_time[0]["timestamp"], 
+            '1900-01-01 01:01:00'
+        )
+        
+        self.assertEqual(
+            int(measurement.active_max_power_list_off_peak_time[0]["value"]), 0
+        )
+        self.assertEqual(
+            measurement.active_max_power_list_off_peak_time[0]["timestamp"], 
+            '1900-01-01 01:01:00'
+        )
+        
+        self.assertEqual(
+            int(measurement.reactive_max_power_list_peak_time[0]["value"]), 0
+        )
+        self.assertEqual(
+            measurement.reactive_max_power_list_peak_time[0]["timestamp"],
+            '1900-01-01 01:01:00'
+        )
+        
+        self.assertEqual(
+            int(measurement.reactive_max_power_list_off_peak_time[0]["value"]),
+            0
+        )
+        self.assertEqual(
+            measurement.reactive_max_power_list_off_peak_time[0]["timestamp"],
+            '1900-01-01 01:01:00'
+        )

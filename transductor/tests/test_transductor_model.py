@@ -5,9 +5,11 @@ from django.db import IntegrityError
 from django.db.utils import DataError
 from transductor_model.models import TransductorModel
 from transductor.models import EnergyTransductor
-from measurement.models import EnergyMeasurement
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
+from measurement.models import MinutelyMeasurement
+from measurement.models import QuarterlyMeasurement
+from measurement.models import MonthlyMeasurement
 
 
 class TransductorTestCase(TestCase):
@@ -224,7 +226,17 @@ class TransductorTestCase(TestCase):
         self._set_measurements(energy_transductor)
         self.assertEqual(
             12,
-            len(energy_transductor.get_measurements())
+            len(energy_transductor.get_minutely_measurements())
+        )
+
+        self.assertEqual(
+            12,
+            len(energy_transductor.get_quarterly_measurements())
+        )
+
+        self.assertEqual(
+            12,
+            len(energy_transductor.get_monthly_measurements())
         )
 
     def test_get_transductor_meassurements_by_date(self):
@@ -239,7 +251,27 @@ class TransductorTestCase(TestCase):
         self.assertEqual(
             4,
             len(
-                energy_transductor.get_measurements_by_datetime(
+                energy_transductor.get_quarterly_measurements_by_datetime(
+                    start_date,
+                    final_date
+                )
+            )
+        )
+
+        self.assertEqual(
+            4,
+            len(
+                energy_transductor.get_quarterly_measurements_by_datetime(
+                    start_date,
+                    final_date
+                )
+            )
+        )
+
+        self.assertEqual(
+            4,
+            len(
+                energy_transductor.get_quarterly_measurements_by_datetime(
                     start_date,
                     final_date
                 )
@@ -258,7 +290,27 @@ class TransductorTestCase(TestCase):
         self.assertEqual(
             3,
             len(
-                energy_transductor.get_measurements_by_datetime(
+                energy_transductor.get_minutely_measurements_by_datetime(
+                    start_date,
+                    final_date
+                )
+            )
+        )
+
+        self.assertEqual(
+            3,
+            len(
+                energy_transductor.get_quarterly_measurements_by_datetime(
+                    start_date,
+                    final_date
+                )
+            )
+        )
+
+        self.assertEqual(
+            3,
+            len(
+                energy_transductor.get_monthly_measurements_by_datetime(
                     start_date,
                     final_date
                 )
@@ -286,7 +338,21 @@ class TransductorTestCase(TestCase):
         ]
 
         for date in datetimes:
-            EnergyMeasurement.objects.create(
+            MinutelyMeasurement.objects.create(
                 collection_date=date,
                 transductor=energy_transductor
+            )
+
+            QuarterlyMeasurement.objects.create(
+                collection_date=date,
+                transductor=energy_transductor
+            )
+
+            MonthlyMeasurement.objects.create(
+                collection_date=date,
+                transductor=energy_transductor,
+                active_max_power_list_peak_time=[],
+                active_max_power_list_off_peak_time=[],
+                reactive_max_power_list_peak_time=[],
+                reactive_max_power_list_off_peak_time=[]
             )
