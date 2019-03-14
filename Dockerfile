@@ -11,7 +11,7 @@ WORKDIR /smi-slave
 COPY . /smi-slave
 
 # Setting cron
-ADD crons/cronjob /etc/cron.d/smi-cron
+COPY crons/cronjob /etc/cron.d/smi-cron
 
 RUN chmod 0644 /etc/cron.d/smi-cron
 
