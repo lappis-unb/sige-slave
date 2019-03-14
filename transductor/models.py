@@ -3,7 +3,9 @@ from datetime import datetime
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
+import json
 from boogie.rest import rest_api
+from itertools import chain
 
 
 class Transductor(models.Model):
@@ -112,11 +114,29 @@ class EnergyTransductor(Transductor):
         self.broken = broken
         self.save()
 
-    def get_measurements_by_datetime(self, start_date, final_date):
+    def get_minutely_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
-        return self.measurements.filter(
+        return self.minutely_measurements.filter(
             collection_date__range=[start_date, final_date]
         )
 
-    def get_measurements(self):
-        return self.measurements.all()
+    def get_quarterly_measurements_by_datetime(self, start_date, final_date):
+        # dates must match 'yyyy-mm-dd'
+        return self.quarterly_measurements.filter(
+            collection_date__range=[start_date, final_date]
+        )
+    
+    def get_monthly_measurements_by_datetime(self, start_date, final_date):
+        # dates must match 'yyyy-mm-dd'
+        return self.monthly_measurements.filter(
+            collection_date__range=[start_date, final_date]
+        )
+
+    def get_minutely_measurements(self):
+        return self.minutely_measurements.all()
+    
+    def get_quarterly_measurements(self):
+        return self.quarterly_measurements.all()
+
+    def get_monthly_measurements(self):
+        return self.monthly_measurements.all()
