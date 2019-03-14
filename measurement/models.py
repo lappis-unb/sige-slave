@@ -5,6 +5,8 @@ from django.contrib.postgres.fields import ArrayField, HStoreField
 from boogie.rest import rest_api
 import json
 from django.core import serializers
+from django.utils import timezone
+from django.conf import settings
 
 
 class Measurement(models.Model):
@@ -16,7 +18,8 @@ class Measurement(models.Model):
         collection_date (datetime): The exactly collection time.
 
     """
-    collection_date = models.DateTimeField(default=datetime.now)
+    settings.USE_TZ = False
+    collection_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract = True
@@ -100,7 +103,7 @@ class MinutelyMeasurement(Measurement):
         minutely_measurement.transductor = transductor
 
         # saving the datetime from transductor
-        minutely_measurement.collection_date = datetime(
+        minutely_measurement.collection_date = timezone.datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -180,7 +183,7 @@ class QuarterlyMeasurement(Measurement):
         quarterly_measurement = QuarterlyMeasurement()
         quarterly_measurement.transductor = transductor
 
-        quarterly_measurement.collection_date = datetime(
+        quarterly_measurement.collection_date = timezone.datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -259,7 +262,7 @@ class MonthlyMeasurement(Measurement):
         measurement = MonthlyMeasurement()
         measurement.transductor = transductor
 
-        measurement.collection_date = datetime(
+        measurement.collection_date = timezone.datetime(
             values_list[0],
             values_list[1],
             values_list[2],
@@ -274,7 +277,7 @@ class MonthlyMeasurement(Measurement):
         measurement.consumption_peak_time = values_list[8]
         measurement.consumption_off_peak_time = values_list[9]
 
-        # FIXME - This 2 measurements comming as NaN from the transductor  
+        # FIXME - This 2 measurements comming as NaN from the transductor
         measurement.inductive_power_peak_time = 0
         measurement.inductive_power_off_peak_time = 0
 

@@ -104,27 +104,27 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
             transductor=self.transductor,
-            generated_energy_peak_time=8, 
-            generated_energy_off_peak_time=8, 
-            consumption_peak_time=8, 
-            consumption_off_peak_time=8, 
-            inductive_power_peak_time=8, 
-            inductive_power_off_peak_time=8, 
-            capacitive_power_peak_time=8, 
-            capacitive_power_off_peak_time=8, 
-            active_max_power_peak_time=8, 
-            active_max_power_off_peak_time=8, 
-            reactive_max_power_peak_time=8, 
-            reactive_max_power_off_peak_time=8, 
+            generated_energy_peak_time=8,
+            generated_energy_off_peak_time=8,
+            consumption_peak_time=8,
+            consumption_off_peak_time=8,
+            inductive_power_peak_time=8,
+            inductive_power_off_peak_time=8,
+            capacitive_power_peak_time=8,
+            capacitive_power_off_peak_time=8,
+            active_max_power_peak_time=8,
+            active_max_power_off_peak_time=8,
+            reactive_max_power_peak_time=8,
+            reactive_max_power_off_peak_time=8,
             active_max_power_list_peak_time=[],
             active_max_power_list_off_peak_time=[],
             reactive_max_power_list_peak_time=[],
             reactive_max_power_list_off_peak_time=[]
         )
 
-    '''
+    """
     MinutelyMeasurementTests
-    '''
+    """
 
     def test_create_minutely_energy_measurement_with_defaults(self):
         size = len(MinutelyMeasurement.objects.all())
@@ -189,7 +189,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         minutely_energy_measurement.total_power_factor = 100
 
-        self.assertEquals(
+        self.assertEqual(
             None,
             minutely_energy_measurement.save(
                 update_fields=['total_power_factor']
@@ -234,12 +234,10 @@ class EnergyMeasurementTestCase(TestCase):
 
         measurement = MinutelyMeasurement.objects.last()
 
-        hour_with_timezone = values_list[3] + 2
-
         self.assertEqual(measurement.collection_date.year, values_list[0])
         self.assertEqual(measurement.collection_date.month, values_list[1])
         self.assertEqual(measurement.collection_date.day, values_list[2])
-        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.hour, values_list[3])
         self.assertEqual(measurement.collection_date.minute, values_list[4])
         self.assertEqual(measurement.collection_date.second, values_list[5])
         self.assertEqual(measurement.frequency_a, values_list[6])
@@ -272,9 +270,9 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertEqual(measurement.dht_current_b, values_list[33])
         self.assertEqual(measurement.dht_current_c, values_list[34])
 
-    '''
+    """
     QuarterlyMeasurementTests
-    '''
+    """
 
     def test_create_quarterly_energy_measurement_with_defaults(self):
         size = len(QuarterlyMeasurement.objects.all())
@@ -302,7 +300,7 @@ class EnergyMeasurementTestCase(TestCase):
         quarterly_en_measurement.active_max_power_off_peak_time = 31
         quarterly_en_measurement.reactive_max_power_peak_time = 31
         quarterly_en_measurement.reactive_max_power_off_peak_time = 31
-        
+
         self.assertIsNone(quarterly_en_measurement.save())
         self.assertEqual(size + 1, len(QuarterlyMeasurement.objects.all()))
 
@@ -322,7 +320,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         quarterly_energy_measurement.generated_energy_peak_time = 9
 
-        self.assertEquals(
+        self.assertEqual(
             None,
             quarterly_energy_measurement.save(
                 update_fields=['generated_energy_peak_time']
@@ -369,12 +367,10 @@ class EnergyMeasurementTestCase(TestCase):
 
         measurement = QuarterlyMeasurement.objects.last()
 
-        hour_with_timezone = values_list[3] + 2
-
         self.assertEqual(measurement.collection_date.year, values_list[0])
         self.assertEqual(measurement.collection_date.month, values_list[1])
         self.assertEqual(measurement.collection_date.day, values_list[2])
-        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.hour, values_list[3])
         self.assertEqual(measurement.collection_date.minute, values_list[4])
         self.assertEqual(measurement.collection_date.second, values_list[5])
         self.assertEqual(measurement.generated_energy_peak_time, values_list[6])
@@ -398,10 +394,10 @@ class EnergyMeasurementTestCase(TestCase):
             measurement.capacitive_power_off_peak_time, values_list[13]
         )
 
-    '''
+    """
     MonthlyMeasurementTests
-    '''
-    
+    """
+
     def test_create_monthly_energy_measurement_with_defaults(self):
         size = len(MonthlyMeasurement.objects.all())
 
@@ -420,23 +416,23 @@ class EnergyMeasurementTestCase(TestCase):
 
         monthly_en_measurement = MonthlyMeasurement()
         monthly_en_measurement.transductor = self.transductor
-        monthly_en_measurement.generated_energy_peak_time = 9 
-        monthly_en_measurement.generated_energy_off_peak_time = 9 
-        monthly_en_measurement.consumption_peak_time = 9 
-        monthly_en_measurement.consumption_off_peak_time = 9 
-        monthly_en_measurement.inductive_power_peak_time = 9 
-        monthly_en_measurement.inductive_power_off_peak_time = 9 
-        monthly_en_measurement.capacitive_power_peak_time = 9 
-        monthly_en_measurement.capacitive_power_off_peak_time = 9 
-        monthly_en_measurement.active_max_power_peak_time = 9 
-        monthly_en_measurement.active_max_power_off_peak_time = 9 
-        monthly_en_measurement.reactive_max_power_peak_time = 9 
-        monthly_en_measurement.reactive_max_power_off_peak_time = 9 
+        monthly_en_measurement.generated_energy_peak_time = 9
+        monthly_en_measurement.generated_energy_off_peak_time = 9
+        monthly_en_measurement.consumption_peak_time = 9
+        monthly_en_measurement.consumption_off_peak_time = 9
+        monthly_en_measurement.inductive_power_peak_time = 9
+        monthly_en_measurement.inductive_power_off_peak_time = 9
+        monthly_en_measurement.capacitive_power_peak_time = 9
+        monthly_en_measurement.capacitive_power_off_peak_time = 9
+        monthly_en_measurement.active_max_power_peak_time = 9
+        monthly_en_measurement.active_max_power_off_peak_time = 9
+        monthly_en_measurement.reactive_max_power_peak_time = 9
+        monthly_en_measurement.reactive_max_power_off_peak_time = 9
         monthly_en_measurement.active_max_power_list_peak_time = []
         monthly_en_measurement.active_max_power_list_off_peak_time = []
         monthly_en_measurement.reactive_max_power_list_peak_time = []
         monthly_en_measurement.reactive_max_power_list_off_peak_time = []
-        
+
         self.assertIsNone(monthly_en_measurement.save())
         self.assertEqual(size + 1, len(MonthlyMeasurement.objects.all()))
 
@@ -460,7 +456,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         monthly_energy_measurement.generated_energy_peak_time = 9
 
-        self.assertEquals(
+        self.assertEqual(
             None,
             monthly_energy_measurement.save(
                 update_fields=['generated_energy_peak_time']
@@ -514,14 +510,12 @@ class EnergyMeasurementTestCase(TestCase):
 
         measurement = MonthlyMeasurement.objects.last()
 
-        hour_with_timezone = values_list[3] + 3
-
         self.assertEqual(measurement.collection_date.year, values_list[0])
         self.assertEqual(measurement.collection_date.month, values_list[1])
         self.assertEqual(measurement.collection_date.day, values_list[2])
-        self.assertEqual(measurement.collection_date.hour, hour_with_timezone)
+        self.assertEqual(measurement.collection_date.hour, values_list[3])
         self.assertEqual(measurement.collection_date.minute, values_list[4])
-        self.assertEqual(measurement.collection_date.second, values_list[5])        
+        self.assertEqual(measurement.collection_date.second, values_list[5])
         self.assertEqual(
             measurement.generated_energy_peak_time, values_list[6]
         )
@@ -558,18 +552,18 @@ class EnergyMeasurementTestCase(TestCase):
             int(measurement.active_max_power_list_peak_time[0]["value"]), 0
         )
         self.assertEqual(
-            measurement.active_max_power_list_peak_time[0]["timestamp"], 
+            measurement.active_max_power_list_peak_time[0]["timestamp"],
             '1900-01-01 01:01:00'
         )
-        
+
         self.assertEqual(
             int(measurement.active_max_power_list_off_peak_time[0]["value"]), 0
         )
         self.assertEqual(
-            measurement.active_max_power_list_off_peak_time[0]["timestamp"], 
+            measurement.active_max_power_list_off_peak_time[0]["timestamp"],
             '1900-01-01 01:01:00'
         )
-        
+
         self.assertEqual(
             int(measurement.reactive_max_power_list_peak_time[0]["value"]), 0
         )
@@ -577,7 +571,7 @@ class EnergyMeasurementTestCase(TestCase):
             measurement.reactive_max_power_list_peak_time[0]["timestamp"],
             '1900-01-01 01:01:00'
         )
-        
+
         self.assertEqual(
             int(measurement.reactive_max_power_list_off_peak_time[0]["value"]),
             0
