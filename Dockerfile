@@ -10,10 +10,6 @@ WORKDIR /smi-slave
 
 COPY . /smi-slave
 
-
-# seeding db'
-RUN python3 manage.py loaddata data_reader/fixtures/initial_data.json
-
 # Setting cron
 COPY crons/cronjob /etc/cron.d/smi-cron
 
