@@ -91,7 +91,8 @@ class DataCollector(object):
     def quarterly_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
             try:
-                QuarterlyMeasurement.save_measurements(measurements, transductor)
+                QuarterlyMeasurement.save_measurements(measurements,
+                                                       transductor)
             except (Exception) as exception:
                 print(str(exception))
         else:
