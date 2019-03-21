@@ -81,20 +81,30 @@ class DataCollector(object):
 
     def minutely_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
-            MinutelyMeasurement.save_measurements(measurements, transductor)
+            try:
+                MinutelyMeasurement.save_measurements(measurements, transductor)
+            except (Exception) as exception:
+                print(str(exception))
         else:
             pass
 
     def quarterly_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
-            QuarterlyMeasurement.save_measurements(measurements, transductor)
+            try:
+                QuarterlyMeasurement.save_measurements(measurements,
+                                                       transductor)
+            except (Exception) as exception:
+                print(str(exception))
         else:
             pass
 
     def monthly_data_collection(self, measurements, transductor):
 
         if transductor.model.name == "TR4020":
-            MonthlyMeasurement.save_measurements(measurements, transductor)
+            try:
+                MonthlyMeasurement.save_measurements(measurements, transductor)
+            except(Exception) as exception:
+                print(str(exception))
         else:
             pass
 

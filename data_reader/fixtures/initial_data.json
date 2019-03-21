@@ -1,107 +1,65 @@
 [
-    {
-        "model": "transductor.TransductorModel",
-        "pk": 1,
-        "fields": {
-            "name": "TR4020",
-            "transport_protocol": "UdpProtocol",
-            "serial_protocol": "ModbusRTU",
-            "minutely_register_addresses": [
-                [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [66,2],
-                [68,2], [70,2], [72,2], [74,2], [76,2], [78,2], [80,2],
-                [82,2], [84,2], [86,2], [88,2], [90,2], [92,2], [94,2],
-                [96,2], [98,2], [100,2], [102,2], [104,2], [106,2], [108,2],
-                [110,2], [112,2], [114,2], [116,2], [118,2], [120,2], [122,2],
-                [132,2], [134,2], [136,2], [138,2]
-            ],
-            "quarterly_register_addresses": [
-              [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [264,2], [266,2],
-              [270,2], [272,2], [276,2], [278,2], [282,2], [284,2]
-            ],
-            "monthly_register_addresses": [
-              [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [156,2], [158,2],
-              [162,2], [164,2], [168,2], [170,2], [174,2], [176,2], [180,2],
-              [182,2], [186,2], [188,2], [420,2], [422,2], [424,2], [426,2],
-              [428,2], [430,2], [432,2], [434,2], [444,2], [446,2], [448,2],
-              [450,2], [452,2], [454,2], [456,2], [458,2], [516,4], [520,4],
-              [524,4], [528,4], [540,4], [544,4], [548,4], [552,4]
-            ]
-        }
-    },
-    {
-        "model": "campuses.AdministrativeRegion",
-        "pk": 1,
-        "fields": {
-            "name": "Asa Norte"
-        }
-    },
-    {
-        "model": "campuses.AdministrativeRegion",
-        "pk": 2,
-        "fields": {
-            "name": "Ceilândia"
-        }
-    },
-    {
-        "model": "campuses.AdministrativeRegion",
-        "pk": 3,
-        "fields": {
-            "name": "Gama"
-        }
-    },
-    {
-        "model": "campuses.AdministrativeRegion",
-        "pk": 4,
-        "fields": {
-            "name": "Planaltina"
-        }
-    },
-    {
-        "model": "campuses.Campus",
-        "pk": 1,
-        "fields": {
-            "administrative_region": 1,
-            "name": "Darcy Ribeiro",
-            "acronym": "Darcy Ribeiro",
-            "address": "Campus Universitário Darcy Ribeiro, Brasília - DF, 70910-900",
-            "phone": "(55 61) 3107-4100",
-            "url_param": "darcy_ribeiro"
-        }
-    },
-    {
-        "model": "campuses.Campus",
-        "pk": 2,
-        "fields": {
-            "administrative_region": 2,
-            "name": "Faculdade de Ceilândia",
-            "acronym": "FCE",
-            "address": "Centro Metropolitano, conjunto A, lote 01, Ceilândia Sul, Brasília - DF. 72220-275",
-            "phone": "(55 61) 3107-8427 / 8428",
-            "url_param": "fce"
-        }
-    },
-    {
-        "model": "campuses.Campus",
-        "pk": 3,
-        "fields": {
-            "administrative_region": 3,
-            "name": "Faculdade UnB Gama",
-            "acronym": "FGA",
-            "address": "St. Leste Projeção A - Gama Leste, Brasília - DF, 72444-240",
-            "phone": "(55 61) 3107-8901 / 8904",
-            "url_param": "fga"
-        }
-    },
-    {
-        "model": "campuses.Campus",
-        "pk": 4,
-        "fields": {
-            "administrative_region": 4,
-            "name": "Faculdade UnB Planaltina",
-            "acronym": "FUP",
-            "address": "Área Universitária, 01, Vila Nossa Senhora de Fátima - Planaltina, Brasília - DF, 73345-010",
-            "phone": "(55 61) 3107-8002 / 8007",
-            "url_param": "fup"
-        }
+  {
+    "model": "transductor_model.TransductorModel",
+    "pk": 1,
+    "fields": {
+      "name": "TR4020",
+      "transport_protocol": "UdpProtocol",
+      "serial_protocol": "ModbusRTU",
+      "minutely_register_addresses": [
+        [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [66,2],
+        [68,2], [70,2], [72,2], [74,2], [76,2], [78,2], [80,2],
+        [82,2], [84,2], [86,2], [88,2], [90,2], [92,2], [94,2],
+        [96,2], [98,2], [100,2], [102,2], [104,2], [106,2], [108,2],
+        [110,2], [112,2], [114,2], [116,2], [118,2], [120,2], [122,2],
+        [132,2], [134,2], [136,2], [138,2]
+      ],
+      "quarterly_register_addresses": [
+        [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [264,2], [266,2],
+        [270,2], [272,2], [276,2], [278,2], [282,2], [284,2]
+      ],
+      "monthly_register_addresses": [
+        [10,1], [11,1], [14,1], [15,1], [16,1], [17,1], [156,2], [158,2],
+        [162,2], [164,2], [168,2], [170,2], [174,2], [176,2], [180,2],
+        [182,2], [186,2], [188,2], [420,2], [422,2], [424,2], [426,2],
+        [428,2], [430,2], [432,2], [434,2], [444,2], [446,2], [448,2],
+        [450,2], [452,2], [454,2], [456,2], [458,2], [516,4], [520,4],
+        [524,4], [528,4], [540,4], [544,4], [548,4], [552,4]
+      ]
     }
+  },
+  {
+    "model": "transductor.EnergyTransductor",
+    "pk": 1,
+    "fields": {
+      "model": 1,
+      "serial_number": "12345",
+      "ip_address": "164.41.86.43",
+      "broken": false,
+      "active": true,
+      "firmware_version": "1.1.1",
+      "physical_location": "prédio da 36",
+      "geolocation_longitude": 30.33,
+      "geolocation_latitude": 30.33,
+      "last_clock_battery_change": "2019-03-11T11:25:11.119676-03:00",
+      "installation_date": "2019-03-11T11:25:11.119406-03:00"
+    }
+  },
+  {
+    "model": "transductor.EnergyTransductor",
+    "pk": 2,
+    "fields": {
+      "model": 1,
+      "serial_number": "54321",
+      "ip_address": "164.41.86.42",
+      "broken": false,
+      "active": true,
+      "firmware_version": "1.1.1",
+      "physical_location": "prédio da 36",
+      "geolocation_longitude": -30.33,
+      "geolocation_latitude": -30.33,
+      "last_clock_battery_change": "2019-03-11T11:25:11.119676-03:00",
+      "installation_date": "2019-03-11T11:25:11.119406-03:00"
+    }
+  }
 ]
