@@ -10,6 +10,7 @@ from measurement.models import QuarterlyMeasurement
 from measurement.models import MonthlyMeasurement
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
+from django.utils import timezone
 
 
 class EnergyMeasurementTestCase(TestCase):
@@ -58,6 +59,7 @@ class EnergyMeasurementTestCase(TestCase):
             geolocation_latitude=-24.45996
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             frequency_a=8,
             voltage_a=8,
@@ -91,6 +93,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
             generated_energy_off_peak_time=8,
@@ -103,6 +106,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
             generated_energy_off_peak_time=8,
@@ -116,10 +120,30 @@ class EnergyMeasurementTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
-            active_max_power_list_peak_time=[],
-            active_max_power_list_off_peak_time=[],
-            reactive_max_power_list_peak_time=[],
-            reactive_max_power_list_off_peak_time=[]
+            active_max_power_list_peak_time=[
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+            ],
+            active_max_power_list_off_peak_time=[
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+            ],
+            reactive_max_power_list_peak_time=[
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+            ],
+            reactive_max_power_list_off_peak_time=[
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
+                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+            ]
         )
 
     """
@@ -139,6 +163,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MinutelyMeasurement.objects.all())
 
         minutely_en_measurement = MinutelyMeasurement()
+        minutely_en_measurement.collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         minutely_en_measurement.transductor = self.transductor
         minutely_en_measurement.frequency_a = 666
         minutely_en_measurement.voltage_a = 666
@@ -287,6 +313,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(QuarterlyMeasurement.objects.all())
 
         quarterly_en_measurement = QuarterlyMeasurement()
+        quarterly_en_measurement.collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         quarterly_en_measurement.transductor = self.transductor
         quarterly_en_measurement.generated_energy_peak_time = 31
         quarterly_en_measurement.generated_energy_off_peak_time = 31
@@ -402,6 +430,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
+        monthly_en_measurement.collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
         monthly_en_measurement.active_max_power_list_off_peak_time = []
@@ -415,6 +445,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
+        monthly_en_measurement.collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.generated_energy_peak_time = 9
         monthly_en_measurement.generated_energy_off_peak_time = 9
