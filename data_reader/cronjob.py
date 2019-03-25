@@ -4,7 +4,7 @@ from .utils import DataCollector
 
 
 class MinutelyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS = 1
+    RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'data_reader.cronjob.MinutelyCollectCronJob'
 
@@ -14,7 +14,7 @@ class MinutelyCollectCronJob(CronJobBase):
 
 
 class QuarterlyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS = 15
+    RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'data_reader.cronjob.QuartelyCollectCronJob'
 
@@ -24,20 +24,20 @@ class QuarterlyCollectCronJob(CronJobBase):
 
 
 class MonthlyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0    
+    RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'data_reader.cronjob.MonthlyCollectCronJob'
-    
+
     def do(self):
         data_collector = DataCollector()
         data_collector.perform_all_data_collection('Monthly')
 
 
 class CorrectDateCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0    
+    RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = 'data_reader.cronjob.CorrectDateCronJob'
-    
+
     def do(self):
         data_collector = DataCollector()
         data_collector.correct_all_transductor_date()

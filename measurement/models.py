@@ -321,7 +321,7 @@ class MonthlyMeasurement(Measurement):
             if values_list[initial_date_position][0 + i] != 0:
                 value_result = values_list[value + count]
                 timestamp = \
-                    datetime(
+                    timezone.datetime(
                         current_year,
                         values_list[initial_date_position][0 + i],
                         values_list[initial_date_position][1 + i],
@@ -330,7 +330,7 @@ class MonthlyMeasurement(Measurement):
                     )
             else:
                 value_result = values_list[value + count]
-                timestamp = datetime(1900, 1, 1, 1, 1)
+                timestamp = timezone.datetime(1900, 1, 1, 1, 1)
 
             dict = {
                 'value': value_result,
