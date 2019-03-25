@@ -1,9 +1,22 @@
 FROM python:3.6
 
+RUN apt-get update && \
+    apt-get install -y postgresql \
+                       postgresql-client \
+                       libpq-dev\
+                       cron
+
 WORKDIR /smi-slave
 
 COPY . /smi-slave
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Setting cron
+COPY crons/cronjob /etc/cron.d/smi-cron
 
-CMD ["flask", "run", "--host", "0.0.0.0"]
+RUN chmod 0644 /etc/cron.d/smi-cron
+
+RUN touch /var/log/cron.log
+
+RUN /usr/bin/crontab /etc/cron.d/smi-cron
+
+RUN pip install --no-cache-dir -r requirements.txt
