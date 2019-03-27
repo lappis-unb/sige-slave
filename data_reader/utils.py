@@ -208,3 +208,9 @@ class DataCollector(object):
 
         if transductor.broken:
             transductor.set_broken(False)
+
+    def collect_old_data(self):
+        time = 1553685175
+        transductor = EnergyTransductor.objects.last()
+        a, b = self.get_protocols(transductor)
+        a.old_data_message(time)
