@@ -1,4 +1,5 @@
 import socket
+from datetime import *
 
 from freezegun import freeze_time
 
@@ -187,3 +188,13 @@ class TestDataReaderModels(TestCase):
         self.assertEqual(False, self.modbus_rtu._check_crc(response_1))
         self.assertEqual(False, self.modbus_rtu._check_crc(response_2))
         self.assertEqual(False, self.modbus_rtu._check_crc(response_3))
+
+    def test_datetime_to_int64_valid(self):
+        dt = datetime(1996, 10, 12, 1, 31)
+
+        self.assertEqual(845095020, self.modbus_rtu.datetime_to_int_converter(dt))
+        self.assertEqual(845083860, self.modbus_rtu.datetime_to_int_converter(dt, 'UTC'))
+        self.assertEqual(
+            845095020,
+            self.modbus_rtu.datetime_to_int_converter(dt, 'Brazil/East')
+        )

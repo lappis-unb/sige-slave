@@ -1,9 +1,11 @@
-import importlib
-import struct
 import sys
+import struct
+import importlib
+from pytz import timezone
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from datetime import datetime
+from abc import abstractmethod
 
 from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
@@ -217,6 +219,11 @@ class ModbusRTU(SerialProtocol):
                 value.append(struct.unpack("1B", new_message)[0])
 
         return value
+
+    def datetime_to_int_converter(self, datetime_entry, tz='America/Sao_Paulo'):
+        datetime_entry = datetime_entry.replace(tzinfo=timezone(tz))
+
+        return int(datetime_entry.timestamp())
 
     def _unpack_int_response(self, n_bytes, msg):
         """
