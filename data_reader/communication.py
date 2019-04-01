@@ -187,7 +187,7 @@ class ModbusRTU(SerialProtocol):
         else:
             return self._unpack_float_response(n_bytes, msg)
 
-    def unpack_date_time_response(sef, n_bytes, msg):
+    def unpack_date_time_response(self, n_bytes, msg):
         value = []
         for i in range(0, n_bytes, 1):
             if sys.byteorder == "little":
