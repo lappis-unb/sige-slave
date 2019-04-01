@@ -192,8 +192,10 @@ class TestDataReaderModels(TestCase):
     def test_datetime_to_int64_valid(self):
         dt = datetime(1996, 10, 12, 1, 31)
 
-        self.assertEqual(845095020, self.modbus_rtu.datetime_to_int_converter(dt))
-        self.assertEqual(845083860, self.modbus_rtu.datetime_to_int_converter(dt, 'UTC'))
+        self.assertEqual(
+            845095020, self.modbus_rtu.datetime_to_int_converter(dt))
+        self.assertEqual(
+            845083860, self.modbus_rtu.datetime_to_int_converter(dt, 'UTC'))
         self.assertEqual(
             845095020,
             self.modbus_rtu.datetime_to_int_converter(dt, 'Brazil/East')

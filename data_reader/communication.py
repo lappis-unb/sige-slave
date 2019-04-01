@@ -107,26 +107,26 @@ class ModbusRTU(SerialProtocol):
 
         return packaged_message
 
-    def old_data_message(self,time):
-        message_id = (1).to_bytes(1, byteorder = 'big')
-        message_type = (16).to_bytes(1, byteorder = 'big')
-        message_address = (160).to_bytes(2, byteorder = 'big')
-        message_size = (4).to_bytes(2, byteorder = 'big')
-        message_byte_count =(8).to_bytes(2, byteorder = 'big')
-        message_content = (time).to_bytes(8, byteorder = 'big')
+    def old_data_message(self, time):
+        message_id = (1).to_bytes(1, byteorder='big')
+        message_type = (16).to_bytes(1, byteorder='big')
+        message_address = (160).to_bytes(2, byteorder='big')
+        message_size = (4).to_bytes(2, byteorder='big')
+        message_byte_count = (8).to_bytes(2, byteorder='big')
+        message_content = (time).to_bytes(8, byteorder='big')
         #     "", time
         # )
 
         # message
 
-        message = message_address + message_type + message_address + message_size + message_byte_count + message_content
+        message = message_address + message_type + message_address + \
+            message_size + message_byte_count + message_content
         crc = self._computate_crc(message)
-        crc = (crc) .to_bytes(2, byteorder = 'big')
+        crc = (crc) .to_bytes(2, byteorder='big')
         full_message = message + crc
-        print('*'*100)
+        print('*' * 100)
         print(full_message)
-        print('*'*100)
-
+        print('*' * 100)
 
     def create_date_send_message(self):
         """
