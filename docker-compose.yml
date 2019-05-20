@@ -16,8 +16,15 @@ services:
       - 8000:8000
     volumes:
       - .:/smi-slave
+    networks:
+      - smi-slave
+      - default
     depends_on:
       - db
 
 volumes:
   pg-data: {}
+
+networks:
+  smi-slave:
+    name: smi-slave
