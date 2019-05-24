@@ -37,13 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.postgres',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
+    'measurement',
+    'rest_framework',
     'transductor_model',
     'transductor',
-    'measurement',
-    'rest_framework'
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +76,14 @@ TEMPLATES = [
     },
 ]
 
+CRON_CLASSES = [
+    "data_reader.cronjob.MinutelyCollectCronJob",
+    "data_reader.cronjob.QuarterlyCollectCronJob",
+    "data_reader.cronjob.MonthlyCollectCronJob",
+    "data_reader.cronjob.CorrectDateCronJob",
+]
+
+
 WSGI_APPLICATION = 'smi.wsgi.application'
 
 
@@ -103,27 +113,19 @@ DATABASES = {
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},  # noqa
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}
 ]
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 

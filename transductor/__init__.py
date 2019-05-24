@@ -1,1 +1,1 @@
-default_app_config= "transductor.apps.TransductorConfig"
+default_app_config = "transductor.apps.TransductorConfig"
