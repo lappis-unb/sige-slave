@@ -12,9 +12,7 @@ class CommsMiddleware(object):
     def __call__(self, request):
         jwt = JWT()
         if request.method == 'GET':
-            print('============================================ GET')
             return self.get_response(request)
-        print('============================================ POST')
         decoded_json = jwt.decode(request.data, SECRET_KEY)
         response = self.get_response(decoded_json)
         return response
