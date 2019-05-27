@@ -4,7 +4,6 @@ from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
 import json
-from boogie.rest import rest_api
 from itertools import chain
 
 
@@ -91,7 +90,6 @@ class Transductor(models.Model):
         raise NotImplementedError
 
 
-@rest_api()
 class EnergyTransductor(Transductor):
     """
     Class responsible to represent a Energy Transductor which will
