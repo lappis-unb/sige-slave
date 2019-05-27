@@ -34,6 +34,9 @@ class DataCollector(object):
         self.transductors = EnergyTransductor.objects.all()
         self.functions_dict = self.build_functions_dict()
 
+    def update_transductors(self):
+        self.transductors = EnergyTransductor.objects.all()        
+    
     def build_functions_dict(self):
         return {
             "Minutely": self.minutely_data_collection,
@@ -156,14 +159,16 @@ class DataCollector(object):
         threads = []
 
         for transductor in self.transductors:
-            collection_thread = Thread(
-                target=self.single_data_collection,
-                args=(transductor, collection_type)
-            )
+            self.update_transductors()
+            if(transductor.active):
+                collection_thread = Thread(
+                    target=self.single_data_collection,
+                    args=(transductor, collection_type)
+                )
 
-            collection_thread.start()
+                collection_thread.start()
 
-            threads.append(collection_thread)
+                threads.append(collection_thread)
 
         for thread in threads:
             thread.join()
