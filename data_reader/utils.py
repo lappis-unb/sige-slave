@@ -55,6 +55,7 @@ class DataCollector(object):
 
         Args:
             transductor (Transductor): The transductor used.
+            collection_type (String): The type of collection to be made
 
         Returns:
             None
