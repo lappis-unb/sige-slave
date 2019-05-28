@@ -2,7 +2,6 @@ from django.db import models
 from datetime import datetime
 from transductor.models import EnergyTransductor
 from django.contrib.postgres.fields import ArrayField, HStoreField
-from boogie.rest import rest_api
 import json
 from django.core import serializers
 from django.utils import timezone
@@ -20,6 +19,15 @@ class Measurement(models.Model):
     """
     settings.USE_TZ = False
     collection_date = models.DateTimeField(default=timezone.now)
+    
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        related_name="%(app_label)s_%(class)s",
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+
 
     class Meta:
         abstract = True
@@ -38,14 +46,7 @@ class Measurement(models.Model):
         raise NotImplementedError
 
 
-@rest_api()
 class MinutelyMeasurement(Measurement):
-
-    transductor = models.ForeignKey(
-        EnergyTransductor,
-        related_name="minutely_measurements",
-        on_delete=models.CASCADE
-    )
 
     def __str__(self):
         return '%s' % self.collection_date
@@ -149,14 +150,7 @@ class MinutelyMeasurement(Measurement):
         minutely_measurement.save()
 
 
-@rest_api()
 class QuarterlyMeasurement(Measurement):
-
-    transductor = models.ForeignKey(
-        EnergyTransductor,
-        related_name="quarterly_measurements",
-        on_delete=models.CASCADE
-    )
 
     def __str__(self):
         return '%s' % self.collection_date
@@ -207,14 +201,7 @@ class QuarterlyMeasurement(Measurement):
         quarterly_measurement.save()
 
 
-@rest_api()
 class MonthlyMeasurement(Measurement):
-
-    transductor = models.ForeignKey(
-        EnergyTransductor,
-        related_name="monthly_measurements",
-        on_delete=models.CASCADE
-    )
 
     def __str__(self):
         return '%s' % self.collection_date

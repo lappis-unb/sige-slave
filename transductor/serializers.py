@@ -17,11 +17,11 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'firmware_version',
             'installation_date',
             'last_clock_battery_change',
-            # 'measurements_minutelymeasurement',
-            # 'measurements_quarterlymeasurement',
-            # 'measurements_monthlymeasurement',
+            'measurement_minutelymeasurement',
+            'measurement_quarterlymeasurement',
+            'measurement_monthlymeasurement',
             'model',
-            'url'
+            'url',
         )
 
 class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
@@ -29,7 +29,13 @@ class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
         model = EnergyTransductor
         fields = (
             'serial_number',
-            'ip_address',
             'active',
-            'url'
+        )
+
+class BrokenTransductorsSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = EnergyTransductor
+        fields = (
+            'serial_number',
+            'broken',
         )

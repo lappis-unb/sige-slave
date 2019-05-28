@@ -23,6 +23,7 @@ from django.conf.urls import url
 
 from transductor_model import views as transductor_models_views
 from transductor import views as energy_transductor_views
+from measurement import views as measurements_views
 
 
 router = DefaultRouter()
@@ -32,12 +33,35 @@ router.register(
 )
 router.register(
     r'energy_transductors',
-    energy_transductor_views.EnergyTransductorViewSet
+    energy_transductor_views.EnergyTransductorViewSet,
+    basename='energytransductor',
+
 )
 router.register(
     r'active_transductors',
     energy_transductor_views.ActiveTransductorsViewSet,
-    basename='ActiveTransductors'
+    basename='active_transductor',
+)
+router.register(
+    r'broken_transductors',
+    energy_transductor_views.BrokenTransductorsViewSet,
+    basename='broken_transductor',
+)
+router.register(
+    r'minutely_measurements',
+    measurements_views.MinutelyMeasurementViewSet,
+    basename='minutelymeasurement',
+)
+router.register(
+    r'quarterly_measurements',
+    measurements_views.QuarterlyMeasurementViewSet,
+    basename='quarterlymeasurement',
+)
+
+router.register(
+    r'monthly_measurements',
+    measurements_views.MonthlyMeasurementViewSet,
+    basename='monthlymeasurement',
 )
 
 urlpatterns = [
