@@ -24,6 +24,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'url',
         )
 
+
 class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
@@ -31,6 +32,7 @@ class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
             'serial_number',
             'active',
         )
+
 
 class BrokenTransductorsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

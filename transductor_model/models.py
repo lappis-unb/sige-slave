@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+
 class TransductorModel(models.Model):
     """
     Class responsible to define a transductor model which contains

@@ -28,7 +28,6 @@ class Measurement(models.Model):
         null=False
     )
 
-
     class Meta:
         abstract = True
 

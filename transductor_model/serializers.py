@@ -14,4 +14,3 @@ class TransductorModelSerializer(serializers.HyperlinkedModelSerializer):
                   'quarterly_register_addresses',
                   'monthly_register_addresses',
                   'url')
-    
