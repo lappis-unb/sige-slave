@@ -1,11 +1,68 @@
-from rest_framework import serializers, viewsets
+import jwt as JWT
 
 from django.shortcuts import render
+from rest_framework import viewsets
+from django.conf import LazySettings
+from rest_framework import serializers
+from rest_framework.response import Response
+from django.http import HttpResponseForbidden
 
 from .models import TransductorModel
 from .serializers import TransductorModelSerializer
 
 
+settings = LazySettings()
+
+
 class TransductorModelViewSet(viewsets.ModelViewSet):
     queryset = TransductorModel.objects.all()
     serializer_class = TransductorModelSerializer
+
+    def _verify_jwt(self, token):
+        jwt = JWT()
+        try:
+            data = jwt.decode(token, settings.SECRET_KEY)
+            return data
+        except Exception:
+            return None
+
+    def create(self, request):
+        data = self._verify_jwt(request.body['msg'])
+        if data is None:
+            return Response({'error': 'invalid or unexistent comms token'},
+                            status=403)
+        else:
+            super(TransductorModelViewSet, self).create(self, request)
+
+    def update(self, request):
+        data = self._verify_jwt(request.body['msg'])
+        if data is not True:
+            return Response({'error': 'invalid or unexistent comms token'},
+                            status=403)
+        else:
+            super(TransductorModelViewSet, self).update(self, request)
+
+    def update(self, request, pk=None):
+        data = self._verify_jwt(request.body['msg'])
+        if data is not True:
+            return Response({'error': 'invalid or unexistent comms token'},
+                            status=403)
+        else:
+            super(TransductorModelViewSet, self).update(self, request, pk)
+
+    def partial_update(self, request, pk=None):
+        data = self._verify_jwt(request.body['msg'])
+        if data is not True:
+            return Response({'error': 'invalid or unexistent comms token'},
+                            status=403)
+        else:
+            super(TransductorModelViewSet, self).partial_update(
+                self, request, pk)
+
+    def destroy(self, request, pk=None):
+        data = self._verify_jwt(request.body['msg'])
+        if data is not True:
+            return Response({'error': 'invalid or unexistent comms token'},
+                            status=403)
+        else:
+            super(TransductorModelViewSet, self).destroy(self, request, pk)
