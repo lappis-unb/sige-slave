@@ -11,7 +11,7 @@ services:
 
   slave-api:
     container_name: slave-api
-    image: lappis/smi-slave:0.9
+    image: lappis/smi-slave:0.9.1
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
     networks:
