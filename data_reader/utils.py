@@ -66,13 +66,24 @@ class DataCollector(object):
 
         serial_protocol_instance, \
             transport_protocol_instance = self.get_protocols(transductor)
-
-        messages, transductor = self.create_communication(
-            (serial_protocol_instance, transport_protocol_instance),
-            transductor,
-            collection_type
-        )
-
+            
+        time = datetime.now()
+        try:
+            messages, transductor = self.create_communication(
+                (serial_protocol_instance, transport_protocol_instance),
+                transductor,
+                collection_type
+            )
+        except(Exception) as e:
+            print("Error", 
+                  e, 
+                  "while performing the ", 
+                  collection_type, 
+                  " collection in the transductor", 
+                  transductor.ip_address, 
+                  " at ", 
+                  time)
+            return
         measurements = []
 
         for message in messages:
@@ -85,30 +96,62 @@ class DataCollector(object):
 
     def minutely_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
+            time = datetime.now()            
             try:
                 MinutelyMeasurement.save_measurements(measurements, transductor)
+                print("Minutely performed at ", time)
             except (Exception) as exception:
-                print(str(exception))
+                print("Error", 
+                      exception,
+                      "while performing the Minutely collection in the",
+                      " transductor", 
+                      transductor.ip_address, 
+                      " at ", 
+                      time)            
+                if not transductor.broken:
+                    transductor.set_broken(True)
         else:
             pass
 
     def quarterly_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
+            time = datetime.now()                        
             try:
                 QuarterlyMeasurement.save_measurements(measurements,
                                                        transductor)
+                print("Quarterly performed at ", time)
+
             except (Exception) as exception:
-                print(str(exception))
+                print("Error",
+                      exception, 
+                      "while performing the Minutely collection in the",
+                      " transductor", 
+                      transductor.ip_address,
+                      " at ", 
+                      time)            
+                if not transductor.broken:
+                    transductor.set_broken(True)        
         else:
             pass
 
     def monthly_data_collection(self, measurements, transductor):
 
         if transductor.model.name == "TR4020":
+            time = datetime.now()            
             try:
                 MonthlyMeasurement.save_measurements(measurements, transductor)
+                print("Monthly performed at ", time)
+
             except(Exception) as exception:
-                print(str(exception))
+                print("Error",
+                      exception, 
+                      "while performing the Minutely collection in the",
+                      "transductor", 
+                      transductor.ip_address, 
+                      " at ", 
+                      time)            
+                if not transductor.broken:
+                    transductor.set_broken(True)
         else:
             pass
 
@@ -141,7 +184,7 @@ class DataCollector(object):
         except (NumberOfAttempsReachedException, CRCInvalidException) as e:
             if not transductor.broken:
                 transductor.set_broken(True)
-            return None
+            raise e
 
         if transductor.broken:
             transductor.set_broken(False)
@@ -210,6 +253,14 @@ class DataCollector(object):
         except (NumberOfAttempsReachedException, CRCInvalidException) as e:
             if not transductor.broken:
                 transductor.set_broken(True)
+            time = datetime.now()
+            print("Error", 
+                  e, 
+                  "while fixing transductor", 
+                  transductor.ip_address,
+                  " time at ", 
+                  time)
+
             return None
 
         if transductor.broken:
