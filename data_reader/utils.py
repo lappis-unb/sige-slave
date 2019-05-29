@@ -256,9 +256,9 @@ class DataCollector(object):
             time = datetime.now()
             print("Error", 
                   e, 
-                  "while fixing transductor", 
+                  "while fixing time of transductor", 
                   transductor.ip_address,
-                  " time at ", 
+                  " at ", 
                   time)
 
             return None
