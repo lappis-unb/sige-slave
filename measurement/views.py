@@ -11,49 +11,33 @@ from .serializers import MonthlyMeasurementSerializer
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it 
 #  can't have update and create methods so it only inherits from parts of it 
-class MinutelyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                 mixins.DestroyModelMixin,
-                                 mixins.ListModelMixin,
-                                 viewsets.GenericViewSet):
+class MeasurementViewSet(mixins.RetrieveModelMixin,
+                         mixins.DestroyModelMixin,
+                         mixins.ListModelMixin,
+                         viewsets.GenericViewSet):
+    queryset = None
+
+    def get_queryset(self):
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+        if((start_date is not None) and (end_date is not None)):
+            self.queryset = self.queryset.filter(
+                collection_date__gte=start_date
+            )
+            self.queryset = self.queryset.filter(collection_date__lte=end_date)
+        return self.queryset
+
+
+class MinutelyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MinutelyMeasurementSerializer
-       
-    def get_queryset(self):
-        queryset = MinutelyMeasurement.objects.all()
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        if((start_date is not None) and (end_date is not None)):
-            queryset = queryset.filter(collection_date__gte=start_date)
-            queryset = queryset.filter(collection_date__lte=end_date)
-        return queryset
+    queryset = MinutelyMeasurement.objects.all()
 
 
-class QuarterlyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                  mixins.DestroyModelMixin,
-                                  mixins.ListModelMixin,
-                                  viewsets.GenericViewSet):
+class QuarterlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = QuarterlyMeasurementSerializer
-    
-    def get_queryset(self):
-        queryset = QuarterlyMeasurement.objects.all()
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        if((start_date is not None) and (end_date is not None)):
-            queryset = queryset.filter(collection_date__gte=start_date)
-            queryset = queryset.filter(collection_date__lte=end_date)
-        return queryset
+    queryset = QuarterlyMeasurement.objects.all()
 
 
-class MonthlyMeasurementViewSet(mixins.RetrieveModelMixin,
-                                mixins.DestroyModelMixin,
-                                mixins.ListModelMixin,
-                                viewsets.GenericViewSet):
+class MonthlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MonthlyMeasurementSerializer
-
-    def get_queryset(self):
-        queryset = MonthlyMeasurement.objects.all()
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        if((start_date is not None) and (end_date is not None)):
-            queryset = queryset.filter(collection_date__gte=start_date)
-            queryset = queryset.filter(collection_date__lte=end_date)
-        return queryset
+    queryset = MonthlyMeasurement.objects.all()
