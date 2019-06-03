@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'dw%46&k@_hx-qw@m+5p7p)2t13q-6^5pmw!4+5p_hw!l62v)wk'
+SECRET_KEY = 'smi-lappis'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -56,7 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'smi.master_middleware.CommsMiddleware'
+    'smi.master_middleware.CommsMiddleware'
 ]
 
 ROOT_URLCONF = 'smi.urls'
