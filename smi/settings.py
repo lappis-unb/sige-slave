@@ -41,11 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
-    'measurement',
+    'django_cron',
     'rest_framework',
+    'measurement',
     'transductor_model',
     'transductor',
-    'django_cron',
 ]
 
 MIDDLEWARE = [
