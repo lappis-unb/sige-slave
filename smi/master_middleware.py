@@ -2,6 +2,10 @@ import json as js
 import jwt as JWT
 from django.conf import LazySettings
 from django.http import HttpRequest
+from io import BytesIO
+
+from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 
@@ -18,34 +22,23 @@ class CommsMiddleware(object):
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.method == 'GET':
+        try:
+            if request.method == 'GET':
+                return self.get_response(request)
+
+            jwt = JWT.JWT()
+            jason = js.loads(request.body)
+            a = jason['msg']
+
+            key = JWT.jwk.OctetJWK(key=settings.SECRET_KEY.encode('utf-8'), kid=1)
+
+            decoded_json = js.dumps(jwt.decode(a, key))
+            new_body = js.dumps(decoded_json)
+
+            request._body = decoded_json.encode()
+
+            response = self.get_response(request)
+            return response
+
+        except:
             return self.get_response(request)
-
-        jwt = JWT.JWT()
-        jason = js.loads(request.body)
-        a = jason['msg']
-
-        print('-=-=-=-=-=-=-=-=-=-=-')
-        print(settings.SECRET_KEY)
-        print('-=-=-=-=-=-=-=-=-=-=-')
-
-        key = JWT.jwk.OctetJWK(key=settings.SECRET_KEY.encode('utf-8'), kid=1)
-        decoded_json = jwt.decode(a, key)
-        new_body = js.dumps(decoded_json)
-
-        print('-=-=-=-=-=-=-=-=-=-=-')
-        print(new_body)
-        print('-=-=-=-=-=-=-=-=-=-=-')
-
-        new_request = HttpRequest()
-        new_request.POST = new_body
-        new_request.META.update(request.META)
-
-        print('-=-=-=-=-=-=-=-=-=-=-')
-        print('HUASHUASHUASASHUAHSUASU')
-        print(new_request.POST)
-        print('-=-=-=-=-=-=-=-=-=-=-')
-
-
-        response = self.get_response(new_request)
-        return response
