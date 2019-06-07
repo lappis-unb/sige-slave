@@ -49,14 +49,19 @@ class Transductor(models.Model):
         ])
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
-    firmware_version = models.CharField(max_length=20)
+    firmware_version = models.CharField(max_length=20, null=True)
     installation_date = models.DateTimeField(auto_now=True)
     physical_location = models.CharField(max_length=30, default='')
     geolocation_longitude = models.DecimalField(
         max_digits=15,
-        decimal_places=10
+        decimal_places=10,
+        null=True
     )
-    geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
+    geolocation_latitude = models.DecimalField(
+        max_digits=15,
+        decimal_places=10,
+        null=True
+    )
     last_clock_battery_change = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -123,7 +128,7 @@ class EnergyTransductor(Transductor):
         return self.quarterly_measurements.filter(
             collection_date__range=[start_date, final_date]
         )
-    
+
     def get_monthly_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
         return self.monthly_measurements.filter(
@@ -132,7 +137,7 @@ class EnergyTransductor(Transductor):
 
     def get_minutely_measurements(self):
         return self.minutely_measurements.all()
-    
+
     def get_quarterly_measurements(self):
         return self.quarterly_measurements.all()
 
