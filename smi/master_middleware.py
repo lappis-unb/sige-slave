@@ -28,12 +28,12 @@ class CommsMiddleware(object):
 
             jwt = JWT.JWT()
             jason = js.loads(request.body)
-            a = jason['msg']
+            enc_token = jason['msg']
 
             key = JWT.jwk.OctetJWK(
                 key=settings.SECRET_KEY.encode('utf-8'), kid=1)
 
-            decoded_json = js.dumps(jwt.decode(a, key))
+            decoded_json = js.dumps(jwt.decode(enc_token, key))
             new_body = js.dumps(decoded_json)
 
             request._body = decoded_json.encode()
