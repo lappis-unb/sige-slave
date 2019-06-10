@@ -47,6 +47,7 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    last_collection = models.DateTimeField(auto_now=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)

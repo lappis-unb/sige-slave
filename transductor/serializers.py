@@ -16,6 +16,7 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'active',
             'firmware_version',
             'installation_date',
+            'last_collection',
             'last_clock_battery_change',
             'measurement_minutelymeasurement',
             'measurement_quarterlymeasurement',

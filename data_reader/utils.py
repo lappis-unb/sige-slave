@@ -17,6 +17,7 @@ from .communication import *
 from transductor.models import *
 from measurement.models import *
 from transductor_model.models import *
+import time
 
 
 class DataCollector(object):
@@ -201,8 +202,8 @@ class DataCollector(object):
         """
         threads = []
 
+        self.update_transductors()
         for transductor in self.transductors:
-            self.update_transductors()
             if(transductor.active):
                 collection_thread = Thread(
                     target=self.single_data_collection,
@@ -265,3 +266,111 @@ class DataCollector(object):
 
         if transductor.broken:
             transductor.set_broken(False)
+
+
+
+    def collect_old_measurements(self,timestamp):
+        transductors = EnergyTransductor.objects.all()
+        threads = []
+        for transductor in self.transductors:
+            collect_old_data_thread = Thread(
+                target=self.collect_old_measurements_from_transductor, args=(transductor,timestamp)
+            )
+
+            collect_old_data_thread.start()
+
+            threads.append(collect_old_data_thread)
+
+        for thread in threads:
+            thread.join()
+
+    def collect_old_measurements_from_transductor(self,transductor,date):
+        # date = transductor.last_collection
+        # date = datetime(2019,6,10,9,0)
+        date = date.timestamp
+        timestamp = int(timestamp.timestamp())
+        try:
+            if self.test(transductor,timestamp) is None :
+                return
+            time.sleep(30)
+            self.test2(transductor)
+        except Exception as e:
+            print(e)
+
+    def test(self,transductor,timestamp):
+        
+        # message = [1,16,0,160,0,4,8,0,0,0,0,0,0,0,0,53,187]
+        # for transductor in transductors:
+        message = ModbusRTU.int_to_bytes(1)
+        message += ModbusRTU.int_to_bytes(16)
+        message += ModbusRTU.int_to_bytes(160,2)
+        message += ModbusRTU.int_to_bytes(4,2)
+        message += ModbusRTU.int_to_bytes(8)
+        message += ModbusRTU.int_to_bytes(timestamp,8)
+        serial_protocol_instance, transport_protocol_instance = self.get_protocols(transductor)
+        a = ModbusRTU.int_to_bytes(serial_protocol_instance._computate_crc(message))
+        message += ModbusRTU.int_to_bytes(a[1])
+        message += ModbusRTU.int_to_bytes(a[0])
+
+        try:        
+            received_messages = transport_protocol_instance.handle_messages_via_socket([message])
+            return received_messages
+        except Exception as e:
+            print("Exception ",e)
+            return None
+
+
+    def test2(self,transductor): 
+        serial_protocol_instance, transport_protocol_instance = self.get_protocols(transductor)
+
+
+        message = ModbusRTU.int_to_bytes(1)
+        message += ModbusRTU.int_to_bytes(3)
+        message += ModbusRTU.int_to_bytes(200,2)
+        message += ModbusRTU.int_to_bytes(22,2)
+        serial_protocol_instance, transport_protocol_instance = self.get_protocols(transductor)
+        a = ModbusRTU.int_to_bytes(serial_protocol_instance._computate_crc(message))
+        message += ModbusRTU.int_to_bytes(a[1])
+        message += ModbusRTU.int_to_bytes(a[0])
+
+        try:        
+            received_messages = transport_protocol_instance.handle_messages_via_socket([message])
+        except Exception as e:
+            print("Exception ",e)
+            return None
+
+        minutely_measurement = MinutelyMeasurement()        
+        date = received_messages[0][3:11]
+        date = ModbusRTU.bytes_to_timestamp_to_datetime(date)
+        minutely_measurement.collection_date = date
+        va = received_messages[0][11:15]
+        va = ModbusRTU.bytes_to_float(va)[0]
+        minutely_measurement.voltage_a = va
+        vb = received_messages[0][15:19]
+        vb = ModbusRTU.bytes_to_float(vb)[0]
+        minutely_measurement.voltage_b = vb
+        vc = received_messages[0][19:23]
+        vc = ModbusRTU.bytes_to_float(vc)[0]
+        minutely_measurement.voltage_c = vc
+        ia = received_messages[0][23:27]
+        ia = ModbusRTU.bytes_to_float(ia)[0]
+        minutely_measurement.current_b = ia
+        ib = received_messages[0][27:31]
+        ib = ModbusRTU.bytes_to_float(ib)[0]
+        minutely_measurement.current_b = ib
+        ic = received_messages[0][31:35]
+        ic = ModbusRTU.bytes_to_float(ic)[0]
+        minutely_measurement.current_c = ic
+        pa = received_messages[0][35:39]
+        pa = ModbusRTU.bytes_to_float(pa)[0]
+        minutely_measurement.total_active_power = pa
+        pr = received_messages[0][39:43]
+        pr = ModbusRTU.bytes_to_float(pr)[0]
+        minutely_measurement.total_reactive_power = pr
+        minutely_measurement.transductor = transductor
+        try:
+            minutely_measurement.save()
+        except Exception as e:  
+            print("Exception ",e)
+            return None
+        return minutely_measurement

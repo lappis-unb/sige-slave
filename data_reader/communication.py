@@ -299,3 +299,20 @@ class ModbusRTU(SerialProtocol):
                     crc ^= 0xA001
 
         return crc
+
+    #TODO Change communication to use this methods
+    def bytes_to_int(x):
+        return int.from_bytes(x, byteorder='big')
+    
+
+    def bytes_to_float(x):
+        return struct.unpack('>f', x )
+    
+    def bytes_to_timestamp_to_datetime(x):
+        timestamp = ModbusRTU.bytes_to_int(x)
+        return datetime.fromtimestamp(timestamp)
+
+    def int_to_bytes(x,size=None):
+        if(size == None):
+            return x.to_bytes((x.bit_length() + 7) // 8, 'big')
+        return x.to_bytes(size, 'big')
