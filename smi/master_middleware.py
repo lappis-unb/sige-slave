@@ -12,10 +12,10 @@ from rest_framework.response import Response
 settings = LazySettings()
 
 
-class CommsMiddleware(object):
+class RequestMiddleware(object):
     """
     Middleware for parsing and validate the json web token from the master's
-    request.
+    POST request.
     """
 
     def __init__(self, get_response):
@@ -43,3 +43,15 @@ class CommsMiddleware(object):
 
         except:
             return self.get_response(request)
+
+
+class ResponseMiddleware(object):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        print(response.content.decode())
+        response.content = b'{"aosjfoida": "ajsojasddfsjioasdjfiodsjodasf"}'
+        print(response.content.decode())
+        return response
