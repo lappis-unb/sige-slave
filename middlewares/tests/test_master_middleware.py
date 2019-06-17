@@ -1,16 +1,17 @@
 import pytest
 from mock import Mock
-from django.conf import TestCase
+from django.test import TestCase
 from django.conf import settings
 
-from smi.master_middleware import *
+from middlewares.master_middleware import *
 
 # https://medium.com/@adamdonaghy/unit-testing-django-middleware-2e8cb26e06ca
 
 
 class RequestMiddlewareTestCase(TestCase):
     def setUp(self):
-        self.middleware = RequestMiddleware()
+        # see about the constructor here
+        self.middleware = RequestMiddleware(get_response)
         self.request = Mock()
         self.request.META = {
             "HTTP_PROFILE_ID": self.profileId,
@@ -26,7 +27,8 @@ class RequestMiddlewareTestCase(TestCase):
 
 class ResponseMiddlewareTestCase(TestCase):
     def setUp(self):
-        self.middleware = ResponseMiddleware()
+        # see about the constructor here
+        self.middleware = ResponseMiddleware(get_response)
         self.request = Mock()
         self.request.META = {
             "HTTP_PROFILE_ID": self.profileId,
