@@ -46,12 +46,26 @@ class RequestMiddleware(object):
 
 
 class ResponseMiddleware(object):
+    """
+    Middleware for returning the master's GET request response content.
+    """
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         response = self.get_response(request)
-        print(response.content.decode())
-        response.content = b'{"aosjfoida": "ajsojasddfsjioasdjfiodsjodasf"}'
-        print(response.content.decode())
+        # print(response.content.decode())
+        # response.content = b'{"aosjfoida": "ajsojasddfsjioasdjfiodsjodasf"}'
+        # print(response.content.decode())
+
+        jwt = JWT.JWT()
+        key = JWT.jwk.OctetJWK(
+            key=settings.SECRET_KEY.encode('utf-8'), kid=1)
+
+        new_content = dict({'msg': str(jwt.encode(response.content, key))})
+        new_content = js.dumps(new_content)
+
+        response.content = new_content.encode()
+
         return response
