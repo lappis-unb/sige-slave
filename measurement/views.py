@@ -7,10 +7,12 @@ from .models import MonthlyMeasurement
 from .serializers import MinutelyMeasurementSerializer
 from .serializers import QuarterlyMeasurementSerializer
 from .serializers import MonthlyMeasurementSerializer
+from .pagination import PostLimitOffsetPagination
+from .pagination import PostPageNumberPagination
 
 
-#  this viewset don't inherits from viewsets.ModelViewSet because it 
-#  can't have update and create methods so it only inherits from parts of it 
+#  this viewset don't inherits from viewsets.ModelViewSet because it
+#  can't have update and create methods so it only inherits from parts of it
 class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.ListModelMixin,
@@ -30,14 +32,23 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MinutelyMeasurementSerializer
-    queryset = MinutelyMeasurement.objects.all()
+    pagination_class = PostLimitOffsetPagination
+
+    def get_queryset(self):
+        return MinutelyMeasurement.objects.all()[::-1]
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = QuarterlyMeasurementSerializer
-    queryset = QuarterlyMeasurement.objects.all()
+    pagination_class = PostLimitOffsetPagination
+
+    def get_queryset(self):
+        return QuarterlyMeasurement.objects.all()[::-1]
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MonthlyMeasurementSerializer
-    queryset = MonthlyMeasurement.objects.all()
+    pagination_class = PostLimitOffsetPagination
+
+    def get_queryset(self):
+        return MonthlyMeasurement.objects.all()[::-1]
