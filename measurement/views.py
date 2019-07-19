@@ -27,28 +27,26 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 collection_date__gte=start_date
             )
             self.queryset = self.queryset.filter(collection_date__lte=end_date)
-        return self.queryset
+
+            return self.queryset[::-1]
+        else:
+
+            return self.queryset[::-1]
 
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MinutelyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-
-    def get_queryset(self):
-        return MinutelyMeasurement.objects.all()[::-1]
+    queryset = MinutelyMeasurement.objects.all()
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = QuarterlyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-
-    def get_queryset(self):
-        return QuarterlyMeasurement.objects.all()[::-1]
+    queryset = QuarterlyMeasurement.objects.all()
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MonthlyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-
-    def get_queryset(self):
-        return MonthlyMeasurement.objects.all()[::-1]
+    queryset = MonthlyMeasurement.objects.all()
