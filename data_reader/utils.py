@@ -266,13 +266,13 @@ class DataCollector(object):
         if transductor.broken:
             transductor.set_broken(False)
 
-    def collect_old_measurements(self, timestamp):
+    def collect_old_measurements(self, end_date):
         transductors = EnergyTransductor.objects.all()
         threads = []
         for transductor in self.transductors:
             collect_old_data_thread = Thread(
                 target=self.collect_old_measurements_from_transductor, args=(
-                    transductor, timestamp)
+                    transductor, end_date)
             )
 
             collect_old_data_thread.start()
@@ -288,14 +288,14 @@ class DataCollector(object):
         last_collection_date = int(last_collection_date.timestamp())
         end_date = int(end_date.timestamp())
         minute_in_timestamp = 60
+        last_collection_date += minute_in_timestamp
         while(last_collection_date < end_date):
             try:
-                self.test(transductor, last_collection_date)
+                self.request_old_data_from_mass_memory(transductor, last_collection_date)
                 time.sleep(30)
-                a = self.test2(transductor)
-                print("aqui ", a)
+                self.get_old_data_from_transductor(transductor)
             except Exception as e:
-                print("deu ruim ", e)
+                print("Exeption:", e)
             last_collection_date += minute_in_timestamp
 
     def request_old_data_from_mass_memory(self, transductor, timestamp):
