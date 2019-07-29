@@ -11,6 +11,7 @@ from .serializers import MonthlyMeasurementSerializer
 from .pagination import PostLimitOffsetPagination
 from .pagination import PostPageNumberPagination
 
+
 #  this viewset don't inherits from viewsets.ModelViewSet because it
 #  can't have update and create methods so it only inherits from parts of it
 class MeasurementViewSet(mixins.RetrieveModelMixin,
@@ -29,22 +30,25 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             )
             self.queryset = self.queryset.filter(collection_date__lte=end_date)
 
-        return self.queryset[::-1]
+        return self.queryset.reverse()
 
 
 class MinutelyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MinutelyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-    queryset = MinutelyMeasurement.objects.all()
+    collect = MinutelyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
 
 
 class QuarterlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = QuarterlyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-    queryset = QuarterlyMeasurement.objects.all()
+    collect = QuarterlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
 
 
 class MonthlyMeasurementViewSet(MeasurementViewSet):
     serializer_class = MonthlyMeasurementSerializer
     pagination_class = PostLimitOffsetPagination
-    queryset = MonthlyMeasurement.objects.all()
+    collect = MonthlyMeasurement.objects.select_related('transductor').all()
+    queryset = collect.order_by('id')
