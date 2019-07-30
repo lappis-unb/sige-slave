@@ -31,7 +31,12 @@ class Transductor(models.Model):
             transductor's internal clock.
     """
     # TODO fix default value problem
-    model = models.ForeignKey(TransductorModel, db_column="model_code", on_delete=models.DO_NOTHING)
+    model = models.ForeignKey(
+        TransductorModel,
+        db_column="model_code",
+        on_delete=models.DO_NOTHING
+    )
+
     serial_number = models.CharField(
         max_length=8,
         unique=True,

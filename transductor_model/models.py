@@ -33,7 +33,7 @@ class TransductorModel(models.Model):
     """
 
     model_code = models.CharField(
-        max_length=10,
+        max_length=9,
         unique=True,
         primary_key=True
     )

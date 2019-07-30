@@ -10,6 +10,7 @@ class EnergyTransductorViewSet(viewsets.ModelViewSet):
     queryset = EnergyTransductor.objects.all()
     serializer_class = EnergyTransductorSerializer
 
+
 class ActiveTransductorsViewSet(mixins.RetrieveModelMixin,
                                 mixins.ListModelMixin,
                                 viewsets.GenericViewSet):
