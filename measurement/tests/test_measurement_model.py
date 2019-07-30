@@ -17,6 +17,7 @@ class EnergyMeasurementTestCase(TestCase):
 
     def setUp(self):
         self.trans_model = TransductorModel.objects.create(
+            model_code="987654321",
             name='TR4020',
             transport_protocol='UDP',
             serial_protocol='ModbusRTU',

@@ -47,3 +47,7 @@ class TransductorModel(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(TransductorModel, self).save(*args, **kwargs)
