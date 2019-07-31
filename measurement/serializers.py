@@ -43,7 +43,7 @@ class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'transductor',
                   'url')
 
-        
+
 class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = QuarterlyMeasurement
@@ -58,9 +58,9 @@ class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'capacitive_power_peak_time',
                   'capacitive_power_off_peak_time',
                   'transductor',
-                  'url')            
+                  'url')
 
-  
+
 class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MonthlyMeasurement
@@ -83,4 +83,4 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'reactive_max_power_list_peak_time',
                   'reactive_max_power_list_off_peak_time',
                   'transductor',
-                  'url')            
+                  'url')
