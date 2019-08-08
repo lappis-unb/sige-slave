@@ -3,6 +3,7 @@ from rest_framework import routers
 from .views import EnergyTransductorViewSet
 from .views import ActiveTransductorsViewSet
 from .views import BrokenTransductorsViewSet
+from .views import MinutelyVoltageThreePhaseViewSet
 
 app_name = "transductors"
 

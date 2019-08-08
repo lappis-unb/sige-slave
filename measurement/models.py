@@ -19,7 +19,7 @@ class Measurement(models.Model):
     """
     settings.USE_TZ = False
     collection_date = models.DateTimeField(default=timezone.now)
-    
+
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
