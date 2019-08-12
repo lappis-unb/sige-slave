@@ -27,34 +27,12 @@ class TransportProtocol(metaclass=ABCMeta):
         self.timeout = timeout
         self.port = port
         self.socket = None
-
-    @abstractmethod
-    def start_communication(self):
-        """
-        Abstract method responsible to start the communication with
-        the transductor based on his transport protocol.
-        """
-        pass
-
-
-class UdpProtocol(TransportProtocol):
-    """
-    Class responsible to represent a UDP protocol and handle all
-    the communication.
-
-    Attributes:
-        receive_attemps (int): Total attempts to receive a message
-        via socket UDP.
-        max_receive_attempts (int): Maximum number of attemps to
-        receive message via socket UDP.
-    """
-
-    def __init__(self, serial_protocol, timeout=0.5, port=1001):
-        super(UdpProtocol, self).__init__(serial_protocol, timeout, port)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.settimeout(timeout)
         self.receive_attempts = 0
         self.max_receive_attempts = 3
+
+
+    def reset_receive_attempts(self):
+        self.receive_attemps = 0
 
     def start_communication(self, registers):
         """
@@ -100,6 +78,72 @@ class UdpProtocol(TransportProtocol):
 
         return received_messages
 
+    @abstractmethod
+    def handle_messages_via_socket(self, messages_to_send):
+        pass
+
+class TcpProtocol(TransportProtocol):
+    """
+    Class responsible to represent a TCP protocol and handle all
+    the communication.
+
+    Attributes:
+        receive_attemps (int): Total attempts to receive a message
+        via socket TCP.
+        max_receive_attempts (int): Maximum number of attemps to
+        receive message via socket TCP.
+    """
+    def __init__(self, serial_protocol, timeout=0.5, port=1001):
+        super(TcpProtocol, self).__init__(serial_protocol, timeout, port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(timeout)
+        self.socket.connect((self.transductor.ip_address, port))
+
+    def handle_messages_via_socket(self, messages_to_send):
+        """
+        Method responsible to handle send/receive messages via socket UDP.
+
+        Args:
+            messages_to_send (list): The requests to be sent to the
+            transductor via socket.
+
+        Returns:
+            The messages received if successful, None otherwise.
+        """
+        messages = []
+
+        for i, message in enumerate(messages_to_send):
+            self.socket.send(message)
+
+            try:
+                message_received = self.socket.recvfrom(4096)
+            except socket.timeout:
+                raise
+
+            messages.append(message_received[0])
+
+        return messages
+
+
+class UdpProtocol(TransportProtocol):
+    """
+    Class responsible to represent a UDP protocol and handle all
+    the communication.
+
+    Attributes:
+        receive_attemps (int): Total attempts to receive a message
+        via socket UDP.
+        max_receive_attempts (int): Maximum number of attemps to
+        receive message via socket UDP.
+    """
+
+    def __init__(self, serial_protocol, timeout=0.5, port=1001):
+        super(UdpProtocol, self).__init__(serial_protocol, timeout, port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.settimeout(timeout)
+        self.receive_attempts = 0
+        self.max_receive_attempts = 3
+
     def data_sender(self):
         self.reset_receive_attempts()
 
@@ -126,12 +170,6 @@ class UdpProtocol(TransportProtocol):
                 raise
         else:
             raise NumberOfAttempsReachedException("Maximum attempts reached!")
-
-    def reset_receive_attempts(self):
-        """
-        Method responsible to reset the number of receive attempts.
-        """
-        self.receive_attempts = 0
 
     def handle_messages_via_socket(self, messages_to_send):
         """
