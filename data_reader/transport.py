@@ -30,7 +30,6 @@ class TransportProtocol(metaclass=ABCMeta):
         self.receive_attempts = 0
         self.max_receive_attempts = 3
 
-
     def reset_receive_attempts(self):
         self.receive_attemps = 0
 
@@ -81,6 +80,7 @@ class TransportProtocol(metaclass=ABCMeta):
     @abstractmethod
     def handle_messages_via_socket(self, messages_to_send):
         pass
+
 
 class TcpProtocol(TransportProtocol):
     """
