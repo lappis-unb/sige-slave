@@ -79,6 +79,16 @@ class DataCollector(object):
             if transductor.broken:
                 date = datetime.now()
                 self.collect_old_measurements_from_transductor(transductor, date)
+            
+            measurements = []
+
+            for message in messages:
+                measurements.append(
+                    serial_protocol_instance
+                    .get_measurement_value_from_response(message)
+                )
+
+            self.functions_dict[collection_type](measurements, transductor)
 
         except(Exception) as e:
             print("Error", 
@@ -92,16 +102,7 @@ class DataCollector(object):
             if not transductor.broken:
                 transductor.set_broken(True)
             return
-        measurements = []
-
-        for message in messages:
-            measurements.append(
-                serial_protocol_instance
-                .get_measurement_value_from_response(message)
-            )
-
-        self.functions_dict[collection_type](measurements, transductor)
-
+        
     def minutely_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
             time = datetime.now()            
