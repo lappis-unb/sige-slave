@@ -19,7 +19,7 @@ class Measurement(models.Model):
     """
     settings.USE_TZ = False
     collection_date = models.DateTimeField(default=timezone.now)
-    
+
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
@@ -148,6 +148,7 @@ class MinutelyMeasurement(Measurement):
         minutely_measurement.save()
         transductor.last_collection = minutely_measurement.collection_date 
         transductor.save()
+
 
 class QuarterlyMeasurement(Measurement):
 

@@ -75,11 +75,12 @@ class DataCollector(object):
                 transductor,
                 collection_type
             )
-            
+
             if transductor.broken:
                 date = datetime.now()
-                self.collect_old_measurements_from_transductor(transductor, date)
-            
+                self.collect_old_measurements_from_transductor(transductor, 
+                                                               date)
+
             measurements = []
 
             for message in messages:
@@ -102,7 +103,7 @@ class DataCollector(object):
             if not transductor.broken:
                 transductor.set_broken(True)
             return
-        
+
     def minutely_data_collection(self, measurements, transductor):
         if transductor.model.name == "TR4020":
             time = datetime.now()            
@@ -292,7 +293,8 @@ class DataCollector(object):
         last_collection_date += minute_in_timestamp
         while(last_collection_date < end_date):
             try:
-                self.request_old_data_from_mass_memory(transductor, last_collection_date)
+                self.request_old_data_from_mass_memory(transductor,
+                                                       last_collection_date)
                 time.sleep(30)
                 self.get_old_data_from_transductor(transductor)
             except Exception as e:
@@ -309,34 +311,34 @@ class DataCollector(object):
         message += ModbusRTU.int_to_bytes(4, 2)
         message += ModbusRTU.int_to_bytes(8)
         message += ModbusRTU.int_to_bytes(timestamp, 8)
-        serial_protocol_instance, transport_protocol_instance = self.get_protocols(
-            transductor)
+        serial_protocol_instance, \
+            transport_protocol_instance = self.get_protocols(transductor)
         a = ModbusRTU.int_to_bytes(
             serial_protocol_instance._computate_crc(message))
         message += ModbusRTU.int_to_bytes(a[1])
         message += ModbusRTU.int_to_bytes(a[0])
 
-        received_messages = transport_protocol_instance.handle_messages_via_socket([
-                                                                                   message])
+        received_messages = \
+            transport_protocol_instance.handle_messages_via_socket([message])
         return received_messages
 
     def get_old_data_from_transductor(self, transductor): 
-        serial_protocol_instance, transport_protocol_instance = self.get_protocols(
-            transductor)
+        serial_protocol_instance, \
+            transport_protocol_instance = self.get_protocols(transductor)
 
         message = ModbusRTU.int_to_bytes(1)
         message += ModbusRTU.int_to_bytes(3)
         message += ModbusRTU.int_to_bytes(200, 2)
         message += ModbusRTU.int_to_bytes(22, 2)
-        serial_protocol_instance, transport_protocol_instance = self.get_protocols(
-            transductor)
+        serial_protocol_instance, \
+            transport_protocol_instance = self.get_protocols(transductor)
         a = ModbusRTU.int_to_bytes(
             serial_protocol_instance._computate_crc(message))
         message += ModbusRTU.int_to_bytes(a[1])
         message += ModbusRTU.int_to_bytes(a[0])
 
-        received_messages = transport_protocol_instance.handle_messages_via_socket([
-                                                                                   message])
+        received_messages = \
+            transport_protocol_instance.handle_messages_via_socket([message])
 
         minutely_measurement = MinutelyMeasurement()        
         date = received_messages[0][3:11]
