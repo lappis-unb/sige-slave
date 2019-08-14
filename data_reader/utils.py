@@ -88,7 +88,8 @@ class DataCollector(object):
                     serial_protocol_instance
                     .get_measurement_value_from_response(message)
                 )
-
+            if(collection_type == "Minutely"):
+                self.verify_collection_date(transductor, measurements)
             self.functions_dict[collection_type](measurements, transductor)
 
         except(Exception) as e:
@@ -271,7 +272,7 @@ class DataCollector(object):
     def collect_old_measurements(self, end_date):
         transductors = EnergyTransductor.objects.all()
         threads = []
-        for transductor in self.transductors:
+        for transductor in transductors:
             collect_old_data_thread = Thread(
                 target=self.collect_old_measurements_from_transductor, args=(
                     transductor, end_date)
@@ -372,3 +373,28 @@ class DataCollector(object):
         minutely_measurement.save()
         transductor.last_collection = minutely_measurement.collection_date
         return minutely_measurement
+
+    def verify_collection_date(self, transductor, measurements):
+        model = transductor.model
+        if(model == "MD30" or model == "TR4020"):
+            real_date = datatime.now()
+            year = measurements[0]
+            month = measurements[1]
+            day = measurements[2]
+            hour = measurements[3]
+            minute = measurements[4]
+            second = measurements[5]
+            collected_date = datatime(year, month, day, hour, minute, second)
+            time_diference = real_date - collected_date
+            five_minutes = 300
+            if(time_diference > five_minutes):
+                self.set_correct_date(transductor)
+                measurements[0] = real_date.year
+                measurements[1] = real_date.month
+                measurements[2] = real_date.day
+                measurements[3] = real_date.hour
+                measurements[4] = real_date.minute
+                measurements[5] = real_date.second
+        else:
+            # this transductor model data verification wasn't implementated yet
+            pass
