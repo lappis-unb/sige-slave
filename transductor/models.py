@@ -3,6 +3,7 @@ from datetime import datetime
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
 from transductor_model.models import TransductorModel
+import django.utils.timezone
 import json
 from itertools import chain
 
@@ -47,17 +48,20 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    last_collection = models.DateTimeField(default=django.utils.timezone.now())
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
-    installation_date = models.DateTimeField(auto_now=True)
+    installation_date = models.DateTimeField(
+        default=django.utils.timezone.now())
     physical_location = models.CharField(max_length=30, default='')
     geolocation_longitude = models.DecimalField(
         max_digits=15,
         decimal_places=10
     )
     geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
-    last_clock_battery_change = models.DateTimeField(auto_now=True)
+    last_clock_battery_change = models.DateTimeField(
+        default=django.utils.timezone.now())
 
     class Meta:
         abstract = True
@@ -69,20 +73,6 @@ class Transductor(models.Model):
 
         Args:
             None
-
-        Returns:
-            list: List of all measurements
-        """
-        raise NotImplementedError
-
-    def get_measurements(self, start_date, final_date):
-        """
-        Method responsible to retrieve all measurements from
-        a specific transductor within a time window.
-
-        Args:
-            start_date (datetime): Collections time window start date.
-            final_date (datetime): Collections time window final date.
 
         Returns:
             list: List of all measurements
@@ -123,7 +113,7 @@ class EnergyTransductor(Transductor):
         return self.quarterly_measurements.filter(
             collection_date__range=[start_date, final_date]
         )
-    
+
     def get_monthly_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
         return self.monthly_measurements.filter(
@@ -132,7 +122,7 @@ class EnergyTransductor(Transductor):
 
     def get_minutely_measurements(self):
         return self.minutely_measurements.all()
-    
+
     def get_quarterly_measurements(self):
         return self.quarterly_measurements.all()
 
