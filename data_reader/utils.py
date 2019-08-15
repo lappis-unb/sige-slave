@@ -10,6 +10,7 @@ from threading import Thread
 from .exceptions import NumberOfAttempsReachedException
 from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
+from .exceptions import InvalidDateException
 
 from .transport import *
 from .communication import *
@@ -18,6 +19,7 @@ from transductor.models import *
 from measurement.models import *
 from transductor_model.models import *
 import time
+
 
 class DataCollector(object):
     """
@@ -69,13 +71,11 @@ class DataCollector(object):
 
         time = datetime.now()
         try:
-            print("antes de enviar")
             messages, transductor = self.create_communication(
                 (serial_protocol_instance, transport_protocol_instance),
                 transductor,
                 collection_type
             )
-            print("depois de receber")
 
             measurements = []
 
@@ -84,22 +84,18 @@ class DataCollector(object):
                     serial_protocol_instance
                     .get_measurement_value_from_response(message)
                 )
-            print("depois de traduzir a resposta")
 
             if(collection_type == "Minutely"):
                 self.verify_collection_date(transductor, measurements)
                 date = datetime.now()
-                print("depois de arrumar a hora")
                 if transductor.broken:
                     collect_old_data_thread = Thread(
-                        target=self.collect_old_measurements_from_transductor, args=(
-                            transductor, date)
+                        target=self.collect_old_measurements_from_transductor, 
+                        args=(transductor, date)
                     )
                     collect_old_data_thread.start()
-                    print("coletando dados antigos")
 
             self.functions_dict[collection_type](measurements, transductor)
-            print("depois de salvar a medida")
         except(Exception) as e:
             print("Error", 
                   e, 
@@ -289,9 +285,13 @@ class DataCollector(object):
                 self.request_old_data_from_mass_memory(transductor,
                                                        last_collection_date)
                 time.sleep(30)
-                self.get_old_data_from_transductor(transductor)
+                measurement = self.get_old_data_from_transductor(transductor)
+                last_collection_date = measurement.collection_date
+                last_collection_date = int(last_collection_date.timestamp())
+
             except Exception as e:
                 print("Exeption:", e)
+                return
             last_collection_date += minute_in_timestamp
 
     def request_old_data_from_mass_memory(self, transductor, timestamp):
@@ -336,6 +336,10 @@ class DataCollector(object):
         minutely_measurement = MinutelyMeasurement()        
         date = received_messages[0][3:11]
         date = ModbusRTU.bytes_to_timestamp_to_datetime(date)
+        if(date > datetime.now()):
+            raise InvalidDateException(
+                "Collected date is gretter that current date"
+            )
         minutely_measurement.collection_date = date
         va = received_messages[0][11:15]
         va = ModbusRTU.bytes_to_float(va)[0]
@@ -363,14 +367,11 @@ class DataCollector(object):
         minutely_measurement.total_reactive_power = pr
         minutely_measurement.transductor = transductor
         minutely_measurement.save()
-        transductor.last_collection = minutely_measurement.collection_date
         return minutely_measurement
 
     def verify_collection_date(self, transductor, measurements):
         model = transductor.model.name
-        print("verificando hora: modelo", model)
         if(model == "MD30" or model == 'TR4020'):
-            print("verificando hora: modelo certo")
             real_date = datetime.now()
             year = measurements[0]
             month = measurements[1]
@@ -381,11 +382,8 @@ class DataCollector(object):
             collected_date = datetime(year, month, day, hour, minute, second)
             time_diference = real_date - collected_date
             five_minutes = 300
-            print("verificando hora: hora coletada", collected_date)
-            print("verificando hora: hora real", real_date)
 
             if(abs(time_diference.seconds > five_minutes)):
-                print("verificando hora: hora errada")
                 self.set_correct_date(transductor)
                 measurements[0] = real_date.year
                 measurements[1] = real_date.month
@@ -394,6 +392,5 @@ class DataCollector(object):
                 measurements[4] = real_date.minute
                 measurements[5] = real_date.second
         else:
-            print("verificando hora: modelo errado")            
             # this transductor model data verification wasn't implementated yet
             pass
