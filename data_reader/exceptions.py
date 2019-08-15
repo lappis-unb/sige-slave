@@ -6,6 +6,7 @@ class NumberOfAttempsReachedException(Exception):
     Attributes:
         message (str): The exception message.
     """
+
     def __init__(self, message):
         super(NumberOfAttempsReachedException, self).__init__(message)
         self.message = message
@@ -19,6 +20,7 @@ class RegisterAddressException(Exception):
     Attributes:
         message (str): The exception message.
     """
+
     def __init__(self, message):
         super(RegisterAddressException, self).__init__(message)
         self.message = message
@@ -27,4 +29,17 @@ class RegisterAddressException(Exception):
 class CRCInvalidException(Exception):
     def __init__(self, message):
         super(CRCInvalidException, self).__init__(message)
+        self.message = message
+
+
+class InvalidDateException(Exception):
+    """
+    Exception to signal that date does not make sence in this contest.
+
+    Attributes:
+        message (str): The exception message.
+    """
+
+    def __init__(self, message):
+        super(InvalidDateException, self).__init__(message)
         self.message = message
