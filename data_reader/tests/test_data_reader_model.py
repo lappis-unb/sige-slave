@@ -17,6 +17,7 @@ class TestDataReaderModels(TestCase):
         HOST, PORT = "localhost", 9999
 
         self.t_model = TransductorModel.objects.create(
+            model_code="987654321",
             name="TR4020",
             transport_protocol="UdpProtocol",
             serial_protocol="ModbusRTU",

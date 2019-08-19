@@ -32,6 +32,12 @@ class TransductorModel(models.Model):
     <TransductorModel: Test Name>
     """
 
+    model_code = models.CharField(
+        max_length=9,
+        unique=True,
+        primary_key=True
+    )
+
     name = models.CharField(max_length=50, unique=True)
     transport_protocol = models.CharField(max_length=50)
     serial_protocol = models.CharField(max_length=50)
@@ -41,3 +47,7 @@ class TransductorModel(models.Model):
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super(TransductorModel, self).save(*args, **kwargs)

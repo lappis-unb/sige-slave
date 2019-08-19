@@ -6,7 +6,7 @@ from .models import TransductorModel
 class TransductorModelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = TransductorModel
-        fields = ('id',
+        fields = ('model_code',
                   'name',
                   'serial_protocol',
                   'transport_protocol',
