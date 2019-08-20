@@ -89,9 +89,11 @@ class TestDataReaderModels(TestCase):
         )
 
     def test_abstract_methods_from_transport_protocol(self):
+        message = []
         self.assertEqual(
             None,
-            TransportProtocol.start_communication(self.udp_protocol)
+            TransportProtocol.handle_messages_via_socket(self.udp_protocol, 
+                                                         message)
         )
     '''
     ModbusRTU Tests
