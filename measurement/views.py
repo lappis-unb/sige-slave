@@ -26,9 +26,12 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         serial_number = self.request.query_params.get('serial_number', None)
 
         if serial_number is not None:
-            transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
-            )
+            try:
+                transductor = EnergyTransductor.objects.get(
+                    serial_number=serial_number
+                )
+            except EnergyTransductor.DoesNotExist:
+                transductor = None
 
             self.queryset = self.queryset.filter(transductor=transductor)
 
