@@ -9,6 +9,8 @@ variables:
   POSTGRES_DB: smi-slave-test
   POSTGRES_PORT: 5432
   POSTGRES_HOST: postgres
+  SLAVE_SECRET_KEY: some-random-stuff
+  ENVIRONMENT: test
 
 before_script:
   - pip install -r requirements.txt
