@@ -10,6 +10,8 @@ variables:
   POSTGRES_PORT: 5432
   POSTGRES_HOST: postgres
   IMAGE_TAG: lappis/smi-slave:$CI_COMMIT_TAG
+  SLAVE_SECRET_KEY: some-random-stuff
+  ENVIRONMENT: test
 
 stages:
   - test
