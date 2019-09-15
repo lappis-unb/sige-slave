@@ -57,6 +57,7 @@ class TransductorTestCase(TestCase):
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
             geolocation_latitude=-24.45996,
+            installation_date=datetime.now()
         )
 
     def test_create_energy_transductor(self):
@@ -72,6 +73,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.physical_location = 'predio 2 sala 44'
         energy_transductor.geolocation_longitude = -24.4556
         energy_transductor.geolocation_latitude = -24.45996
+        energy_transductor.installation_date = datetime.now()
 
         self.assertIsNone(energy_transductor.save())
         self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
@@ -88,6 +90,7 @@ class TransductorTestCase(TestCase):
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_longitude = -24.4556
         transductor.geolocation_latitude = -24.45996
+        transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
             transductor.save()
@@ -104,6 +107,7 @@ class TransductorTestCase(TestCase):
         transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_longitude = -24.4556
+        transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
             transductor.save()
@@ -120,6 +124,7 @@ class TransductorTestCase(TestCase):
         transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_latitude = -24.4556
+        transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
             transductor.save()
@@ -133,6 +138,7 @@ class TransductorTestCase(TestCase):
         transductor.broken = False
         transductor.active = True
         transductor.model = self.trans_model
+        transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
             transductor.save()
@@ -146,6 +152,7 @@ class TransductorTestCase(TestCase):
         transductor.broken = False
         transductor.active = True
         transductor.model = self.trans_model
+        transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
             transductor.save()
@@ -158,6 +165,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.ip_address = ''
         energy_transductor.broken = False
         energy_transductor.active = True
+        energy_transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
             energy_transductor.save()

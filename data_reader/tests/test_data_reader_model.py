@@ -56,7 +56,8 @@ class TestDataReaderModels(TestCase):
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
-            geolocation_latitude=-24.45996
+            geolocation_latitude=-24.45996,
+            installation_date=datetime.now()
         )
 
         self.modbus_rtu = ModbusRTU(self.transductor)
@@ -92,7 +93,7 @@ class TestDataReaderModels(TestCase):
         message = []
         self.assertEqual(
             None,
-            TransportProtocol.handle_messages_via_socket(self.udp_protocol, 
+            TransportProtocol.handle_messages_via_socket(self.udp_protocol,
                                                          message)
         )
     '''
