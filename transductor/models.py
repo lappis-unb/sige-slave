@@ -85,6 +85,22 @@ class Transductor(models.Model):
         """
         raise NotImplementedError
 
+    def save(self):
+        """
+        Method responsible to set the value of last_clock_battery_change,
+        installation_date and last_collection to the current date and time.
+
+        Args:
+            None
+
+        Returns:
+            object: Transductor
+        """
+        self.installation_date = django.utils.timezone.now()
+        self.last_collection = datetime(1970,1,1,0,0,0)
+        self.last_clock_battery_change = django.utils.timezone.now()
+        super(TransductorModel, self).save
+
 
 class EnergyTransductor(Transductor):
     """
@@ -106,7 +122,7 @@ class EnergyTransductor(Transductor):
 
     def set_broken(self, broken):
         self.broken = broken
-        self.save()
+        self.update()
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
