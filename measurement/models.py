@@ -147,7 +147,7 @@ class MinutelyMeasurement(Measurement):
 
         minutely_measurement.save()
         transductor.last_collection = minutely_measurement.collection_date 
-        transductor.save()
+        transductor.update()
 
 
 class QuarterlyMeasurement(Measurement):

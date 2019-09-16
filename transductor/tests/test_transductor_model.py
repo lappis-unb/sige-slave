@@ -75,7 +75,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.geolocation_latitude = -24.45996
         energy_transductor.installation_date = datetime.now()
 
-        self.assertIsNone(energy_transductor.save())
+        self.assertIsNone(energy_transductor.update())
         self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
 
     def test_not_create_energy_transductor_no_firmware(self):
@@ -93,7 +93,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.save()
+            transductor.update()
 
     def test_not_create_energy_transductor_no_geolocation_latitude(self):
         size = len(EnergyTransductor.objects.all())
@@ -110,7 +110,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.save()
+            transductor.update()
 
     def test_not_create_energy_transductor_no_geolocation_longitude(self):
         size = len(EnergyTransductor.objects.all())
@@ -127,7 +127,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.save()
+            transductor.update()
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -141,7 +141,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.save()
+            transductor.update()
 
     def test_not_create_energy_transductor_empty_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -155,7 +155,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
-            transductor.save()
+            transductor.update()
 
     def test_not_create_energy_transductor_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
@@ -168,7 +168,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
-            energy_transductor.save()
+            energy_transductor.update()
 
     def test_update_transductor_serial_number(self):
         energy_transductor = EnergyTransductor.objects.filter(

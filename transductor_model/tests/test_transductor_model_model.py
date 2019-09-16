@@ -111,7 +111,7 @@ class TransductorModelTestCase(TestCase):
             [550, 1], [551, 1], [552, 1], [553, 1], [554, 1], [555, 1]
         ]
 
-        self.assertIsNone(transductor_model.save())
+        self.assertIsNone(transductor_model.update())
 
     def test_not_create_transductor_model(self):
         transductor_model = TransductorModel()
@@ -147,7 +147,7 @@ class TransductorModelTestCase(TestCase):
         ]
 
         with self.assertRaises(ValidationError):
-            transductor_model.save()
+            transductor_model.update()
 
     def test_retrieve_transductor_model(self):
         model_code = '987654321'
