@@ -97,7 +97,7 @@ class Transductor(models.Model):
             object: Transductor
         """
         self.installation_date = django.utils.timezone.now()
-        self.last_collection = datetime(1970,1,1,0,0,0)
+        self.last_collection = datetime(1970, 1, 1, 0, 0, 0)
         self.last_clock_battery_change = django.utils.timezone.now()
         super(TransductorModel, self).save
 
