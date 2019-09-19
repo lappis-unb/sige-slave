@@ -1,4 +1,6 @@
 from rest_framework import serializers
+import django.utils.timezone
+from datetime import datetime
 
 from .models import EnergyTransductor
 
@@ -21,6 +23,14 @@ class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
             'model',
             'url',
         )
+
+    def create(self, validated_data):
+        transductor = EnergyTransductor.objects.create(**validated_data)
+        transductor.installation_date = django.utils.timezone.now()
+        transductor.last_collection = datetime(1970, 1, 1, 0, 0, 0)
+        transductor.last_clock_battery_change = django.utils.timezone.now()
+        transductor.save()
+        return transductor
 
 
 class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
