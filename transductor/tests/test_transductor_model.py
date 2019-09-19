@@ -10,6 +10,7 @@ from datetime import datetime
 from measurement.models import MinutelyMeasurement
 from measurement.models import QuarterlyMeasurement
 from measurement.models import MonthlyMeasurement
+from django.shortcuts import get_object_or_404
 
 
 class TransductorTestCase(TestCase):
@@ -75,7 +76,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.geolocation_latitude = -24.45996
         energy_transductor.installation_date = datetime.now()
 
-        self.assertIsNone(energy_transductor.update())
+        self.assertIsNone(energy_transductor.save())
         self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
 
     def test_not_create_energy_transductor_no_firmware(self):
@@ -93,7 +94,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.update()
+            transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_latitude(self):
         size = len(EnergyTransductor.objects.all())
@@ -110,7 +111,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.update()
+            transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_longitude(self):
         size = len(EnergyTransductor.objects.all())
@@ -127,7 +128,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.update()
+            transductor.save()
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -141,7 +142,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
-            transductor.update()
+            transductor.save()
 
     def test_not_create_energy_transductor_empty_serial_number(self):
         size = len(EnergyTransductor.objects.all())
@@ -155,7 +156,7 @@ class TransductorTestCase(TestCase):
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
-            transductor.update()
+            transductor.save()
 
     def test_not_create_energy_transductor_no_transductor_model(self):
         size = len(EnergyTransductor.objects.all())
@@ -168,32 +169,28 @@ class TransductorTestCase(TestCase):
         energy_transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
-            energy_transductor.update()
+            energy_transductor.save()
 
-    def test_update_transductor_serial_number(self):
-        energy_transductor = EnergyTransductor.objects.filter(
-            serial_number='87654321'
-        )
-
-        self.assertTrue(
-            energy_transductor.update(serial_number='12345677')
-        )
 
     def test_not_update_transductor_wrong_serial_number(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
+
+        energy_transductor.serial_number='12345677777'
 
         with self.assertRaises(DataError):
-            energy_transductor.update(serial_number='12345677777')
+            energy_transductor.save()
 
     def test_update_transductor_ip_address(self):
-        energy_transductor = EnergyTransductor.objects.filter(
+        energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
-        self.assertTrue(
-            energy_transductor.update(ip_address='111.111.111.111')
+        energy_transductor.ip_address='111.111.111.111'
+
+        self.assertIsNone(
+            energy_transductor.save()
         )
 
     def test_set_transductor_broken_status(self):
@@ -208,7 +205,7 @@ class TransductorTestCase(TestCase):
 
     def test_delete_transductor(self):
         size = len(EnergyTransductor.objects.all())
-        EnergyTransductor.objects.filter(serial_number='87654321').delete()
+        EnergyTransductor.objects.get(serial_number='87654321').delete()
 
         self.assertEqual(size - 1, len(EnergyTransductor.objects.all()))
 
