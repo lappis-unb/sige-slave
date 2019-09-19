@@ -171,13 +171,12 @@ class TransductorTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             energy_transductor.save()
 
-
     def test_not_update_transductor_wrong_serial_number(self):
         energy_transductor = EnergyTransductor.objects.get(
             serial_number='87654321'
         )
 
-        energy_transductor.serial_number='12345677777'
+        energy_transductor.serial_number = '12345677777'
 
         with self.assertRaises(DataError):
             energy_transductor.save()
@@ -187,7 +186,7 @@ class TransductorTestCase(TestCase):
             serial_number='87654321'
         )
 
-        energy_transductor.ip_address='111.111.111.111'
+        energy_transductor.ip_address = '111.111.111.111'
 
         self.assertIsNone(
             energy_transductor.save()

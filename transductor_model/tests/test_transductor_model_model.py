@@ -148,17 +148,7 @@ class TransductorModelTestCase(TestCase):
         ]
 
         with self.assertRaises(ValidationError):
-            transductor_model.save(update_fields=
-                                            [
-                                             'model_code',
-                                             'name',
-                                             'transport_protocol',
-                                             'serial_protocol',
-                                             'minutely_register_addresses',
-                                             'quarterly_register_addresses',
-                                             'monthly_register_addresses'
-                                            ]
-                                  )
+            transductor_model.save()
 
     def test_retrieve_transductor_model(self):
         model_code = '987654321'
