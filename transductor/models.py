@@ -2,8 +2,8 @@ from django.db import models
 from datetime import datetime
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
-from transductor_model.models import TransductorModel
-import django.utils.timezone
+# from transductor_model.models import TransductorModel
+from django.utils import timezone
 import json
 from itertools import chain
 
@@ -31,7 +31,6 @@ class Transductor(models.Model):
             transductor's internal clock.
     """
     # TODO fix default value problem
-    model = models.ForeignKey(TransductorModel, on_delete=models.DO_NOTHING)
     serial_number = models.CharField(
         max_length=8,
         unique=True,
@@ -48,12 +47,13 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
-    last_collection = models.DateTimeField(default=django.utils.timezone.now())
+    model = models.CharField(max_length=50, default="EnergyTransductorModel")
+    last_collection = models.DateTimeField(default=timezone.now())
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
     installation_date = models.DateTimeField(
-        default=django.utils.timezone.now())
+        default=timezone.now())
     physical_location = models.CharField(max_length=30, default='')
     geolocation_longitude = models.DecimalField(
         max_digits=15,
@@ -61,7 +61,7 @@ class Transductor(models.Model):
     )
     geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
     last_clock_battery_change = models.DateTimeField(
-        default=django.utils.timezone.now())
+        default=timezone.now())
 
     class Meta:
         abstract = True
