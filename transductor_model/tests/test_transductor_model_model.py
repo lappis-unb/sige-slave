@@ -6,6 +6,7 @@ from rest_framework.test import APIRequestFactory
 from django.db.utils import DataError
 import pytest
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 
 class TransductorModelTestCase(TestCase):
@@ -162,70 +163,85 @@ class TransductorModelTestCase(TestCase):
             TransductorModel.objects.get(model_code=wrong_model_code)
 
     def test_update_transport_protocol_of_transductor_model(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
 
-        self.assertTrue(
-            transductor_model.update(transport_protocol='TCP')
+        transductor_model.transport_protocol = 'TCP'
+
+        self.assertIsNone(
+            transductor_model.save(update_fields=['transport_protocol'])
         )
 
     def test_update_serial_protocol_of_transductor_model(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
 
-        self.assertTrue(
-            transductor_model.update(serial_protocol='I2C')
+        transductor_model.serial_protocol = 'I2C'
+
+        self.assertIsNone(
+            transductor_model.save(update_fields=['serial_protocol'])
         )
 
     def test_update_minutely_register_address_of_transductor_model(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
 
-        self.assertTrue(
-            transductor_model.update(
-                minutely_register_addresses=[[54, 0], [60, 1]]
+        transductor_model.minutely_register_addresses = [[54, 0], [60, 1]]
+
+        self.assertIsNone(
+            transductor_model.save(
+                update_fields=['minutely_register_addresses']
             )
         )
 
     def test_update_name_of_transductor_model(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
 
-        self.assertTrue(transductor_model.update(name='SP4000'))
+        transductor_model.name = 'SP4000'
+
+        self.assertIsNone(
+            transductor_model.save(update_fields=['name'])
+        )
 
     def test_not_update_with_invalid_name(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
+        name = '123456789101112131415161718192021222324252627282930'
+        transductor_model.name = name
 
-        with self.assertRaises(DataError):
-            transductor_model.update(
-                name='123456789101112131415161718192021222324252627282930')
+        with self.assertRaises(ValidationError):
+            transductor_model.save(update_fields=['name'])
 
     def test_update_with_valid_transport_protocol(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
 
-        self.assertTrue(transductor_model.update(transport_protocol='USB-C'))
+        transductor_model.transport_protocol = 'USB-C'
+
+        self.assertIsNone(
+            transductor_model.save(update_fields=['transport_protocol'])
+        )
 
     def test_not_update_with_invalid_serial_protocol(self):
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         )
-        new_serial = '123456789101112131415161718192021222324252627282930'
+        transductor_model.transport_protocol =\
+            '123456789101112131415161718192021222324252627282930'
 
-        with self.assertRaises(DataError):
-            transductor_model.update(
-                transport_protocol=new_serial)
+        with self.assertRaises(ValidationError):
+            transductor_model.save(update_fields=['transport_protocol'])
 
     def test_delete_transductor_model(self):
         size = len(TransductorModel.objects.all())
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='987654321'
         ).delete()
 
@@ -233,7 +249,7 @@ class TransductorModelTestCase(TestCase):
 
     def test_not_delete_transductor_model(self):
         original_size = len(TransductorModel.objects.all())
-        transductor_model = TransductorModel.objects.filter(
+        transductor_model = TransductorModel.objects.get(
             model_code='123456789'
         ).delete()
         new_size = len(TransductorModel.objects.all())

@@ -57,7 +57,8 @@ class EnergyMeasurementTestCase(TestCase):
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
-            geolocation_latitude=-24.45996
+            geolocation_latitude=-24.45996,
+            installation_date=datetime.now()
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
             collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
