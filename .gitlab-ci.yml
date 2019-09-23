@@ -12,6 +12,7 @@ variables:
   IMAGE_TAG: lappis/smi-slave:$CI_COMMIT_TAG
   SLAVE_SECRET_KEY: some-random-stuff
   ENVIRONMENT: test
+  ALLOWED_HOSTS: "*"
 
 stages:
   - test
@@ -45,6 +46,7 @@ code_quality:
   script:
     - docker run
         --env SOURCE_CODE="$PWD"
+        --env ALLOWED_HOSTS=*
         --volume "$PWD":/code
         --volume /var/run/docker.sock:/var/run/docker.sock
         "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code

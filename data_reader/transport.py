@@ -21,24 +21,28 @@ class TransportProtocol(metaclass=ABCMeta):
         socket (socket._socketobject): The socket used in communication.
     """
 
-    def __init__(self, serial_protocol, timeout, port):
+    def __init__(self, serial_protocol, timeout=2, port=1001):
         self.serial_protocol = serial_protocol
         self.transductor = serial_protocol.transductor
         self.timeout = timeout
         self.port = port
         self.socket = None
 
-    @abstractmethod
     def send_messages(self, messages):
         response_messages = []
+        self.open_socket
         for message in messages:
             response_messages.append(self.send_message(message))
+        self.socket.close()
         return response_messages
 
     @abstractmethod
     def send_message(self, message):
         pass
 
+    @abstractmethod
+    def open_socket(self):
+        pass
 
 class UdpProtocol(TransportProtocol):
     """
@@ -52,15 +56,15 @@ class UdpProtocol(TransportProtocol):
         receive message via socket UDP.
     """
 
-    def __init__(self, serial_protocol, timeout=2, port=1001):
-        super(UdpProtocol, self).__init__(serial_protocol, timeout, port)
+    def open_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.settimeout(timeout)
+        self.socket.settimeout(self.timeout)
         self.receive_attempts = 0
         self.max_receive_attempts = 3
 
     def send_messages(self, messages):
         response_messages = []
+        self.open_socket()
         for message in messages:
             response_messages.append(self.send_message(message))
         return response_messages
@@ -87,19 +91,17 @@ class UdpProtocol(TransportProtocol):
                     raise NumberOfAttempsReachedException(
                         "Maximum attempts reached!")
                 pass
-            except CRCInvalidException:
+            except CRCInvalidException as e:
                 crc_errors += 1
                 if(crc_errors == self.max_receive_attempts):
-                    raise
-            finally:
-                socket.close()
+                    self.socket.close()
+                    raise e
         return received_message[0]
 
 
 def TcpProtocol(TransportProtocol):
 
-    def __init__(self, serial_protocol, timeout=1, port=1001):
-        super(TcpProtocol, self).__init__(serial_protocol, timeout, port)
+    def open_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(timeout)
         self.socket.connect((self.transductor.ip_address, port))
@@ -108,5 +110,4 @@ def TcpProtocol(TransportProtocol):
         self.socket.sendto(message)
         received_message = self.socket.recvfrom(256)
         self.serial_protocol._check_crc(received_message[0])
-        socket.close()
         return received_message[0]
