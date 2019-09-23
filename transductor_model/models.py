@@ -102,7 +102,7 @@ class EnergyTransductorModel():
         payload = [timestamp]
         return (self.preset_multiple_register, self.registers['DataRescuePost'],
                 payload)
-    
+
     def data_rescue_get(self):
         return (self.read_register, self.registers['DataRescueGet'])
 
@@ -299,15 +299,15 @@ class EnergyTransductorModel():
         date = timezone.datetime(year, response[43] // 256, response[43] % 256,
                                  response[44] // 256, response[44] % 256)  
         measurement.reactive_max_power_list_peak_time.append([response[42], 
-                                                                date])
+                                                              date])
         date = timezone.datetime(year, response[46] // 256, response[46] % 256,
                                  response[47] // 256, response[47] % 256)  
         measurement.reactive_max_power_list_peak_time.append([response[45], 
-                                                                date])
+                                                              date])
         date = timezone.datetime(year, response[49] // 256, response[49] % 256,
                                  response[50] // 256, response[50] % 256)  
         measurement.reactive_max_power_list_peak_time.append([response[48], 
-                                                                date])
+                                                              date])
         date = timezone.datetime(year, response[52] // 256, response[52] % 256,
                                  response[53] // 256, response[53] % 256)  
         measurement.reactive_max_power_list_peak_time.append([response[51], 
@@ -340,7 +340,7 @@ class EnergyTransductorModel():
     def save_rescued_data(self, response, transductor):
         measurement = MinutelyMeasurement()
         if(MinutelyMeasurement.objects.filter(
-            collection_date = response[0][0]).__len__() != 0):
+                collection_date=response[0][0]).__len__() != 0):
             return response[0][0]
         measurement.collection_date = response[0][0]       
         measurement.voltage_a = response[0][1]

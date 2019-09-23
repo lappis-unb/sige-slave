@@ -44,6 +44,7 @@ class InvalidDateException(Exception):
         super(InvalidDateException, self).__init__(message)
         self.message = message
 
+
 class NotANumberException(Exception):
     def __init__(self, message):
         super(NotANumberException, self).__init__(message)

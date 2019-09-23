@@ -108,7 +108,8 @@ class ModbusRTU(SerialProtocol):
 
         return messages    
 
-    def get_content_from_messages(self, collection_type, recived_messages, date=None):
+    def get_content_from_messages(self, collection_type, recived_messages,
+                                  date=None):
         request = \
             self.transductor_model.data_collection(
                 collection_type, date)
