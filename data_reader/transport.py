@@ -30,10 +30,13 @@ class TransportProtocol(metaclass=ABCMeta):
 
     @abstractmethod
     def send_messages(self, messages):
-        """
-        Abstract method responsible to start the communication with
-        the transductor based on his transport protocol.
-        """
+        response_messages = []
+        for message in messages:
+            response_messages.append(self.send_message(message))
+        return response_messages
+
+    @abstractmethod
+    def send_message(self, message):
         pass
 
 
@@ -88,5 +91,22 @@ class UdpProtocol(TransportProtocol):
                 crc_errors += 1
                 if(crc_errors == self.max_receive_attempts):
                     raise
+            finally:
+                socket.close()
+        return received_message[0]
 
+
+def TcpProtocol(TransportProtocol):
+
+    def __init__(self, serial_protocol, timeout=1, port=1001):
+        super(TcpProtocol, self).__init__(serial_protocol, timeout, port)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(timeout)
+        self.socket.connect((self.transductor.ip_address, port))
+
+    def send_message(self, message):
+        self.socket.sendto(message)
+        received_message = self.socket.recvfrom(256)
+        self.serial_protocol._check_crc(received_message[0])
+        socket.close()
         return received_message[0]

@@ -1,5 +1,6 @@
 version: '3.5'
 services:
+
   slave-db:
     container_name: slave-db
     image: postgres:9.6
@@ -11,7 +12,8 @@ services:
 
   slave-api:
     container_name: slave-api
-    image: lappis/smi-slave:0.9.2
+    # image: lappis/smi-slave:latest
+    build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
     networks:

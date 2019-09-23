@@ -17,6 +17,7 @@ class TestDataReaderModels(TestCase):
         HOST, PORT = "localhost", 9999
 
         self.t_model = TransductorModel.objects.create(
+            model_code="987654321",
             name="TR4020",
             transport_protocol="UdpProtocol",
             serial_protocol="ModbusRTU",
@@ -55,7 +56,8 @@ class TestDataReaderModels(TestCase):
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
-            geolocation_latitude=-24.45996
+            geolocation_latitude=-24.45996,
+            installation_date=datetime.now()
         )
 
         self.modbus_rtu = ModbusRTU(self.transductor)
@@ -88,9 +90,11 @@ class TestDataReaderModels(TestCase):
         )
 
     def test_abstract_methods_from_transport_protocol(self):
+        message = []
         self.assertEqual(
             None,
-            TransportProtocol.start_communication(self.udp_protocol)
+            TransportProtocol.handle_messages_via_socket(self.udp_protocol,
+                                                         message)
         )
     '''
     ModbusRTU Tests

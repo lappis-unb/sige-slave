@@ -3,3 +3,5 @@ POSTGRES_PASSWORD=password
 POSTGRES_DB=smi-slave-dev
 POSTGRES_PORT=5432
 POSTGRES_HOST=slave-db
+SLAVE_SECRET_KEY=some-random-stuff
+ENVIRONMENT=development

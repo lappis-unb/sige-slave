@@ -48,20 +48,21 @@ class Transductor(models.Model):
             ),
         ])
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
-    last_collection = models.DateTimeField(default=timezone.now())
+    last_collection = models.DateTimeField(blank=True, null=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
-    installation_date = models.DateTimeField(
-        default=timezone.now())
+    installation_date = models.DateTimeField(blank=True, null=True)
     physical_location = models.CharField(max_length=30, default='')
     geolocation_longitude = models.DecimalField(
         max_digits=15,
         decimal_places=10
     )
-    geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
-    last_clock_battery_change = models.DateTimeField(
-        default=timezone.now())
+    geolocation_latitude = models.DecimalField(
+        max_digits=15,
+        decimal_places=10
+    )
+    last_clock_battery_change = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         abstract = True
@@ -100,7 +101,7 @@ class EnergyTransductor(Transductor):
 
     def set_broken(self, broken):
         self.broken = broken
-        self.save()
+        self.save(update_fields=['broken'])
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
