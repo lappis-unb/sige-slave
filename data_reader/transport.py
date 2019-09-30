@@ -44,6 +44,7 @@ class TransportProtocol(metaclass=ABCMeta):
     def open_socket(self):
         pass
 
+
 class UdpProtocol(TransportProtocol):
     """
     Class responsible to represent a UDP protocol and handle all
