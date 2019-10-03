@@ -27,11 +27,11 @@ SECRET_KEY = env('SLAVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if env('ENVIRONMENT') == 'production':
-    DEBUG = True
-else:
     DEBUG = False
+else:
+    DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
