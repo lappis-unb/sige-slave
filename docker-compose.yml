@@ -21,11 +21,13 @@ services:
       - 8000:8000
     volumes:
       - .:/smi-slave
+      - pip_cache:/usr/local/lib/python3.6/site-packages
     depends_on:
       - slave-db
 
 volumes:
   pg-data: {}
+  pip_cache:
 
 networks:
   smi-network:
