@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.7'
 services:
 
   slave-db:
@@ -12,7 +12,6 @@ services:
 
   slave-api:
     container_name: slave-api
-    # image: lappis/smi-slave:latest
     build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
