@@ -50,21 +50,20 @@ def single_data_collection(transductor, collection_type, date=None):
 
     messages_to_send = serial_protocol_instance.create_messages(
         collection_type, date)
-    # try:
-    received_messages = transport_protocol_instance.send_messages(
-        messages_to_send)
-    received_messages_content = \
-        serial_protocol_instance.get_content_from_messages(
-            collection_type, received_messages, date)
+    try:
+        received_messages = transport_protocol_instance.send_messages(
+            messages_to_send)
+        received_messages_content = \
+            serial_protocol_instance.get_content_from_messages(
+                collection_type, received_messages, date)
 
-    return transductor_model.handle_response(collection_type,
-                                             received_messages_content,
-                                             transductor)
-
-    # except Exception as e:
-    #     transductor.set_broken(True)
-    #     print(collection_type, datetime.now(), "exception:", e)
-    #     return
+        return transductor_model.handle_response(collection_type,
+                                                 received_messages_content,
+                                                 transductor)
+    except Exception as e:
+        transductor.set_broken(True)
+        print(collection_type, datetime.now(), "exception:", e)
+        return
 
 
 def perform_data_rescue(transductor, begin_date, end_date):

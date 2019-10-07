@@ -94,7 +94,6 @@ class ModbusRTU(SerialProtocol):
         else:
             messages_bodies = zip(request[1], request[2])    
             for message_body in messages_bodies:
-                print(message_body, collection_type)
                 message = self.int_to_bytes(1, 1) 
                 message += self.int_to_bytes(request[0], 1)
                 message += self.int_to_bytes(message_body[0][0], 2)
@@ -132,7 +131,6 @@ class ModbusRTU(SerialProtocol):
             message_content = self.bytes_to_int(message)
         elif(message_type == 22):
             message_content = []
-            print(message, message[0:8])
             message_content.append(
                 self.bytes_to_timestamp_to_datetime(message[0:8]))
             for i in range(8, 44, 4):
@@ -196,14 +194,35 @@ class ModbusRTU(SerialProtocol):
         else:
             return number
 
-    @staticmethod    
-    def bytes_to_float(x):
-        number = struct.unpack('>f', x)
-        if(math.isnan(number[0])):
-            raise NotANumberException(
-                "The bytestring can't be conveted to a float")
-        else:
-            return number[0]
+    @staticmethod
+    def bytes_to_float(msg):
+        #     number = struct.unpack('>f', x)
+        #     if(math.isnan(number[0])):
+        #         raise NotANumberException(
+        #             "The bytestring can't be conveted to a float")
+        #     else:
+        #         return number[0]
+        # def _unpack_float_response(msg):
+        """
+        Args:
+            message_received_data (str): The data from received message.
+
+        Returns:
+            float: The value from response.
+        """
+        new_message = bytearray()
+
+        if sys.byteorder == "little":
+            msb = msg[0]
+            new_message.append(msg[1])
+            new_message.append(msb)
+
+            msb = msg[2]
+            new_message.append(msg[3])
+            new_message.append(msb)
+
+        value = struct.unpack("1f", new_message)[0]
+        return value
 
     @staticmethod
     def bytes_to_timestamp_to_datetime(x):
