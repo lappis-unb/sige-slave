@@ -105,10 +105,10 @@ class EnergyTransductorModel():
 
     def handle_response(self, collection_type, response, transductor):
         response_dict = self.handle_response_functions()
-        # try:
-        return response_dict[collection_type](response, transductor)
-        # except Exception as e:
-        #     print("Error:", e)
+        try:
+            return response_dict[collection_type](response, transductor)
+        except Exception as e:
+            print("Error:", e)
 
     def save_minutely_measurement(self, response, transductor):
         from data_reader.utils import perform_data_rescue
