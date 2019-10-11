@@ -12,10 +12,11 @@ from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
 from .exceptions import InvalidDateException
 
-from .transport import UdpProtocol
-from .communication import ModbusRTU
+from .transport import *
+from .communication import *
 
 from transductor_model.models import EnergyTransductorModel
+from transductor_model.models import MD30
 from transductor.models import EnergyTransductor
 from measurement.models import *
 import time

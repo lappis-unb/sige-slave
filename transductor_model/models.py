@@ -12,9 +12,6 @@ class EnergyTransductorModel():
     transport_protocol = "UdpProtocol"
     serial_protocol = "ModbusRTU"
 
-    read_register = 3
-    preset_multiple_register = 16
-
     registers = {
         "Minutely": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
@@ -82,29 +79,29 @@ class EnergyTransductorModel():
             return collection_dict[type](date)
 
     def minutely_collection(self):
-        return (self.read_register, self.registers['Minutely'])
+        return ("ReadHoldingRegisters", self.registers['Minutely'])
 
     def quarterly_collection(self):
-        return (self.read_register, self.registers['Quarterly'])
+        return ("ReadHoldingRegisters", self.registers['Quarterly'])
 
     def monthly_collection(self):
-        return (self.read_register, self.registers['Monthly'])
+        return ("ReadHoldingRegisters", self.registers['Monthly'])
 
     def correct_date(self):
         date = timezone.datetime.now()
         payload = [date.year, date.month, date.day, date.hour, date.minute, 
                    date.second]
-        return (self.preset_multiple_register, self.registers['CorrectDate'],
+        return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
 
     def data_rescue_post(self, date):
         timestamp = int(timezone.datetime.timestamp(date))
         payload = [timestamp]
-        return (self.preset_multiple_register, self.registers['DataRescuePost'],
+        return ("PresetMultipleRegisters", self.registers['DataRescuePost'],
                 payload)
 
     def data_rescue_get(self):
-        return (self.read_register, self.registers['DataRescueGet'])
+        return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
     def handle_response(self, collection_type, response, transductor):
         response_dict = self.handle_response_functions()
@@ -378,3 +375,7 @@ class EnergyTransductorModel():
             measurements[3] = real_date.hour
             measurements[4] = real_date.minute
             measurements[5] = real_date.second
+
+class MD30(EnergyTransductorModel):
+    transport_protocol = "TcpProtocol"
+    serial_protocol = "ModbusTCP"
