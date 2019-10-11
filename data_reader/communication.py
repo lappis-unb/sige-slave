@@ -134,7 +134,8 @@ class ModbusRTU(SerialProtocol):
             message_content.append(
                 self.bytes_to_timestamp_to_datetime(message[0:8]))
             for i in range(8, 44, 4):
-                message_content.append(self.bytes_to_float(message[i:i + 4]))
+                message_content.append(
+                    self._unpack_float_response(message[i:i + 4]))
 
         return message_content
 
@@ -195,14 +196,16 @@ class ModbusRTU(SerialProtocol):
             return number
 
     @staticmethod
+    def _unpack_float_response(msg):
+        number = struct.unpack('>f', msg)
+        if(math.isnan(number[0])):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a float")
+        else:
+            return number[0]
+
+    @staticmethod
     def bytes_to_float(msg):
-        #     number = struct.unpack('>f', x)
-        #     if(math.isnan(number[0])):
-        #         raise NotANumberException(
-        #             "The bytestring can't be conveted to a float")
-        #     else:
-        #         return number[0]
-        # def _unpack_float_response(msg):
         """
         Args:
             message_received_data (str): The data from received message.
@@ -222,7 +225,11 @@ class ModbusRTU(SerialProtocol):
             new_message.append(msb)
 
         value = struct.unpack("1f", new_message)[0]
-        return value
+        if(math.isnan(value)):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a float")
+        else:
+            return value
 
     @staticmethod
     def bytes_to_timestamp_to_datetime(x):
