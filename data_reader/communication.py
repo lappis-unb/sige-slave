@@ -298,12 +298,12 @@ class ModbusTCP(Modbus):
     def add_complement(self, message):
         timestamp = timezone.datetime.now().timestamp()
         timestamp = str(timestamp).split('.')
-        trasaction_id = int(timestamp[1])% 65535
+        trasaction_id = int(timestamp[1]) % 65535
         full_message = self.int_to_bytes(trasaction_id, 2)
         protocol_identifier = 0
-        full_message += self.int_to_bytes(protocol_identifier,2)
+        full_message += self.int_to_bytes(protocol_identifier, 2)
         message_length = message.__len__()
-        full_message += self.int_to_bytes(message_length,2)
+        full_message += self.int_to_bytes(message_length, 2)
         full_message += message
         return full_message
 

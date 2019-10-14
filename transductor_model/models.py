@@ -94,7 +94,8 @@ class EnergyTransductorModel():
     def data_rescue_get(self, date):
         return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
-    def handle_response(self, collection_type, response, transductor, date=None):
+    def handle_response(self, collection_type, response, transductor,
+                        date=None):
         response_dict = self.handle_response_functions()
         try:
             return response_dict[collection_type](response, transductor, date)
@@ -367,7 +368,6 @@ class MD30(EnergyTransductorModel):
     transport_protocol = "TcpProtocol"
     serial_protocol = "ModbusTCP"
 
-
     registers = {
         "Minutely": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
@@ -402,7 +402,6 @@ class MD30(EnergyTransductorModel):
         "DataRescueGet": [[200, 22]]
     }
 
-
     def collection_functions(self):
         return {
             "Minutely": self.minutely_collection,
@@ -423,13 +422,13 @@ class MD30(EnergyTransductorModel):
             "DataRescueGet": self.save_rescued_data,
         }
 
-    def save_minutely_measurement(self, response, transductor, date=None ):
+    def save_minutely_measurement(self, response, transductor, date=None):
         from data_reader.utils import perform_data_rescue
         date = super().save_minutely_measurement(response, transductor, date)
         collect_old_data_thread = Thread(
-                target=perform_data_rescue,
-                args=(transductor, transductor.last_collection,
-                      date)
+            target=perform_data_rescue,
+            args=(transductor, transductor.last_collection,
+                  date)
         )
         was_broken = transductor.broken
         if transductor.broken:
@@ -440,7 +439,6 @@ class MD30(EnergyTransductorModel):
         transductor.save()
         if was_broken:
             collect_old_data_thread.join()
-
 
 
 class TR4020(EnergyTransductorModel):
