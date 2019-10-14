@@ -55,7 +55,7 @@ class SerialProtocol(metaclass=ABCMeta):
             return number
 
     @staticmethod
-    def bytes_to_float(msg):
+    def _unpack_float_response(msg):
         number = struct.unpack('>f', msg)
         if(math.isnan(number[0])):
             raise NotANumberException(
@@ -64,7 +64,7 @@ class SerialProtocol(metaclass=ABCMeta):
             return number[0]
             
     @staticmethod
-    def _unpack_float_response(msg):
+    def bytes_to_float(msg):
         """
         Args:
             message_received_data (str): The data from received message.
@@ -84,6 +84,11 @@ class SerialProtocol(metaclass=ABCMeta):
             new_message.append(msb)
 
         value = struct.unpack("1f", new_message)[0]
+        if(math.isnan(value)):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a float")
+        else:
+            return value
         return value
 
     @staticmethod
@@ -291,7 +296,9 @@ class ModbusTCP(Modbus):
         super(ModbusTCP, self).__init__(transductor, transductor_model)
 
     def add_complement(self, message):
-        trasaction_id = int(timezone.datetime.now().timestamp())% 65535
+        timestamp = timezone.datetime.now().timestamp()
+        timestamp = str(timestamp).split('.')
+        trasaction_id = int(timestamp[1])% 65535
         full_message = self.int_to_bytes(trasaction_id, 2)
         protocol_identifier = 0
         full_message += self.int_to_bytes(protocol_identifier,2)

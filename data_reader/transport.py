@@ -104,7 +104,7 @@ class TcpProtocol(TransportProtocol):
 
     def open_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(0.5)
+        self.socket.settimeout(1)
         self.socket.connect((self.transductor.ip_address, 1001))
 
     def send_message(self, message):
