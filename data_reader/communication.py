@@ -1,12 +1,15 @@
+from .exceptions import CRCInvalidException
 import importlib
 import struct
 import sys
+import math
 
 from abc import ABCMeta, abstractmethod
-from datetime import datetime
+from django.utils import timezone
 
 from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
+from .exceptions import NotANumberException
 
 
 class SerialProtocol(metaclass=ABCMeta):
@@ -18,8 +21,9 @@ class SerialProtocol(metaclass=ABCMeta):
         hold communication.
     """
 
-    def __init__(self, transductor):
+    def __init__(self, transductor, transductor_model):
         self.transductor = transductor
+        self.transductor_model = transductor_model
 
     @abstractmethod
     def create_messages(self):
@@ -30,7 +34,7 @@ class SerialProtocol(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_measurement_value_from_response(self, message_received_data):
+    def get_content_from_message(self, message, message_type):
         """
         Abstract method responsible for read an value of
         a message sent by transductor.
@@ -38,10 +42,6 @@ class SerialProtocol(metaclass=ABCMeta):
         Args:
             message_received_data (str): The data from received message.
         """
-        pass
-
-    @abstractmethod
-    def check_all_messages_crc(self, messages):
         pass
 
 
@@ -60,37 +60,8 @@ class ModbusRTU(SerialProtocol):
     `Modbus reference guide <http://modbus.org/docs/PI_MBUS_300.pdf>`_
     """
 
-    def __init__(self, transductor):
-        super(ModbusRTU, self).__init__(transductor)
-
-    def create_messages(self, registers):
-        """
-        This method creates all messages based on transductor
-        model register address that will be sent to a transductor
-        seeking out their respective values.
-
-        Returns:
-            list: The list with all messages.
-
-        Raises:
-            RegisterAddressException: raised if the register
-            address from transductor model is in a wrong format.
-        """
-
-        messages_to_send = []
-
-        for register in registers:
-            try:
-                packaged_message = self.create_get_message(register)
-            except IndexError:
-                raise RegisterAddressException("Wrong register address type.")
-
-            crc = struct.pack("<H", self._computate_crc(packaged_message))
-            packaged_message = packaged_message + crc
-
-            messages_to_send.append(packaged_message)
-
-        return messages_to_send
+    def __init__(self, transductor, transductor_model):
+        super(ModbusRTU, self).__init__(transductor, transductor_model)
 
     def create_get_message(self, register):
 
@@ -105,152 +76,68 @@ class ModbusRTU(SerialProtocol):
 
         return packaged_message
 
-    def create_date_send_message(self):
-        """
-        This method creates a get message to update datetime informations.
-        The attributes specifically updated are: year, month, year day,
-        week day, day, hour, minute and second of an day.
+    def create_messages(self, collection_type, date=None):
+        request = self.transductor_model.data_collection(
+            collection_type, date)
+        messages = []
 
-        Returns:
-            message (list): Represents the package to send to
-            the transductor
-        """
-
-        int_addr = 0
-        float_addr = 1
-
-        address_value = 0
-        address_type = 1
-
-        date = datetime.now()
-
-        week_day = ((date.weekday()) + 1) % 6
-        year_day = date.timetuple().tm_yday
-
-        date_infos = [
-            date.year,
-            date.month,
-            year_day,
-            week_day,
-            date.day,
-            date.hour,
-            date.minute,
-            date.second
-        ]
-
-        data_registers = [[10, 1], [11, 1], [14, 1], [15, 1], [16, 1]]
-        message = []
-
-        packaged_message = struct.pack(
-            "2B", 0x01, 0x10) + \
-            struct.pack(
-                ">2H", 10, 8) + \
-            struct.pack(
-                ">B", 0x10) + \
-            struct.pack(
-                ">8H", date_infos[0],
-                date_infos[1],
-                date_infos[2],
-                date_infos[3],
-                date_infos[4],
-                date_infos[5],
-                date_infos[6],
-                date_infos[7])
-
-        crc = struct.pack("<H", self._computate_crc(packaged_message))
-        packaged_message = packaged_message + crc
-
-        message.append(packaged_message)
-
-        return message
-
-    def get_measurement_value_from_response(self, message_received_data):
-        """
-        Method responsible to read a value (int/float)
-        from a Modbus RTU response.
-
-        Args:
-            message_received_data: The Modbus RTU response.
-
-        Returns:
-            int: if the value on response is an int.
-            float: if the value on response is an float.
-        """
-        n_bytes = message_received_data[2]
-
-        msg = bytearray(message_received_data[3:-2])
-
-        if n_bytes == 2:
-            return self._unpack_int_response(n_bytes, msg)
-        elif n_bytes == 8:
-            return self.unpack_date_time_response(n_bytes, msg)
+        if(request.__len__() == 2):
+            for register in request[1]:
+                message = self.int_to_bytes(1, 1) 
+                message += self.int_to_bytes(request[0], 1) 
+                message += self.int_to_bytes(register[0], 2)
+                aux = register[1]
+                message += self.int_to_bytes(aux, 2)
+                aux = self._computate_crc(message)
+                message += self.int_to_bytes(aux, 2, 'little')
+                messages.append(message)
         else:
-            return self._unpack_float_response(n_bytes, msg)
+            messages_bodies = zip(request[1], request[2])    
+            for message_body in messages_bodies:
+                message = self.int_to_bytes(1, 1) 
+                message += self.int_to_bytes(request[0], 1)
+                message += self.int_to_bytes(message_body[0][0], 2)
+                aux = message_body[0][1]
+                message += self.int_to_bytes(aux, 2)
+                message += self.int_to_bytes(aux * 2, 1)
+                message += self.int_to_bytes(message_body[1], aux * 2)
+                aux = self._computate_crc(message)
+                message += self.int_to_bytes(aux, 2, 'little')
+                messages.append(message)
 
-    def unpack_date_time_response(self, n_bytes, msg):
-        value = []
-        for i in range(0, n_bytes, 1):
-            if sys.byteorder == "little":
-                new_message = bytearray()
-                new_message.append(msg[i])
-                value.append(struct.unpack("1B", new_message)[0])
+        return messages    
 
-        return value
+    def get_content_from_messages(self, collection_type, recived_messages,
+                                  date=None):
+        request = \
+            self.transductor_model.data_collection(
+                collection_type, date)
+        messages_registers = zip(recived_messages, request[1])    
+        messages_content = []
+        for message_register in messages_registers:
+            messages_content.append(self.get_content_from_message(
+                message_register[0],
+                message_register[1][1]
+            ))
+        return messages_content
 
-    def _unpack_int_response(self, n_bytes, msg):
-        """
-        Args:
-            message_received_data (str): The data from received message.
+    def get_content_from_message(self, message, message_type):
+        message = message[3:-2]            
+        if(message_type == 1):
+            message_content = self.bytes_to_int(message)
+        elif(message_type == 2):
+            message_content = self.bytes_to_float(message)
+        elif(message_type == 4):
+            message_content = self.bytes_to_int(message)
+        elif(message_type == 22):
+            message_content = []
+            message_content.append(
+                self.bytes_to_timestamp_to_datetime(message[0:8]))
+            for i in range(8, 44, 4):
+                message_content.append(
+                    self._unpack_float_response(message[i:i + 4]))
 
-        Returns:
-            int: The value from response.
-        """
-        new_message = bytearray()
-
-        for i in range(0, n_bytes, 2):
-            if sys.byteorder == "little":
-                msb = msg[i]
-                new_message.append(msg[i + 1])
-                new_message.append(msb)
-
-        value = struct.unpack("1h", new_message)[0]
-        return value
-
-    def _unpack_float_response(self, n_bytes, msg):
-        """
-        Args:
-            message_received_data (str): The data from received message.
-
-        Returns:
-            float: The value from response.
-        """
-        new_message = bytearray()
-
-        for i in range(0, n_bytes, 4):
-            if sys.byteorder == "little":
-                msb = msg[i]
-                new_message.append(msg[i + 1])
-                new_message.append(msb)
-
-                msb = msg[i + 2]
-                new_message.append(msg[i + 3])
-                new_message.append(msb)
-
-        value = struct.unpack("1f", new_message)[0]
-        return value
-
-    def check_all_messages_crc(self, messages):
-        all_crc_valid = False
-
-        for message in messages:
-            crc = struct.pack("<H", self._computate_crc(message[:-2]))
-
-            if not (message[-2:] == crc):
-                raise CRCInvalidException('CRC is invalid!')
-
-        all_crc_valid = True
-
-        return all_crc_valid
+        return message_content
 
     def _check_crc(self, packaged_message):
         """
@@ -262,15 +149,13 @@ class ModbusRTU(SerialProtocol):
 
         Returns:
             bool: True if CRC is valid, False otherwise.
-        """
-        integer_message_array = []
+        """            
+        crc = struct.pack("<H", self._computate_crc(packaged_message[:-2]))
 
-        for unicode_element in packaged_message:
-            integer_message_array.append(ord(unicode_element))
+        return (crc == packaged_message[-2:])
 
-        return (self._computate_crc(integer_message_array) == 0)
-
-    def _computate_crc(self, packaged_message):
+    @staticmethod
+    def _computate_crc(packaged_message):
         """
         Method responsible to computate the crc from a packaged message.
 
@@ -301,17 +186,58 @@ class ModbusRTU(SerialProtocol):
         return crc
 
     # TODO Change communication to use this methods
+    @staticmethod
     def bytes_to_int(x):
-        return int.from_bytes(x, byteorder='big')
-    
-    def bytes_to_float(x):
-        return struct.unpack('>f', x)
-    
+        number = int.from_bytes(x, byteorder='big')
+        if(math.isnan(number)):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a integer")
+        else:
+            return number
+
+    @staticmethod
+    def _unpack_float_response(msg):
+        number = struct.unpack('>f', msg)
+        if(math.isnan(number[0])):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a float")
+        else:
+            return number[0]
+
+    @staticmethod
+    def bytes_to_float(msg):
+        """
+        Args:
+            message_received_data (str): The data from received message.
+
+        Returns:
+            float: The value from response.
+        """
+        new_message = bytearray()
+
+        if sys.byteorder == "little":
+            msb = msg[0]
+            new_message.append(msg[1])
+            new_message.append(msb)
+
+            msb = msg[2]
+            new_message.append(msg[3])
+            new_message.append(msb)
+
+        value = struct.unpack("1f", new_message)[0]
+        if(math.isnan(value)):
+            raise NotANumberException(
+                "The bytestring can't be conveted to a float")
+        else:
+            return value
+
+    @staticmethod
     def bytes_to_timestamp_to_datetime(x):
         timestamp = ModbusRTU.bytes_to_int(x)
-        return datetime.fromtimestamp(timestamp)
+        return timezone.datetime.fromtimestamp(timestamp)
 
-    def int_to_bytes(x, size=None):
+    @staticmethod
+    def int_to_bytes(x, size=None, encryption='big'):
         if(size is None):
-            return x.to_bytes((x.bit_length() + 7) // 8, 'big')
-        return x.to_bytes(size, 'big')
+            return x.to_bytes((x.bit_length() + 7) // 8, encryption)
+        return x.to_bytes(size, encryption)

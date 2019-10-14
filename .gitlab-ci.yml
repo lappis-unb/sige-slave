@@ -12,6 +12,7 @@ variables:
   IMAGE_TAG: lappis/smi-slave
   SLAVE_SECRET_KEY: some-random-stuff
   ENVIRONMENT: test
+  ALLOWED_HOSTS: "*"
 
 stages:
   - test

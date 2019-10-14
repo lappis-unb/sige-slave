@@ -2,8 +2,8 @@ from django.db import models
 from datetime import datetime
 from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
-from transductor_model.models import TransductorModel
-import django.utils.timezone
+# from transductor_model.models import TransductorModel
+from django.utils import timezone
 import json
 from itertools import chain
 
@@ -31,12 +31,6 @@ class Transductor(models.Model):
             transductor's internal clock.
     """
     # TODO fix default value problem
-    model = models.ForeignKey(
-        TransductorModel,
-        db_column="model_code",
-        on_delete=models.DO_NOTHING
-    )
-
     serial_number = models.CharField(
         max_length=8,
         unique=True,
@@ -53,6 +47,7 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    model = models.CharField(max_length=50, default="EnergyTransductorModel")
     last_collection = models.DateTimeField(blank=True, null=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)

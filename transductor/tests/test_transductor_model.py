@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.conf import settings
 from django.db import IntegrityError
 from django.db.utils import DataError
-from transductor_model.models import TransductorModel
 from transductor.models import EnergyTransductor
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
@@ -14,46 +13,13 @@ from django.shortcuts import get_object_or_404
 
 
 class TransductorTestCase(TestCase):
-
     def setUp(self):
-        self.trans_model = TransductorModel.objects.create(
-            model_code="987654321",
-            name='TR4020',
-            transport_protocol='UDP',
-            serial_protocol='ModbusRTU',
-            minutely_register_addresses=[
-                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
-                [68, 2], [70, 2], [72, 2], [74, 2], [76, 2], [78, 2], [80, 2],
-                [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [92, 2], [94, 2],
-                [96, 2], [98, 2], [100, 2], [102, 2], [104, 2], [106, 2],
-                [108, 2], [110, 2], [112, 2], [114, 2], [116, 2], [118, 2],
-                [120, 2], [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
-            ],
-            quarterly_register_addresses=[
-                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
-                [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-                [284, 2]
-            ],
-            monthly_register_addresses=[
-                [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1],
-                [156, 2], [158, 2], [162, 2], [164, 2], [168, 2], [170, 2],
-                [174, 2], [176, 2], [180, 2], [182, 2], [186, 2], [188, 2],
-                [420, 2], [422, 2], [424, 2], [426, 2], [428, 2], [430, 2],
-                [432, 2], [434, 2], [444, 2], [446, 2], [448, 2], [450, 2],
-                [452, 2], [454, 2], [456, 2], [458, 2], [516, 1], [517, 1],
-                [518, 1], [519, 1], [520, 1], [521, 1], [522, 1], [523, 1],
-                [524, 1], [525, 1], [526, 1], [527, 1], [528, 1], [529, 1],
-                [530, 1], [531, 1], [540, 1], [541, 1], [542, 1], [543, 1],
-                [544, 1], [545, 1], [546, 1], [547, 1], [548, 1], [549, 1],
-                [550, 1], [551, 1], [552, 1], [553, 1], [554, 1], [555, 1]
-            ]
-        )
         self.transductor = EnergyTransductor.objects.create(
             serial_number='87654321',
             ip_address='192.168.10.3',
             broken=False,
             active=True,
-            model=self.trans_model,
+            model="EnergyTransductor",
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
@@ -69,7 +35,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.ip_address = '1.1.1.1'
         energy_transductor.broken = False
         energy_transductor.active = True
-        energy_transductor.model = self.trans_model
+        energy_transductor.model = "EnergyTransductor"
         energy_transductor.firmware_version = '12.1.3215'
         energy_transductor.physical_location = 'predio 2 sala 44'
         energy_transductor.geolocation_longitude = -24.4556
@@ -87,7 +53,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = self.trans_model
+        transductor.model = "EnergyTransductor"
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_longitude = -24.4556
         transductor.geolocation_latitude = -24.45996
@@ -104,7 +70,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = self.trans_model
+        transductor.model = "EnergyTransductor"
         transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_longitude = -24.4556
@@ -121,7 +87,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = self.trans_model
+        transductor.model = "EnergyTransductor"
         transductor.firmware_version = '12.1.3215'
         transductor.physical_location = 'predio 2 sala 44'
         transductor.geolocation_latitude = -24.4556
@@ -138,7 +104,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = self.trans_model
+        transductor.model = "EnergyTransductor"
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
@@ -152,7 +118,7 @@ class TransductorTestCase(TestCase):
         transductor.ip_address = '1.1.1.1'
         transductor.broken = False
         transductor.active = True
-        transductor.model = self.trans_model
+        transductor.model = "EnergyTransductor"
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
