@@ -1,23 +1,35 @@
-version: '3.5'
+version: '3.7'
 services:
-  db:
-    container_name: postgres
+
+  slave-db:
+    container_name: slave-db
     image: postgres:9.6
     env_file: dev-env
+    networks:
+      - smi-network
     volumes:
       - pg-data:/var/lib/postgresql/data
 
-  api:
-    container_name: api
+  slave-api:
+    container_name: slave-api
     build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
+    networks:
+      - smi-network
     ports:
       - 8000:8000
     volumes:
       - .:/smi-slave
+      - pip_cache:/usr/local/lib/python3.6/site-packages
     depends_on:
-      - db
+      - slave-db
 
 volumes:
   pg-data: {}
+  pip_cache:
+
+networks:
+  smi-network:
+    name: smi-network
+    driver: bridge

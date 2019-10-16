@@ -9,21 +9,42 @@ variables:
   POSTGRES_DB: smi-slave-test
   POSTGRES_PORT: 5432
   POSTGRES_HOST: postgres
+  IMAGE_TAG: lappis/smi-slave
+  SLAVE_SECRET_KEY: some-random-stuff
+  ENVIRONMENT: test
+  ALLOWED_HOSTS: "*"
+
+stages:
+  - test
+  - build
 
 before_script:
   - pip install -r requirements.txt
   - python3 manage.py makemigrations
   - python3 manage.py migrate
 
+docker:
+  stage: test
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker --version
+  script:
+    - docker build -t smi-slave .
+
 test:
+  stage: test
   script:
     - pytest
 
 stylesheet:
+  stage: test
   script:
     - pycodestyle *
 
 code_quality:
+  stage: test
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -46,3 +67,15 @@ code_quality:
   only:
     - master
 
+homolog:
+  stage: build
+  image: docker:stable
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+  only:
+    - tags

@@ -10,153 +10,102 @@ from threading import Thread
 from .exceptions import NumberOfAttempsReachedException
 from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
+from .exceptions import InvalidDateException
 
-from .transport import *
-from .communication import *
+from .transport import UdpProtocol
+from .communication import ModbusRTU
 
-from transductor.models import *
+from transductor_model.models import EnergyTransductorModel
+from transductor.models import EnergyTransductor
 from measurement.models import *
-from transductor_model.models import *
+import time
 
 
-class DataCollector(object):
+def get_transductors():
+    return EnergyTransductor.objects.all()
+
+
+def get_transductor_model(transductor):
+    return globals()[
+        transductor.model
+    ]()
+
+
+def single_data_collection(transductor, collection_type, date=None):
     """
-    Class responsible to handle all transductor measurements collect.
+    Thread method responsible to handle all the communication used
+    by a transductor and save the measurements collected.
 
-    Attributes:
-        transductors (Transductor): The existing active transductors.
-        transductor_module (module): The module that contains the
-        transductor models.
+    Args:
+        transductor (Transductor): The transductor used.
+        collection_type (String): The type of collection to be made
+
+    Returns:
+        None
     """
+    transductor_model = get_transductor_model(transductor)
+    serial_protocol_instance, \
+        transport_protocol_instance = get_protocols(transductor,
+                                                    transductor_model)
 
-    def __init__(self):
-        # self.transductors = Transductor.objects.filter(active=True)
-        self.transductors = EnergyTransductor.objects.all()
-        self.functions_dict = self.build_functions_dict()
+    messages_to_send = serial_protocol_instance.create_messages(
+        collection_type, date)
+    try:
+        received_messages = transport_protocol_instance.send_messages(
+            messages_to_send)
+        received_messages_content = \
+            serial_protocol_instance.get_content_from_messages(
+                collection_type, received_messages, date)
 
-    def build_functions_dict(self):
-        return {
-            "Minutely": self.minutely_data_collection,
-            "Quarterly": self.quarterly_data_collection,
-            "Monthly": self.monthly_data_collection
-        }
+        return transductor_model.handle_response(collection_type,
+                                                 received_messages_content,
+                                                 transductor)
+    except Exception as e:
+        transductor.set_broken(True)
+        print(collection_type, datetime.now(), "exception:", e)
+        return
 
-    def build_registers(self, transductor):
-        return {
-            "Minutely": transductor.model.minutely_register_addresses,
-            "Quarterly": transductor.model.quarterly_register_addresses,
-            "Monthly": transductor.model.monthly_register_addresses
-        }
 
-    def single_data_collection(self, transductor, collection_type):
-        """
-        Thread method responsible to handle all the communication used
-        by a transductor and save the measurements collected.
+def perform_data_rescue(transductor, begin_date, end_date):
+    max_acceptable_difference = 30
+    while((end_date - begin_date).total_seconds() > max_acceptable_difference):
+        single_data_collection(transductor, "DataRescuePost", begin_date)
+        time.sleep(1)
+        date = single_data_collection(transductor, "DataRescueGet")
+        if(date is None):
+            return
+        begin_date = date + timezone.timedelta(minutes=1)
 
-        Args:
-            transductor (Transductor): The transductor used.
 
-        Returns:
-            None
-        """
+def get_protocols(transductor, transductor_model):
+    # Creating instances of the serial and transport protocol used
+    # by the transductor
 
-        serial_protocol_instance, \
-            transport_protocol_instance = self.get_protocols(transductor)
+    serial_protocol_instance = globals()[
+        transductor_model.serial_protocol
+    ](transductor, transductor_model)
+    transport_protocol_instance = globals()[
+        transductor_model.transport_protocol
+    ](serial_protocol_instance)
 
-        messages, transductor = self.create_communication(
-            (serial_protocol_instance, transport_protocol_instance),
-            transductor,
-            collection_type
-        )
+    return (serial_protocol_instance, transport_protocol_instance)
 
-        measurements = []
 
-        for message in messages:
-            measurements.append(
-                serial_protocol_instance
-                .get_measurement_value_from_response(message)
-            )
+def perform_all_data_collection(collection_type):
+    """
+    Method responsible to start all transductors data collection
+    simultaneously.
 
-        self.functions_dict[collection_type](measurements, transductor)
+    Returns:
+        None
+    """
+    threads = []
 
-    def minutely_data_collection(self, measurements, transductor):
-        if transductor.model.name == "TR4020":
-            try:
-                MinutelyMeasurement.save_measurements(measurements, transductor)
-            except (Exception) as exception:
-                print(str(exception))
-        else:
-            pass
-
-    def quarterly_data_collection(self, measurements, transductor):
-        if transductor.model.name == "TR4020":
-            try:
-                QuarterlyMeasurement.save_measurements(measurements,
-                                                       transductor)
-            except (Exception) as exception:
-                print(str(exception))
-        else:
-            pass
-
-    def monthly_data_collection(self, measurements, transductor):
-
-        if transductor.model.name == "TR4020":
-            try:
-                MonthlyMeasurement.save_measurements(measurements, transductor)
-            except(Exception) as exception:
-                print(str(exception))
-        else:
-            pass
-
-    def get_protocols(self, transductor):
-        # Creating instances of the serial and transport protocol used
-        # by the transductor
-        serial_protocol_instance = globals()[
-            transductor.model.serial_protocol
-        ](transductor)
-        transport_protocol_instance = globals()[
-            transductor.model.transport_protocol
-        ](serial_protocol_instance)
-
-        return (serial_protocol_instance, transport_protocol_instance)
-
-    def create_communication(self, protocols, transductor, collection_type):
-
-        serial_protocol_instance, \
-            transport_protocol_instance = protocols
-
-        registers = self.build_registers(transductor)[collection_type]
-
-        messages = []
-
-        try:
-            messages = \
-                transport_protocol_instance.start_communication(
-                    registers
-                )
-        except (NumberOfAttempsReachedException, CRCInvalidException) as e:
-            if not transductor.broken:
-                transductor.set_broken(True)
-            return None
-
-        if transductor.broken:
-            transductor.set_broken(False)
-
-        return (messages, transductor)
-
-    def perform_all_data_collection(self, collection_type):
-        """
-        Method responsible to start all transductors data collection
-        simultaneously.
-
-        Returns:
-            None
-        """
-        threads = []
-
-        for transductor in self.transductors:
+    transductors = get_transductors()
+    for transductor in transductors:
+        if(transductor.active):
             collection_thread = Thread(
-                target=self.single_data_collection,
+                target=single_data_collection,
                 args=(transductor, collection_type)
             )
 
@@ -164,47 +113,5 @@ class DataCollector(object):
 
             threads.append(collection_thread)
 
-        for thread in threads:
-            thread.join()
-
-    def correct_all_transductor_date(self):
-        """
-        Method responsible to correct the date and time of all transductors.
-
-        Returns:
-            None
-        """
-        threads = []
-
-        for transductor in self.transductors:
-            correct_date_thread = Thread(
-                target=self.set_correct_date, args=(transductor,)
-            )
-
-            correct_date_thread.start()
-
-            threads.append(correct_date_thread)
-
-        for thread in threads:
-            thread.join()
-
-    # TODO Separate communication and transport classes
-    # and methods from data_reader module
-    def set_correct_date(self, transductor):
-
-        serial_protocol_instance = globals()[
-            transductor.model.serial_protocol
-        ](transductor)
-        transport_protocol_instance = globals()[
-            transductor.model.transport_protocol
-        ](serial_protocol_instance)
-
-        try:
-            messages = transport_protocol_instance.data_sender()
-        except (NumberOfAttempsReachedException, CRCInvalidException) as e:
-            if not transductor.broken:
-                transductor.set_broken(True)
-            return None
-
-        if transductor.broken:
-            transductor.set_broken(False)
+    for thread in threads:
+        thread.join()

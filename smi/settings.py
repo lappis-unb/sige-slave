@@ -23,13 +23,15 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_)321rwjten7b83diz*rb*o8%)c4rsbr1l_#y#uo&m-f))m_5f'
+SECRET_KEY = env('SLAVE_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if env('ENVIRONMENT') == 'production':
+    DEBUG = False
+else:
+    DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -41,11 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
-    'measurement',
+    'django_cron',
     'rest_framework',
+    'measurement',
     'transductor_model',
     'transductor',
-    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -113,12 +115,20 @@ DATABASES = {
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},  # noqa
+    {'NAME': ('django.contrib.auth.password_validation'
+              '.UserAttributeSimilarityValidator')},  # noqa
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}
+    {'NAME': ('django.contrib.auth.password_validation'
+              '.CommonPasswordValidator')},
+    {'NAME': ('django.contrib.auth.password_validation'
+              '.NumericPasswordValidator')}
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': ('measurement.pagination'
+                                 '.PostPageNumberPagination'),
+    'PAGE_SIZE': 50
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

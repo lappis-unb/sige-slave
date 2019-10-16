@@ -13,6 +13,7 @@ def add_transductor_model():
     print('Creating TR4020 transductor model')
 
     name = 'TR4020'
+    model_code = '123456789'
     transport_protocol = 'UdpProtocol'
     serial_protocol = 'ModbusRTU'
     minutely_register_addresses = [
@@ -38,6 +39,7 @@ def add_transductor_model():
 
     model, created = TransductorModel.objects.get_or_create(
         name=name,
+        model_code=model_code,
         transport_protocol=transport_protocol,
         serial_protocol=serial_protocol,
         minutely_register_addresses=minutely_register_addresses,
