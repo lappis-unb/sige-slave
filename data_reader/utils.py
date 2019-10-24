@@ -17,6 +17,7 @@ from .communication import *
 
 from transductor_model.models import EnergyTransductorModel
 from transductor_model.models import MD30
+from transductor_model.models import TR4020
 from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
