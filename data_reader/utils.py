@@ -12,10 +12,12 @@ from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
 from .exceptions import InvalidDateException
 
-from .transport import UdpProtocol
-from .communication import ModbusRTU
+from .transport import *
+from .communication import *
 
 from transductor_model.models import EnergyTransductorModel
+from transductor_model.models import MD30
+from transductor_model.models import TR4020
 from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
@@ -59,7 +61,7 @@ def single_data_collection(transductor, collection_type, date=None):
 
         return transductor_model.handle_response(collection_type,
                                                  received_messages_content,
-                                                 transductor)
+                                                 transductor, date)
     except Exception as e:
         transductor.set_broken(True)
         print(collection_type, datetime.now(), "exception:", e)
@@ -69,9 +71,10 @@ def single_data_collection(transductor, collection_type, date=None):
 def perform_data_rescue(transductor, begin_date, end_date):
     max_acceptable_difference = 30
     while((end_date - begin_date).total_seconds() > max_acceptable_difference):
+        time.sleep(0.1)
         single_data_collection(transductor, "DataRescuePost", begin_date)
-        time.sleep(1)
-        date = single_data_collection(transductor, "DataRescueGet")
+        time.sleep(0.1)
+        date = single_data_collection(transductor, "DataRescueGet", begin_date)
         if(date is None):
             return
         begin_date = date + timezone.timedelta(minutes=1)
