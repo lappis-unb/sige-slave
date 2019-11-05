@@ -58,7 +58,7 @@ spec:
       containers:
       - name: smi-slave-staging
         image: ${CICD_IMAGE}:${CICD_EXECUTION_SEQUENCE}
-        command: ["sh", "scripts/start.sh"]
+        command: ["sh", "scripts/start-prod.sh"]
         ports:
         - containerPort: 8000
           protocol: TCP
@@ -86,5 +86,5 @@ spec:
           value: postgres
         - name: ENVIRONMENT
           value: production
-        - name: ALLOWED_HOST
-          value: smi-slave.dev.lappis.rocks
+        - name: ALLOWED_HOSTS
+          value: "*"

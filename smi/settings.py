@@ -31,7 +31,7 @@ if env('ENVIRONMENT') == 'production':
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = [env('ALLOWED_HOST')]
+ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
 
 # Application definition
 
