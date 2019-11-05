@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.7'
 services:
 
   slave-db:
@@ -12,7 +12,6 @@ services:
 
   slave-api:
     container_name: slave-api
-    # image: lappis/smi-slave:latest
     build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
@@ -22,11 +21,13 @@ services:
       - 8000:8000
     volumes:
       - .:/smi-slave
+      - pip_cache:/usr/local/lib/python3.6/site-packages
     depends_on:
       - slave-db
 
 volumes:
   pg-data: {}
+  pip_cache:
 
 networks:
   smi-network:

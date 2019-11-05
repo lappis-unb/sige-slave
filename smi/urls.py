@@ -21,16 +21,12 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from django.conf.urls import url    
 
-from transductor_model import views as transductor_models_views
 from transductor import views as energy_transductor_views
 from measurement import views as measurements_views
 
 
 router = DefaultRouter()
-router.register(
-    r'transductor_models',
-    transductor_models_views.TransductorModelViewSet
-)
+
 router.register(
     r'energy_transductors',
     energy_transductor_views.EnergyTransductorViewSet,
