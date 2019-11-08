@@ -68,16 +68,19 @@ def single_data_collection(transductor, collection_type, date=None):
         return
 
 
-def perform_data_rescue(transductor, begin_date, end_date):
-    max_acceptable_difference = 30
-    while((end_date - begin_date).total_seconds() > max_acceptable_difference):
-        time.sleep(0.1)
-        single_data_collection(transductor, "DataRescuePost", begin_date)
-        time.sleep(0.1)
-        date = single_data_collection(transductor, "DataRescueGet", begin_date)
-        if(date is None):
-            return
-        begin_date = date + timezone.timedelta(minutes=1)
+def perform_data_rescue():
+    transductors = get_transductors()
+    actual_date = timezone.datetime.now()
+    actual_date = int(timezone.datetime.timestamp(actual_date))
+    for transductor in transductors:
+        recieved_date = transductor.last_collection
+        recieved_date = int(timezone.datetime.timestamp(recieved_date))
+        while recieved_date < actual_date:
+            single_data_collection(
+                transductor, "DataRescuePost", recieved_date)
+            time.sleep(0.1)
+            single_data_collection(
+                transductor, "DataRescuePost", recieved_date)
 
 
 def get_protocols(transductor, transductor_model):
