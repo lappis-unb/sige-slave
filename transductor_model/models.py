@@ -85,15 +85,7 @@ class EnergyTransductorModel():
         return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
 
-    def data_rescue_post(self, date):
-        timestamp = int(timezone.datetime.timestamp(date))
-        payload = [timestamp]
-        return ("PresetMultipleRegisters", self.registers['DataRescuePost'],
-                payload)
-
-    def data_rescue_get(self, date):
-        return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
-
+    
     def handle_response(self, collection_type, response, transductor,
                         date=None):
         response_dict = self.handle_response_functions()
@@ -313,32 +305,6 @@ class EnergyTransductorModel():
 
         measurement.save()
 
-    def verify_rescue_collection_date(self, response, transductor, date=None):
-        pass
-
-    def save_rescued_data(self, response, transductor, date=None):
-        measurement = MinutelyMeasurement()
-        if(MinutelyMeasurement.objects.filter(
-                collection_date=response[0][0]).__len__() != 0):
-            return response[0][0]
-        time_diference = date - response[0][0]
-        max_delay_acceptable = 30
-
-        if(abs(time_diference.seconds) > max_delay_acceptable):
-            return response[0][0]
-        measurement.collection_date = response[0][0]       
-        measurement.voltage_a = response[0][1]
-        measurement.voltage_b = response[0][2]
-        measurement.voltage_c = response[0][3]
-        measurement.current_a = response[0][4]
-        measurement.current_b = response[0][5]
-        measurement.current_c = response[0][6]
-        measurement.total_active_power = response[0][7]
-        measurement.total_reactive_power = response[0][8]
-        measurement.transductor = transductor
-        measurement.save()
-        return measurement.collection_date
-
     @staticmethod
     def verify_collection_date(measurements, transductor):
         from data_reader.utils import single_data_collection
@@ -422,27 +388,41 @@ class MD30(EnergyTransductorModel):
             "DataRescueGet": self.save_rescued_data,
         }
 
-    def save_minutely_measurement(self, response, transductor, date=None):
-        from data_reader.utils import perform_data_rescue
-        date = super().save_minutely_measurement(response, transductor, date)
-        collect_old_data_thread = Thread(
-            target=perform_data_rescue,
-            args=(transductor, transductor.last_collection,
-                  date)
-        )
-        was_broken = transductor.broken
-        if transductor.broken:
-            collect_old_data_thread.start()
-            transductor.broken = False
+    def verify_rescue_collection_date(self, response, transductor, date=None):
+        pass
 
-        transductor.last_collection = date
-        transductor.save()
-        if was_broken:
-            collect_old_data_thread.join()
+    def save_rescued_data(self, response, transductor, date=None):
+        measurement = MinutelyMeasurement()
+        date = timezone.datetime.from_timestamp(date)
+        if(MinutelyMeasurement.objects.filter(
+                collection_date=response[0][0]).__len__() != 0):
+            return response[0][0]
+        time_diference = date - response[0][0]
+        max_delay_acceptable = 30
+
+        if(abs(time_diference.seconds) > max_delay_acceptable):
+            return response[0][0]
+        measurement.collection_date = response[0][0]       
+        measurement.voltage_a = response[0][1]
+        measurement.voltage_b = response[0][2]
+        measurement.voltage_c = response[0][3]
+        measurement.current_a = response[0][4]
+        measurement.current_b = response[0][5]
+        measurement.current_c = response[0][6]
+        measurement.total_active_power = response[0][7]
+        measurement.total_reactive_power = response[0][8]
+        measurement.transductor = transductor
+        measurement.save()
+        return int(timezone.datetime.timestamp(measurement.collection_date))
+
+    def data_rescue_post(self, date):
+        payload = [date]
+        return ("PresetMultipleRegisters", self.registers['DataRescuePost'],
+                payload)
+
+    def data_rescue_get(self, date):
+        return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
 
 class TR4020(EnergyTransductorModel):
-    def save_minutely_measurement(self, response, transductor):
-        date = super().save_minutely_measurement(response, transductor)
-        transductor.last_collection = date
-        transductor.save()
+    pass
