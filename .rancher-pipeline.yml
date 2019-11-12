@@ -8,20 +8,13 @@ stages:
       pushRemote: true
       registry: registry.lappis.rocks
 
-- name: Deploy Production
-  when:
-    branch: master
-  steps:
-  - applyYamlConfig:
-      path: ./deploy/production/deployment-slave.yaml
-
 - name: Deploy Staging
   when:
-    branch: rancher-deploy
+    branch: master
   steps:
   - applyYamlConfig:
       path: ./deploy/staging/deployment-slave.yaml
 
 branch:
-  include: [ master, development, rancher-deploy ]
+  include: [ master ]
 notification: {}
