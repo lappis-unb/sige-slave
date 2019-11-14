@@ -88,68 +88,6 @@ class MinutelyMeasurement(Measurement):
     dht_current_b = models.FloatField(default=0)
     dht_current_c = models.FloatField(default=0)
 
-    def save_measurements(values_list, transductor):
-        """
-        Method responsible to save measurements based on values
-        list received.
-        Args:
-            values_list (list): The list with all important
-            measurements values.
-        Return:
-            None
-        """
-        minutely_measurement = MinutelyMeasurement()
-        minutely_measurement.transductor = transductor
-
-        # saving the datetime from transductor
-        minutely_measurement.collection_date = timezone.datetime(
-            values_list[0],
-            values_list[1],
-            values_list[2],
-            values_list[3],
-            values_list[4],
-            values_list[5]
-        )
-
-        minutely_measurement.frequency_a = values_list[6]
-        minutely_measurement.voltage_a = values_list[7]
-        minutely_measurement.voltage_b = values_list[8]
-        minutely_measurement.voltage_c = values_list[9]
-        minutely_measurement.current_a = values_list[10]
-        minutely_measurement.current_b = values_list[11]
-        minutely_measurement.current_c = values_list[12]
-        minutely_measurement.active_power_a = values_list[13]
-        minutely_measurement.active_power_b = values_list[14]
-        minutely_measurement.active_power_c = values_list[15]
-        minutely_measurement.total_active_power = values_list[16]
-        minutely_measurement.reactive_power_a = values_list[17]
-        minutely_measurement.reactive_power_b = values_list[18]
-        minutely_measurement.reactive_power_c = values_list[19]
-        minutely_measurement.total_reactive_power = values_list[20]
-        minutely_measurement.apparent_power_a = values_list[21]
-        minutely_measurement.apparent_power_b = values_list[22]
-        minutely_measurement.apparent_power_c = values_list[23]
-        minutely_measurement.total_apparent_power = values_list[24]
-        minutely_measurement.power_factor_a = values_list[25]
-        minutely_measurement.power_factor_b = values_list[26]
-        minutely_measurement.power_factor_c = values_list[27]
-        minutely_measurement.total_power_factor = values_list[28]
-        minutely_measurement.dht_voltage_a = values_list[29]
-        minutely_measurement.dht_voltage_b = values_list[30]
-        minutely_measurement.dht_voltage_c = values_list[31]
-        minutely_measurement.dht_current_a = values_list[32]
-        minutely_measurement.dht_current_b = values_list[33]
-        minutely_measurement.dht_current_c = values_list[34]
-        minutely_measurement.consumption_a = values_list[35]
-        minutely_measurement.consumption_b = values_list[36]
-        minutely_measurement.consumption_c = values_list[37]
-        minutely_measurement.total_consumption = values_list[38]
-
-        minutely_measurement.save()
-        transductor.last_collection = minutely_measurement.collection_date
-        transductor.save(update_fields=['last_collection'])
-
-
 class QuarterlyMeasurement(Measurement):
 
     def __str__(self):

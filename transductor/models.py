@@ -48,7 +48,6 @@ class Transductor(models.Model):
             ),
         ])
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
-    last_collection = models.DateTimeField(blank=True, null=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
@@ -99,8 +98,16 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self, broken):
-        self.broken = broken
+    def set_broken(self, new_status):
+
+        if new_status == True and self.broken == False:
+            time_interval = TimeInterval(self)
+            time_interval.save()
+        else new_status == False and self.broken == True:
+            last_time_interval = self.timeintervals.last()
+            if last_time_interval is not None:
+                last_time_interval.end = timezone.datetime.now() - timezone.timedelta(minute=1)
+        self.broken = new_status
         self.save(update_fields=['broken'])
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
@@ -129,3 +136,21 @@ class EnergyTransductor(Transductor):
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()
+
+class TimeInterval(models.Model):
+
+    begin = models.DateTimeField()
+    end = models.DateTimeField()
+
+    # TODO Change related name
+
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        models.CASCADE,
+        related_name='timeintervals',
+    )
+    
+    def __init__(self, transductor):
+        self.begin = timezone.datetime.now()
+        self.transductor = transductor
+    

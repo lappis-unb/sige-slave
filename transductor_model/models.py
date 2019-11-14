@@ -425,24 +425,15 @@ class MD30(EnergyTransductorModel):
     def save_minutely_measurement(self, response, transductor, date=None):
         from data_reader.utils import perform_data_rescue
         date = super().save_minutely_measurement(response, transductor, date)
-        collect_old_data_thread = Thread(
-            target=perform_data_rescue,
-            args=(transductor, transductor.last_collection,
-                  date)
-        )
         was_broken = transductor.broken
         if transductor.broken:
-            collect_old_data_thread.start()
             transductor.broken = False
 
-        transductor.last_collection = date
         transductor.save()
         if was_broken:
-            collect_old_data_thread.join()
-
+            pass
 
 class TR4020(EnergyTransductorModel):
     def save_minutely_measurement(self, response, transductor):
         date = super().save_minutely_measurement(response, transductor)
-        transductor.last_collection = date
         transductor.save()
