@@ -100,13 +100,17 @@ class EnergyTransductor(Transductor):
 
     def set_broken(self, new_status):
 
-        if new_status == True and self.broken == False:
-            time_interval = TimeInterval(self)
-            time_interval.save()
-        else new_status == False and self.broken == True:
+        if self.broken == new_status:
+            return
+
+        if new_status == True:
+            TimeInterval.end_interval(self)
+        
+        elif new_status == False:
             last_time_interval = self.timeintervals.last()
             if last_time_interval is not None:
-                last_time_interval.end = timezone.datetime.now() - timezone.timedelta(minute=1)
+                last_time_interval.end_interval()
+        
         self.broken = new_status
         self.save(update_fields=['broken'])
 
@@ -139,8 +143,8 @@ class EnergyTransductor(Transductor):
 
 class TimeInterval(models.Model):
 
-    begin = models.DateTimeField()
-    end = models.DateTimeField()
+    begin = models.DateTimeField(null=False)
+    end = models.DateTimeField(null=True)
 
     # TODO Change related name
 
@@ -149,8 +153,18 @@ class TimeInterval(models.Model):
         models.CASCADE,
         related_name='timeintervals',
     )
-    
-    def __init__(self, transductor):
-        self.begin = timezone.datetime.now()
-        self.transductor = transductor
-    
+
+    @staticmethod
+    def begin_interval(transductor):   
+        time_interval = TimeInterval()
+        time_interval.begin = timezone.datetime.now()
+        time_interval.transductor = transductor
+        time_interval.save()
+
+    def end_interval(self):
+        self.end = timezone.datetime.now()
+        self.save()
+
+    def change_interval(self, time):
+        self.begin = time + timezone.timedelta(minutes=1)
+        self.save()

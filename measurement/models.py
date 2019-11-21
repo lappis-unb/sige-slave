@@ -102,43 +102,6 @@ class QuarterlyMeasurement(Measurement):
     capacitive_power_peak_time = models.FloatField(default=0)
     capacitive_power_off_peak_time = models.FloatField(default=0)
 
-    def save_measurements(values_list, transductor):
-        """
-        Method responsible to save measurements based on values
-        list received.
-        Args:
-            values_list (list): The list with all important
-            measurements values.
-        Return:
-            None
-        """
-        quarterly_measurement = QuarterlyMeasurement()
-        quarterly_measurement.transductor = transductor
-
-        quarterly_measurement.collection_date = timezone.datetime(
-            values_list[0],
-            values_list[1],
-            values_list[2],
-            values_list[3],
-            values_list[4],
-            values_list[5]
-        )
-
-        quarterly_measurement.generated_energy_peak_time = values_list[6]
-        quarterly_measurement.generated_energy_off_peak_time = values_list[7]
-
-        quarterly_measurement.consumption_peak_time = values_list[8]
-        quarterly_measurement.consumption_off_peak_time = values_list[9]
-
-        quarterly_measurement.inductive_power_peak_time = values_list[10]
-        quarterly_measurement.inductive_power_off_peak_time = values_list[11]
-
-        quarterly_measurement.capacitive_power_peak_time = values_list[12]
-        quarterly_measurement.capacitive_power_off_peak_time = values_list[13]
-
-        quarterly_measurement.save()
-
-
 class MonthlyMeasurement(Measurement):
 
     def __str__(self):
@@ -171,65 +134,6 @@ class MonthlyMeasurement(Measurement):
     reactive_max_power_list_off_peak_time = ArrayField(
         HStoreField(), default=None
     )
-
-    def save_measurements(values_list, transductor):
-        """
-        Method responsible to save measurements based on values
-        list received.
-
-        Args:
-            values_list (list): The list with all important
-            measurements values.
-
-        Return:
-            None
-        """
-        measurement = MonthlyMeasurement()
-        measurement.transductor = transductor
-
-        measurement.collection_date = timezone.datetime(
-            values_list[0],
-            values_list[1],
-            values_list[2],
-            values_list[3],
-            values_list[4],
-            values_list[5]
-        )
-
-        measurement.generated_energy_peak_time = values_list[6]
-        measurement.generated_energy_off_peak_time = values_list[7]
-
-        measurement.consumption_peak_time = values_list[8]
-        measurement.consumption_off_peak_time = values_list[9]
-
-        # FIXME - This 2 measurements comming as NaN from the transductor
-        measurement.inductive_power_peak_time = 0
-        measurement.inductive_power_off_peak_time = 0
-
-        measurement.capacitive_power_peak_time = 0
-        measurement.capacitive_power_off_peak_time = 0
-
-        measurement.active_max_power_peak_time = values_list[14]
-        measurement.active_max_power_off_peak_time = values_list[15]
-
-        measurement.reactive_max_power_peak_time = values_list[16]
-        measurement.reactive_max_power_off_peak_time = values_list[17]
-
-        # Arguments refer to initial positions of values_list information
-        # Further information on transductor's Memory Map
-        measurement.active_max_power_list_peak_time = \
-            measurement._get_list_data(18, 34, values_list)
-
-        measurement.active_max_power_list_off_peak_time = \
-            measurement._get_list_data(22, 36, values_list)
-
-        measurement.reactive_max_power_list_peak_time = \
-            measurement._get_list_data(26, 38, values_list)
-
-        measurement.reactive_max_power_list_off_peak_time = \
-            measurement._get_list_data(30, 40, values_list)
-
-        measurement.save()
 
     def _get_year(self, year, month):
         return (year - 1) if (month == 1) else year

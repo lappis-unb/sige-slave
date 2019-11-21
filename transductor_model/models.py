@@ -97,10 +97,7 @@ class EnergyTransductorModel():
     def handle_response(self, collection_type, response, transductor,
                         date=None):
         response_dict = self.handle_response_functions()
-        try:
-            return response_dict[collection_type](response, transductor, date)
-        except Exception as e:
-            print("Error:", e)
+        return response_dict[collection_type](response, transductor, date)
 
     def save_minutely_measurement(self, response, transductor, date=None):
         from data_reader.utils import perform_data_rescue
@@ -156,6 +153,7 @@ class EnergyTransductorModel():
         minutely_measurement.total_consumption = response[38]
 
         minutely_measurement.save()
+        transductor.set_broken(False)
         return minutely_measurement.collection_date
 
     def save_quarterly_measurement(self, response, transductor, date=None):
@@ -314,7 +312,7 @@ class EnergyTransductorModel():
         measurement.save()
 
     def verify_rescue_collection_date(self, response, transductor, date=None):
-        pass
+        return True
 
     def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
@@ -336,8 +334,7 @@ class EnergyTransductorModel():
         measurement.total_active_power = response[0][7]
         measurement.total_reactive_power = response[0][8]
         measurement.transductor = transductor
-        measurement.save()
-        return measurement.collection_date
+        return measurement
 
     @staticmethod
     def verify_collection_date(measurements, transductor):
@@ -422,18 +419,5 @@ class MD30(EnergyTransductorModel):
             "DataRescueGet": self.save_rescued_data,
         }
 
-    def save_minutely_measurement(self, response, transductor, date=None):
-        from data_reader.utils import perform_data_rescue
-        date = super().save_minutely_measurement(response, transductor, date)
-        was_broken = transductor.broken
-        if transductor.broken:
-            transductor.broken = False
-
-        transductor.save()
-        if was_broken:
-            pass
-
 class TR4020(EnergyTransductorModel):
-    def save_minutely_measurement(self, response, transductor):
-        date = super().save_minutely_measurement(response, transductor)
-        transductor.save()
+    pass
