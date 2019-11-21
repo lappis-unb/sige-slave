@@ -99,14 +99,11 @@ class EnergyTransductor(Transductor):
         return self.serial_number
 
     def set_broken(self, new_status):
-
         if self.broken == new_status:
             return
-
-        if new_status == True:
+        if new_status == False:
             TimeInterval.end_interval(self)
-        
-        elif new_status == False:
+        elif new_status == True:
             last_time_interval = self.timeintervals.last()
             if last_time_interval is not None:
                 last_time_interval.end_interval()
