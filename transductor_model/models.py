@@ -316,14 +316,6 @@ class EnergyTransductorModel():
 
     def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
-        if(MinutelyMeasurement.objects.filter(
-                collection_date=response[0][0]).__len__() != 0):
-            return response[0][0]
-        time_diference = date - response[0][0]
-        max_delay_acceptable = 30
-
-        if(abs(time_diference.seconds) > max_delay_acceptable):
-            return response[0][0]
         measurement.collection_date = response[0][0]       
         measurement.voltage_a = response[0][1]
         measurement.voltage_b = response[0][2]

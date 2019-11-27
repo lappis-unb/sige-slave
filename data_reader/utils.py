@@ -58,42 +58,35 @@ def single_data_collection(transductor, collection_type, date=None):
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
-
         return transductor_model.handle_response(collection_type,
-                                                 received_messages_content,
-                                                 transductor, date)
+                                                    received_messages_content,
+                                                    transductor, date)
     except Exception as e:
         transductor.set_broken(True)
         print(collection_type, datetime.now(), "exception:", e)
-        return
+        return None
 
 
 def perform_data_rescue(transductor):
     interval = transductor.timeintervals.first()
+    if (interval is None or interval.end is None):
+        return
     while(interval.begin < interval.end):
-        print("h1")
-        print(interval.begin)
-        print("h1")
         if(single_data_collection(transductor, "DataRescuePost", 
                                   interval.begin) is None):
             return
         time.sleep(0.1)
-        print("h2")
         measurement = single_data_collection(transductor, "DataRescueGet")
-        print("h3")
-        print(measurement)
-        print("h4")
-
+        print('asked date = ', interval.begin)
+        print('collection_date = ', measurement.collection_date)
         inside_interval = interval.change_interval(
-            measurement.collection_time)
-        
+            measurement.collection_date)
+        print('inside_interval = ', inside_interval)
         if(inside_interval):
+            print('MEASUREMENT ' + measurement.collection_date + ' COLLECTED')
             measurement.save()
         else:
             return
-
-        print("h5")
-
         time.sleep(0.1)
 
 

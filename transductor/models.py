@@ -162,12 +162,11 @@ class TimeInterval(models.Model):
         self.end = timezone.datetime.now()
         self.save(update_fields=['end'])
 
-
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
         if(self.begin >= self.end):
-            self.transductor.time_intervals.pop()
-            self.transductor.save()
             self.delete()
         else:
             self.save(update_fields=['begin'])
+        status = time < self.end
+        return status
