@@ -85,7 +85,6 @@ class EnergyTransductorModel():
         return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
 
-    
     def handle_response(self, collection_type, response, transductor,
                         date=None):
         response_dict = self.handle_response_functions()
@@ -174,6 +173,15 @@ class EnergyTransductorModel():
         quarterly_measurement.capacitive_power_off_peak_time = response[13]
 
         quarterly_measurement.save()
+
+    def data_rescue_post(self, date):
+        timestamp = int(timezone.datetime.timestamp(date))
+        payload = [timestamp]
+        return ("PresetMultipleRegisters", self.registers['DataRescuePost'],
+                payload)
+
+    def data_rescue_get(self):
+        return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
     def save_monthly_measurement(self, response, transductor, date=None):
         measurement = MonthlyMeasurement()
@@ -410,6 +418,7 @@ class MD30(EnergyTransductorModel):
             "DataRescuePost": self.verify_rescue_collection_date,
             "DataRescueGet": self.save_rescued_data,
         }
+
 
 class TR4020(EnergyTransductorModel):
     pass
