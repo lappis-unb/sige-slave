@@ -23,8 +23,8 @@ from measurement.models import *
 import time
 
 
-def get_transductors():
-    return EnergyTransductor.objects.all()
+def get_active_transductors():
+    return EnergyTransductor.objects.filter(active=True)
 
 
 def get_transductor_model(transductor):
@@ -68,19 +68,39 @@ def single_data_collection(transductor, collection_type, date=None):
         return
 
 
-def perform_data_rescue():
-    transductors = get_transductors()
-    actual_date = timezone.datetime.now()
-    actual_date = int(timezone.datetime.timestamp(actual_date))
+def perform_data_rescue(transductor):
+    interval = transductor.timeintervals.first()
+    while(interval.begin < interval.end):
+        print("h1")
+        print(interval.begin)
+        print("h1")
+        if(single_data_collection(transductor, "DataRescuePost", 
+                                  interval.begin) is None):
+            return
+        time.sleep(0.1)
+        print("h2")
+        measurement = single_data_collection(transductor, "DataRescueGet")
+        print("h3")
+        print(measurement)
+        print("h4")
+
+        inside_interval = interval.change_interval(
+            measurement.collection_time)
+        
+        if(inside_interval):
+            measurement.save()
+        else:
+            return
+
+        print("h5")
+
+        time.sleep(0.1)
+
+
+def perform_all_data_rescue():
+    transductors = get_active_transductors()
     for transductor in transductors:
-        recieved_date = transductor.last_collection
-        recieved_date = int(timezone.datetime.timestamp(recieved_date))
-        while recieved_date < actual_date:
-            single_data_collection(
-                transductor, "DataRescuePost", recieved_date)
-            time.sleep(0.1)
-            single_data_collection(
-                transductor, "DataRescuePost", recieved_date)
+        perform_data_rescue(transductor)
 
 
 def get_protocols(transductor, transductor_model):
@@ -107,17 +127,16 @@ def perform_all_data_collection(collection_type):
     """
     threads = []
 
-    transductors = get_transductors()
+    transductors = get_active_transductors()
     for transductor in transductors:
-        if(transductor.active):
-            collection_thread = Thread(
-                target=single_data_collection,
-                args=(transductor, collection_type)
-            )
+        collection_thread = Thread(
+            target=single_data_collection,
+            args=(transductor, collection_type)
+        )
 
-            collection_thread.start()
+        collection_thread.start()
 
-            threads.append(collection_thread)
+        threads.append(collection_thread)
 
     for thread in threads:
         thread.join()

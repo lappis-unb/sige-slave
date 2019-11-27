@@ -1,7 +1,7 @@
 FROM python:3.6
 
-RUN apt-get update && \
-    apt-get install -y libpq-dev \
+RUN apt update && \
+    apt install -y libpq-dev \
                        cron
 
 WORKDIR /smi-slave

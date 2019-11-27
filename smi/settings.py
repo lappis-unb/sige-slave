@@ -31,7 +31,7 @@ if env('ENVIRONMENT') == 'production':
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
 
 # Application definition
 
@@ -79,6 +79,7 @@ TEMPLATES = [
 ]
 
 CRON_CLASSES = [
+    "data_reader.cronjob.DataRescueCronJob",
     "data_reader.cronjob.MinutelyCollectCronJob",
     "data_reader.cronjob.QuarterlyCollectCronJob",
     "data_reader.cronjob.MonthlyCollectCronJob",
