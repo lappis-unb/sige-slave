@@ -101,9 +101,9 @@ class EnergyTransductor(Transductor):
     def set_broken(self, new_status):
         if self.broken == new_status:
             return
-        if new_status == False:
-            TimeInterval.end_interval(self)
-        elif new_status == True:
+        if new_status == True:
+            TimeInterval.begin_interval(self)
+        else:
             last_time_interval = self.timeintervals.last()
             if last_time_interval is not None:
                 last_time_interval.end_interval()
@@ -160,8 +160,14 @@ class TimeInterval(models.Model):
 
     def end_interval(self):
         self.end = timezone.datetime.now()
-        self.save()
+        self.save(update_fields=['end'])
+
 
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
-        self.save()
+        if(self.begin >= self.end):
+            self.transductor.time_intervals.pop()
+            self.transductor.save()
+            self.delete()
+        else:
+            self.save(update_fields=['begin'])
