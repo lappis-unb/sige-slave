@@ -107,6 +107,9 @@ class EnergyTransductor(Transductor):
             last_time_interval = self.timeintervals.last()
             if last_time_interval is not None:
                 last_time_interval.end_interval()
+            
+            else:
+                raise Exception
         
         self.broken = new_status
         self.save(update_fields=['broken'])
@@ -164,9 +167,11 @@ class TimeInterval(models.Model):
 
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
-        if(self.begin >= self.end):
-            self.delete()
-        else:
-            self.save(update_fields=['begin'])
+        # TODO change this comparation
         status = time < self.end
+        if(status):
+            self.save(update_fields=['begin'])
+        else:
+            self.delete()
+
         return status

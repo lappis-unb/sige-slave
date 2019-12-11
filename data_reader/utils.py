@@ -49,12 +49,13 @@ def single_data_collection(transductor, collection_type, date=None):
     serial_protocol_instance, \
         transport_protocol_instance = get_protocols(transductor,
                                                     transductor_model)
-
     messages_to_send = serial_protocol_instance.create_messages(
         collection_type, date)
+    print("->",messages_to_send)
     try:
         received_messages = transport_protocol_instance.send_messages(
             messages_to_send)
+        print("<-",received_messages)
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
@@ -62,7 +63,8 @@ def single_data_collection(transductor, collection_type, date=None):
                                                     received_messages_content,
                                                     transductor, date)
     except Exception as e:
-        transductor.set_broken(True)
+        if(collection_type == "Minutely"):
+            transductor.set_broken(True)
         print(collection_type, datetime.now(), "exception:", e)
         return None
 
@@ -71,19 +73,25 @@ def perform_data_rescue(transductor):
     interval = transductor.timeintervals.first()
     if (interval is None or interval.end is None):
         return
-    while(interval.begin < interval.end):
+    while(True):
         if(single_data_collection(transductor, "DataRescuePost", 
                                   interval.begin) is None):
+            print("Data Rescue Post Error")
             return
         time.sleep(0.1)
+        
         measurement = single_data_collection(transductor, "DataRescueGet")
+        if(measurement is None):
+            return
         print('asked date = ', interval.begin)
         print('collection_date = ', measurement.collection_date)
+        print('interval_end = ', interval.end)
         inside_interval = interval.change_interval(
             measurement.collection_date)
         print('inside_interval = ', inside_interval)
         if(inside_interval):
-            print('MEASUREMENT ' + measurement.collection_date + ' COLLECTED')
+            print('MEASUREMENT ')
+            print(str(measurement.collection_date))
             measurement.save()
         else:
             return
