@@ -21,6 +21,7 @@ class DataRescueCronJob(CronJobBase):
     def do(self):
         perform_all_data_rescue()
 
+
 class QuarterlyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)

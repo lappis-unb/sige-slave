@@ -101,7 +101,7 @@ class EnergyTransductor(Transductor):
     def set_broken(self, new_status):
         if self.broken == new_status:
             return
-        if new_status == True:
+        if new_status:
             TimeInterval.begin_interval(self)
         else:
             last_time_interval = self.timeintervals.last()
@@ -140,6 +140,7 @@ class EnergyTransductor(Transductor):
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()
+
 
 class TimeInterval(models.Model):
 
