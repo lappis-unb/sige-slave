@@ -167,8 +167,9 @@ class TimeInterval(models.Model):
 
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
-        # TODO change this comparation
-        status = time < self.end
+
+        status = (self.end - time) >= timezone.timedelta(minutes=1)
+
         if(status):
             self.save(update_fields=['begin'])
         else:
