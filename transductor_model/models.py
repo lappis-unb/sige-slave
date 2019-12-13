@@ -3,7 +3,6 @@ from data_reader.communication import ModbusRTU
 from measurement.models import MinutelyMeasurement
 from measurement.models import QuarterlyMeasurement
 from measurement.models import MonthlyMeasurement 
-from threading import Thread
 from django.utils import timezone
 from data_reader.exceptions import InvalidDateException
 
@@ -116,7 +115,7 @@ class EnergyTransductorModel():
         minutely_measurement.current_a = response[10]
         minutely_measurement.current_b = response[11]
         minutely_measurement.current_c = response[12]
-        minutely_measurement.active_power_a = response[13]
+        minuely_measurement.active_power_a = response[13]
         minutely_measurement.active_power_b = response[14]
         minutely_measurement.active_power_c = response[15]
         minutely_measurement.total_active_power = response[16]

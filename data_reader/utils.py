@@ -5,7 +5,6 @@ import importlib
 
 from abc import ABCMeta
 from abc import abstractmethod
-from threading import Thread
 
 from .exceptions import NumberOfAttempsReachedException
 from .exceptions import RegisterAddressException
@@ -35,7 +34,7 @@ def get_transductor_model(transductor):
 
 def single_data_collection(transductor, collection_type, date=None):
     """
-    Thread method responsible to handle all the communication used
+    Method responsible to handle all the communication used
     by a transductor and save the measurements collected.
 
     Args:
@@ -119,18 +118,6 @@ def perform_all_data_collection(collection_type):
     Returns:
         None
     """
-    threads = []
-
     transductors = get_active_transductors()
     for transductor in transductors:
-        collection_thread = Thread(
-            target=single_data_collection,
-            args=(transductor, collection_type)
-        )
-
-        collection_thread.start()
-
-        threads.append(collection_thread)
-
-    for thread in threads:
-        thread.join()
+        single_data_collection(transductor,collection_type)
