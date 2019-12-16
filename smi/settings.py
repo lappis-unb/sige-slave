@@ -45,9 +45,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cron',
     'rest_framework',
+    'events',
+    'transductor',
     'measurement',
     'transductor_model',
-    'transductor',
 ]
 
 MIDDLEWARE = [

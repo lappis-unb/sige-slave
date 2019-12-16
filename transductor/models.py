@@ -6,7 +6,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from events.models import FailedConnectionEvent
 
 
 class Transductor(models.Model):
@@ -101,7 +100,9 @@ class EnergyTransductor(Transductor):
         return self.serial_number
 
     def set_broken(self, broken):
+        from events.models import FailedConnectionEvent
         FailedConnectionEvent.save_event(self)
+
         self.broken = broken
         self.save(update_fields=['broken'])
 

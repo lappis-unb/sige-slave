@@ -1,9 +1,8 @@
-from django.db import models
 from django.conf import settings
+from django.core.validators import RegexValidator
+from django.db import models
 from django.utils import timezone
 from transductor.models import EnergyTransductor
-from measurement.models import Measurement
-from django.core.validators import RegexValidator
 
 
 class Event(models.Model):
@@ -47,6 +46,7 @@ class FailedConnectionEvent(Event):
                 code='invalid_ip_address'
             ),
         ])
+
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
@@ -71,14 +71,18 @@ class CriticalVoltageEvent(Event):
     """
     Defines a new event related to a critical voltage measurement
     """
-
+    from measurement.models import MinutelyMeasurement
     measurement = models.ForeignKey(
-        Measurement,
+        MinutelyMeasurement,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
         null=False
     )
+
+    # voltage_a = models.FloatField
+    # voltage_b = models.FloatField
+    # voltage_c = models.FloatField
 
     @staticmethod
     def save_event(measurement):
@@ -90,8 +94,9 @@ class PrecariousVoltageEvent(Event):
     Defines a new event related to a precarious voltage measurement
     """
 
+    from measurement.models import MinutelyMeasurement
     measurement = models.ForeignKey(
-        Measurement,
+        MinutelyMeasurement,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
@@ -107,9 +112,9 @@ class PhaseDropEvent(Event):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
     """
-
+    from measurement.models import MinutelyMeasurement
     measurement = models.ForeignKey(
-        Measurement,
+        MinutelyMeasurement,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
@@ -126,14 +131,17 @@ class MaximumConsumptionReachedEvent(Event):
     Defines a new event related to maximum energy consumption
     """
 
+
+    from measurement.models import QuarterlyMeasurement
     measurement = models.ForeignKey(
-        Measurement,
+        QuarterlyMeasurement,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
         null=False
     )
 
-    @staticmethod
-    def save_event(critical_measures):
+
+@staticmethod
+def save_event(critical_measures):
         pass
