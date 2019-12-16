@@ -1,11 +1,12 @@
-from django.db import models
-from datetime import datetime
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import ArrayField
-# from transductor_model.models import TransductorModel
-from django.utils import timezone
 import json
+from datetime import datetime
 from itertools import chain
+
+from django.contrib.postgres.fields import ArrayField
+from django.core.validators import RegexValidator
+from django.db import models
+from django.utils import timezone
+from events.models import FailedConnectionEvent
 
 
 class Transductor(models.Model):
@@ -100,6 +101,7 @@ class EnergyTransductor(Transductor):
         return self.serial_number
 
     def set_broken(self, broken):
+        FailedConnectionEvent.save_event(self)
         self.broken = broken
         self.save(update_fields=['broken'])
 
