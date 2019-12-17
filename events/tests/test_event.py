@@ -27,9 +27,9 @@ class EventTestCase(TestCase):
             collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             frequency_a=8,
-            voltage_a=8,
-            voltage_b=8,
-            voltage_c=8,
+            voltage_a=220,
+            voltage_b=220,
+            voltage_c=220,
             current_a=8,
             current_b=8,
             current_c=8,
@@ -123,36 +123,54 @@ class EventTestCase(TestCase):
     def test_create_critical_voltage_event(self):
         before = len(CriticalVoltageEvent.objects.all())
 
-        # self.transductor.set_broken(True)
+        a = MinutelyMeasurement()
+        a.voltage_a = 220
+        a.voltage_b = 400
+        a.voltage_c = 200
+        a.check_measurements()
+
+        b = MinutelyMeasurement()
+        b.voltage_a = 220
+        b.voltage_b = 110
+        b.voltage_c = 200
+        b.check_measurements()
+
         event = CriticalVoltageEvent.objects.last()
 
-        self.assertEqual(before + 1, len(CriticalVoltageEvent.objects.all()))
-        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
+        self.assertEqual(before + 2, len(CriticalVoltageEvent.objects.all()))
+        self.assertEqual(0, len(PrecariousVoltageEvent.objects.all()))
 
     def test_create_precarious_voltage_event(self):
         before = len(PrecariousVoltageEvent.objects.all())
 
-        # self.transductor.set_broken(True)
+        a = MinutelyMeasurement()
+        a.voltage_a = 220
+        a.voltage_b = 220
+        a.voltage_c = 210
+        a.check_measurements()
+
         event = PrecariousVoltageEvent.objects.last()
 
         self.assertEqual(before + 1, len(PrecariousVoltageEvent.objects.all()))
-        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_phase_drop_event(self):
         before = len(PhaseDropEvent.objects.all())
 
-        # self.transductor.set_broken(True)
-        event = PhaseDropEvent.objects.last()
+        a = MinutelyMeasurement()
+        a.voltage_a=220
+        a.voltage_b=220
+        a.voltage_c=50
+        a.check_measurements()
+
+        print(len(PhaseDropEvent.objects.all()))
 
         self.assertEqual(before + 1, len(PhaseDropEvent.objects.all()))
-        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
-    def test_create_maximum_consumption_reached_event(self):
-        before = len(MaximumConsumptionReachedEvent.objects.all())
+    # def test_create_maximum_consumption_reached_event(self):
+    #     before = len(MaximumConsumptionReachedEvent.objects.all())
 
-        # self.transductor.set_broken(True)
-        event = MaximumConsumptionReachedEvent.objects.last()
+    #     # self.transductor.set_broken(True)
+    #     event = MaximumConsumptionReachedEvent.objects.last()
 
-        self.assertEqual(
-            before + 1, len(MaximumConsumptionReachedEvent.objects.all()))
-        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
+    #     self.assertEqual(
+    #         before + 1, len(MaximumConsumptionReachedEvent.objects.all()))

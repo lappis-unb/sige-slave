@@ -36,26 +36,26 @@ class VoltageRelatedEvent(Event):
     class Meta:
         abstract = True
 
-    from measurement.models import MinutelyMeasurement
-    measurement = models.ForeignKey(
-        MinutelyMeasurement,
-        related_name="%(app_label)s_%(class)s",
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
+    # from measurement.models import MinutelyMeasurement
+    # measurement = models.ForeignKey(
+    #     MinutelyMeasurement,
+    #     related_name="%(app_label)s_%(class)s",
+    #     on_delete=models.CASCADE,
+    #     blank=False,
+    #     null=False
+    # )
 
     phase_a = models.FloatField(default=0)
     phase_b = models.FloatField(default=0)
     phase_c = models.FloatField(default=0)
 
-    def save_event(self, measurement):
-        event = self.__class__()    # testar
-        event.phase_a = measurement.voltage_a
-        event.phase_b = measurement.voltage_b
-        event.phase_c = measurement.voltage_c
+    # def save_event(self, measurement):
+    #     event = self.__class__()    # testar
+    #     event.phase_a = measurement.voltage_a
+    #     event.phase_b = measurement.voltage_b
+    #     event.phase_c = measurement.voltage_c
 
-        event.save()
+    #     event.save()
 
 
 class FailedConnectionEvent(Event):

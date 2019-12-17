@@ -169,7 +169,7 @@ class MinutelyMeasurement(Measurement):
         transductor.last_collection = minutely_measurement.collection_date
         transductor.save(update_fields=['last_collection'])
 
-    def __check_measurements(self):
+    def check_measurements(self):
         used_voltage = 220
 
         precary_lower_boundary = used_voltage * .91
@@ -178,46 +178,42 @@ class MinutelyMeasurement(Measurement):
         critical_upper_boundary = used_voltage * .86
         critical_lower_boundary = used_voltage * 1.06
 
+
         # shortened validations for the if statement
-        is_precary_upper = self.voltage_a >= precary_upper_boundary or \
-            self.voltage_b >= precary_upper_boundary or \
-            self.voltage_c >= precary_upper_boundary
+        print((self.__dict__.get('voltage_a')))
+        print((self.voltage_b))
+        print((self.voltage_c))
 
-        is_precary_lower = self.voltage_a <= precary_lower_boundary or \
-            self.voltage_b <= precary_lower_boundary or \
-            self.voltage_c <= precary_lower_boundary
+        is_precary_upper = self.voltage_a > precary_upper_boundary or self.voltage_b > precary_upper_boundary or self.voltage_c > precary_upper_boundary
 
-        is_critical_upper = self.voltage_a > critical_upper_boundary or \
-            self.voltage_b > critical_upper_boundary or \
-            self.voltage_c > critical_upper_boundary
+        is_precary_lower = self.voltage_a < precary_lower_boundary or self.voltage_b < precary_lower_boundary or self.voltage_c < precary_lower_boundary
 
-        is_critical_lower = self.voltage_a < critical_lower_boundary or \
-            self.voltage_b < critical_lower_boundary or \
-            self.voltage_c < critical_lower_boundary
+        is_critical_upper = self.voltage_a > critical_upper_boundary or self.voltage_b > critical_upper_boundary or self.voltage_c > critical_upper_boundary
+
+        is_critical_lower = self.voltage_a < critical_lower_boundary or self.voltage_b < critical_lower_boundary or self.voltage_c < critical_lower_boundary
 
         is_phase_a_down = self.voltage_a < 100   # TODO: find the correct value
-
         is_phase_b_down = self.voltage_b < 100   # TODO: find the correct value
-
         is_phase_c_down = self.voltage_c < 100   # TODO: find the correct value
+
+        if is_phase_a_down or is_phase_b_down or is_phase_c_down:
+            from events.models import PhaseDropEvent
+            PhaseDropEvent.save_event(self)
+            print('chegou aqui')
+            return
 
         if is_precary_upper or is_precary_lower:
             # all criticals and down phases are precary,
             # but not all precary are criticals
-            if is_phase_a_down or is_phase_b_down or is_phase_c_down:
-                from events.models import PhaseDropEvent
-                PhaseDropEvent.save_event(self)
-
-                return
-
             if is_critical_lower or is_critical_upper:
                 from events.models import CriticalVoltageEvent
                 CriticalVoltageEvent.save_event(self)
-
+                print('chegou aqui xd')
                 return
 
             from events.models import PrecariousVoltageEvent
             PrecariousVoltageEvent.save_event(self)
+            print('chegou aqui xxxxxxx')
 
 
 class QuarterlyMeasurement(Measurement):
