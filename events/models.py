@@ -31,6 +31,33 @@ class Event(models.Model):
         raise NotImplementedError
 
 
+class VoltageRelatedEvent(Event):
+
+    class Meta:
+        abstract = True
+
+    from measurement.models import MinutelyMeasurement
+    measurement = models.ForeignKey(
+        MinutelyMeasurement,
+        related_name="%(app_label)s_%(class)s",
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+
+    phase_a = models.FloatField(default=0)
+    phase_b = models.FloatField(default=0)
+    phase_c = models.FloatField(default=0)
+
+    def save_event(self, measurement):
+        event = self.__class__()    # testar
+        event.phase_a = measurement.voltage_a
+        event.phase_b = measurement.voltage_b
+        event.phase_c = measurement.voltage_c
+
+        event.save()
+
+
 class FailedConnectionEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
@@ -67,70 +94,92 @@ class FailedConnectionEvent(Event):
         new_event.save()
 
 
-class CriticalVoltageEvent(Event):
+class CriticalVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a critical voltage measurement
     """
     from measurement.models import MinutelyMeasurement
-    measurement = models.ForeignKey(
-        MinutelyMeasurement,
-        related_name="%(app_label)s_%(class)s",
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
+    # measurement = models.ForeignKey(
+    #     MinutelyMeasurement,
+    #     related_name="%(app_label)s_%(class)s",
+    #     on_delete=models.CASCADE,
+    #     blank=False,
+    #     null=False
+    # )
 
-    # voltage_a = models.FloatField
-    # voltage_b = models.FloatField
-    # voltage_c = models.FloatField
+    # phase_a = models.FloatField(default=0)
+    # phase_b = models.FloatField(default=0)
+    # phase_c = models.FloatField(default=0)
 
     @staticmethod
     def save_event(measurement):
-        pass
+        event = CriticalVoltageEvent()
+        event.phase_a = measurement.voltage_a
+        event.phase_b = measurement.voltage_b
+        event.phase_c = measurement.voltage_c
+
+        event.save()
 
 
-class PrecariousVoltageEvent(Event):
+class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a precarious voltage measurement
     """
 
     from measurement.models import MinutelyMeasurement
-    measurement = models.ForeignKey(
-        MinutelyMeasurement,
-        related_name="%(app_label)s_%(class)s",
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
+    # measurement = models.ForeignKey(
+    #     MinutelyMeasurement,
+    #     related_name="%(app_label)s_%(class)s",
+    #     on_delete=models.CASCADE,
+    #     blank=False,
+    #     null=False
+    # )
+
+    # phase_a = models.FloatField(default=0)
+    # phase_b = models.FloatField(default=0)
+    # phase_c = models.FloatField(default=0)
 
     @staticmethod
-    def save_event(critical_measures):
-        pass
+    def save_event(measurement):
+        event = CriticalVoltageEvent()
+        event.phase_a = measurement.voltage_a
+        event.phase_b = measurement.voltage_b
+        event.phase_c = measurement.voltage_c
+
+        event.save()
 
 
-class PhaseDropEvent(Event):
+class PhaseDropEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
     """
     from measurement.models import MinutelyMeasurement
-    measurement = models.ForeignKey(
-        MinutelyMeasurement,
-        related_name="%(app_label)s_%(class)s",
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
+    # measurement = models.ForeignKey(
+    #     MinutelyMeasurement,
+    #     related_name="%(app_label)s_%(class)s",
+    #     on_delete=models.CASCADE,
+    #     blank=False,
+    #     null=False
+    # )
+
+    # phase_a = models.FloatField(default=0)
+    # phase_b = models.FloatField(default=0)
+    # phase_c = models.FloatField(default=0)
 
     @staticmethod
-    def save_event(critical_measures):
-        pass
+    def save_event(measurement):
+        event = CriticalVoltageEvent()
+        event.phase_a = measurement.voltage_a
+        event.phase_b = measurement.voltage_b
+        event.phase_c = measurement.voltage_c
+
+        event.save()
 
 
 class MaximumConsumptionReachedEvent(Event):
     """
     Defines a new event related to maximum energy consumption
     """
-
 
     from measurement.models import QuarterlyMeasurement
     measurement = models.ForeignKey(
@@ -141,7 +190,6 @@ class MaximumConsumptionReachedEvent(Event):
         null=False
     )
 
-
-@staticmethod
-def save_event(critical_measures):
+    @staticmethod
+    def save_event(measurement):
         pass

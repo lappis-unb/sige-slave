@@ -12,11 +12,11 @@ from events.models import *
 class EventTestCase(TestCase):
     def setUp(self):
         self.transductor = EnergyTransductor.objects.create(
-            serial_number='87654321',
-            ip_address='111.111.111.11',
+            serial_number='8764321',
+            ip_address='111.101.111.11',
             broken=False,
             active=True,
-            model="EnergyTransductor",
+            model="TR4020",
             firmware_version='12.1.3215',
             physical_location='predio 2 sala 44',
             geolocation_longitude=-24.4556,
@@ -112,19 +112,47 @@ class EventTestCase(TestCase):
         )
 
     def test_create_failed_connection_event(self):
-        before = len(FailedConnectionEvent.object.all())
+        before = len(FailedConnectionEvent.objects.all())
         self.transductor.set_broken(True)
 
+        event = FailedConnectionEvent.objects.last()
+
         self.assertEqual(before + 1, len(FailedConnectionEvent.objects.all()))
+        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_critical_voltage_event(self):
-        pass
+        before = len(CriticalVoltageEvent.objects.all())
+
+        # self.transductor.set_broken(True)
+        event = CriticalVoltageEvent.objects.last()
+
+        self.assertEqual(before + 1, len(CriticalVoltageEvent.objects.all()))
+        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_precarious_voltage_event(self):
-        pass
+        before = len(PrecariousVoltageEvent.objects.all())
+
+        # self.transductor.set_broken(True)
+        event = PrecariousVoltageEvent.objects.last()
+
+        self.assertEqual(before + 1, len(PrecariousVoltageEvent.objects.all()))
+        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_phase_drop_event(self):
-        pass
+        before = len(PhaseDropEvent.objects.all())
+
+        # self.transductor.set_broken(True)
+        event = PhaseDropEvent.objects.last()
+
+        self.assertEqual(before + 1, len(PhaseDropEvent.objects.all()))
+        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_maximum_consumption_reached_event(self):
-        pass
+        before = len(MaximumConsumptionReachedEvent.objects.all())
+
+        # self.transductor.set_broken(True)
+        event = MaximumConsumptionReachedEvent.objects.last()
+
+        self.assertEqual(
+            before + 1, len(MaximumConsumptionReachedEvent.objects.all()))
+        self.assertEqual(self.transductor.ip_address, event.transductor_ip)
