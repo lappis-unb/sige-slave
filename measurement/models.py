@@ -7,9 +7,6 @@ from django.core import serializers
 from django.db import models
 from django.utils import timezone
 
-from events.models import PhaseDropEvent
-from events.models import CriticalVoltageEvent
-from events.models import PrecariousVoltageEvent
 from transductor.models import EnergyTransductor
 
 
@@ -208,13 +205,18 @@ class MinutelyMeasurement(Measurement):
             # all criticals and down phases are precary,
             # but not all precary are criticals
             if is_phase_a_down or is_phase_b_down or is_phase_c_down:
+                from events.models import PhaseDropEvent
                 PhaseDropEvent.save_event(self)
+
                 return
 
             if is_critical_lower or is_critical_upper:
+                from events.models import CriticalVoltageEvent
                 CriticalVoltageEvent.save_event(self)
+
                 return
 
+            from events.models import PrecariousVoltageEvent
             PrecariousVoltageEvent.save_event(self)
 
 

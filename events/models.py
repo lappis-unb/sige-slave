@@ -98,18 +98,6 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a critical voltage measurement
     """
-    from measurement.models import MinutelyMeasurement
-    # measurement = models.ForeignKey(
-    #     MinutelyMeasurement,
-    #     related_name="%(app_label)s_%(class)s",
-    #     on_delete=models.CASCADE,
-    #     blank=False,
-    #     null=False
-    # )
-
-    # phase_a = models.FloatField(default=0)
-    # phase_b = models.FloatField(default=0)
-    # phase_c = models.FloatField(default=0)
 
     @staticmethod
     def save_event(measurement):
@@ -126,19 +114,6 @@ class PrecariousVoltageEvent(VoltageRelatedEvent):
     Defines a new event related to a precarious voltage measurement
     """
 
-    from measurement.models import MinutelyMeasurement
-    # measurement = models.ForeignKey(
-    #     MinutelyMeasurement,
-    #     related_name="%(app_label)s_%(class)s",
-    #     on_delete=models.CASCADE,
-    #     blank=False,
-    #     null=False
-    # )
-
-    # phase_a = models.FloatField(default=0)
-    # phase_b = models.FloatField(default=0)
-    # phase_c = models.FloatField(default=0)
-
     @staticmethod
     def save_event(measurement):
         event = CriticalVoltageEvent()
@@ -153,18 +128,6 @@ class PhaseDropEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
     """
-    from measurement.models import MinutelyMeasurement
-    # measurement = models.ForeignKey(
-    #     MinutelyMeasurement,
-    #     related_name="%(app_label)s_%(class)s",
-    #     on_delete=models.CASCADE,
-    #     blank=False,
-    #     null=False
-    # )
-
-    # phase_a = models.FloatField(default=0)
-    # phase_b = models.FloatField(default=0)
-    # phase_c = models.FloatField(default=0)
 
     @staticmethod
     def save_event(measurement):
