@@ -39,7 +39,6 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             except EnergyTransductor.DoesNotExist:
                 transductor = None
 
-
         if start_date and end_date:
             self.queryset = self.queryset.filter(
                 collection_date__gte=start_date,

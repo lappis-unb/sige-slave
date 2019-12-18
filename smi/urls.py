@@ -19,10 +19,10 @@ from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from django.urls import path, include
-from django.conf.urls import url    
+from django.conf.urls import url
 
 from transductor import views as energy_transductor_views
-from measurement import views as measurements_views
+from measurement import urls as measurements_routes
 
 
 router = DefaultRouter()
@@ -43,22 +43,8 @@ router.register(
     energy_transductor_views.BrokenTransductorsViewSet,
     basename='broken_transductor',
 )
-router.register(
-    r'minutely_measurements',
-    measurements_views.MinutelyMeasurementViewSet,
-    basename='minutelymeasurement',
-)
-router.register(
-    r'quarterly_measurements',
-    measurements_views.QuarterlyMeasurementViewSet,
-    basename='quarterlymeasurement',
-)
 
-router.register(
-    r'monthly_measurements',
-    measurements_views.MonthlyMeasurementViewSet,
-    basename='monthlymeasurement',
-)
+router.registry.extend(measurements_routes.router.registry)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
