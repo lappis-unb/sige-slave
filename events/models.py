@@ -12,21 +12,12 @@ class Event(models.Model):
     settings.USE_TZ = False
     created_at = models.DateTimeField(default=timezone.now)
 
-    def __format_data(self, data):
-        """
-        Takes the data of what created the event and saves it in a dict.
-        """
-        formatted_data = dict(
-
-        )
-        return formatted_data
-
     def __str__(self):
-        return '%s - %s' % (self.__class__.__name__, self.created_at)
+        return '%s@%s' % (self.__class__.__name__, self.created_at)
 
     def save_event(self):
         """
-        Saves the event
+        Saves the event.
         """
         raise NotImplementedError
 
@@ -39,6 +30,15 @@ class VoltageRelatedEvent(Event):
     phase_a = models.FloatField(default=0)
     phase_b = models.FloatField(default=0)
     phase_c = models.FloatField(default=0)
+
+    def save_event(self, measurement):
+        event = self.__class__()
+        event.phase_a = measurement.voltage_a
+        event.phase_b = measurement.voltage_b
+        event.phase_c = measurement.voltage_c
+
+        event.save()
+        return event
 
 
 class FailedConnectionEvent(Event):
@@ -75,7 +75,6 @@ class FailedConnectionEvent(Event):
         new_event.transductor_ip = new_event.transductor.ip_address
 
         new_event.save()
-
         return new_event
 
 
@@ -84,63 +83,14 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
     Defines a new event related to a critical voltage measurement
     """
 
-    @staticmethod
-    def save_event(measurement):
-        event = CriticalVoltageEvent()
-        event.phase_a = measurement.voltage_a
-        event.phase_b = measurement.voltage_b
-        event.phase_c = measurement.voltage_c
-
-        event.save()
-        return event
-
 
 class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a precarious voltage measurement
     """
 
-    @staticmethod
-    def save_event(measurement):
-        event = PrecariousVoltageEvent()
-        event.phase_a = measurement.voltage_a
-        event.phase_b = measurement.voltage_b
-        event.phase_c = measurement.voltage_c
-
-        event.save()
-        return event
-
 
 class PhaseDropEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
     """
-
-    @staticmethod
-    def save_event(measurement):
-        event = PhaseDropEvent()
-        event.phase_a = measurement.voltage_a
-        event.phase_b = measurement.voltage_b
-        event.phase_c = measurement.voltage_c
-
-        event.save()
-        return event
-
-
-class MaximumConsumptionReachedEvent(Event):
-    """
-    Defines a new event related to maximum energy consumption
-    """
-
-    from measurement.models import QuarterlyMeasurement
-    measurement = models.ForeignKey(
-        QuarterlyMeasurement,
-        related_name="%(app_label)s_%(class)s",
-        on_delete=models.CASCADE,
-        blank=False,
-        null=False
-    )
-
-    @staticmethod
-    def save_event(measurement):
-        pass

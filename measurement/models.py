@@ -201,17 +201,20 @@ class MinutelyMeasurement(Measurement):
 
         if is_phase_a_down or is_phase_b_down or is_phase_c_down:
             from events.models import PhaseDropEvent
-            evt1 = PhaseDropEvent.save_event(self)
+            evt = PhaseDropEvent()
+            evt.save_event(self)
             return
 
         if is_critical_lower or is_critical_upper:
             from events.models import CriticalVoltageEvent
-            evt2 = CriticalVoltageEvent.save_event(self)
+            evt = CriticalVoltageEvent()
+            evt.save_event(self)
             return
 
         if is_precary_upper or is_precary_lower:
             from events.models import PrecariousVoltageEvent
-            evt3 = PrecariousVoltageEvent.save_event(self)
+            evt = PrecariousVoltageEvent()
+            evt.save_event(self)
 
 
 class QuarterlyMeasurement(Measurement):
