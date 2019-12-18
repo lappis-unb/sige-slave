@@ -36,26 +36,9 @@ class VoltageRelatedEvent(Event):
     class Meta:
         abstract = True
 
-    # from measurement.models import MinutelyMeasurement
-    # measurement = models.ForeignKey(
-    #     MinutelyMeasurement,
-    #     related_name="%(app_label)s_%(class)s",
-    #     on_delete=models.CASCADE,
-    #     blank=False,
-    #     null=False
-    # )
-
     phase_a = models.FloatField(default=0)
     phase_b = models.FloatField(default=0)
     phase_c = models.FloatField(default=0)
-
-    # def save_event(self, measurement):
-    #     event = self.__class__()    # testar
-    #     event.phase_a = measurement.voltage_a
-    #     event.phase_b = measurement.voltage_b
-    #     event.phase_c = measurement.voltage_c
-
-    #     event.save()
 
 
 class FailedConnectionEvent(Event):
@@ -93,6 +76,8 @@ class FailedConnectionEvent(Event):
 
         new_event.save()
 
+        return new_event
+
 
 class CriticalVoltageEvent(VoltageRelatedEvent):
     """
@@ -107,6 +92,7 @@ class CriticalVoltageEvent(VoltageRelatedEvent):
         event.phase_c = measurement.voltage_c
 
         event.save()
+        return event
 
 
 class PrecariousVoltageEvent(VoltageRelatedEvent):
@@ -116,12 +102,13 @@ class PrecariousVoltageEvent(VoltageRelatedEvent):
 
     @staticmethod
     def save_event(measurement):
-        event = CriticalVoltageEvent()
+        event = PrecariousVoltageEvent()
         event.phase_a = measurement.voltage_a
         event.phase_b = measurement.voltage_b
         event.phase_c = measurement.voltage_c
 
         event.save()
+        return event
 
 
 class PhaseDropEvent(VoltageRelatedEvent):
@@ -131,12 +118,13 @@ class PhaseDropEvent(VoltageRelatedEvent):
 
     @staticmethod
     def save_event(measurement):
-        event = CriticalVoltageEvent()
+        event = PhaseDropEvent()
         event.phase_a = measurement.voltage_a
         event.phase_b = measurement.voltage_b
         event.phase_c = measurement.voltage_c
 
         event.save()
+        return event
 
 
 class MaximumConsumptionReachedEvent(Event):

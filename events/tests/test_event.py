@@ -113,8 +113,8 @@ class EventTestCase(TestCase):
 
     def test_create_failed_connection_event(self):
         before = len(FailedConnectionEvent.objects.all())
-        self.transductor.set_broken(True)
 
+        self.transductor.set_broken(True)
         event = FailedConnectionEvent.objects.last()
 
         self.assertEqual(before + 1, len(FailedConnectionEvent.objects.all()))
@@ -135,10 +135,7 @@ class EventTestCase(TestCase):
         b.voltage_c = 200
         b.check_measurements()
 
-        event = CriticalVoltageEvent.objects.last()
-
         self.assertEqual(before + 2, len(CriticalVoltageEvent.objects.all()))
-        self.assertEqual(0, len(PrecariousVoltageEvent.objects.all()))
 
     def test_create_precarious_voltage_event(self):
         before = len(PrecariousVoltageEvent.objects.all())
@@ -146,20 +143,26 @@ class EventTestCase(TestCase):
         a = MinutelyMeasurement()
         a.voltage_a = 220
         a.voltage_b = 220
-        a.voltage_c = 210
+        a.voltage_c = 199
         a.check_measurements()
+
+        b = MinutelyMeasurement()
+        b.voltage_a = 220
+        b.voltage_b = 230
+        b.voltage_c = 220
+        b.check_measurements()
 
         event = PrecariousVoltageEvent.objects.last()
 
-        self.assertEqual(before + 1, len(PrecariousVoltageEvent.objects.all()))
+        self.assertEqual(before + 2, len(PrecariousVoltageEvent.objects.all()))
 
     def test_create_phase_drop_event(self):
         before = len(PhaseDropEvent.objects.all())
 
         a = MinutelyMeasurement()
-        a.voltage_a=220
-        a.voltage_b=220
-        a.voltage_c=50
+        a.voltage_a = 220
+        a.voltage_b = 220
+        a.voltage_c = 50
         a.check_measurements()
 
         print(len(PhaseDropEvent.objects.all()))

@@ -46,7 +46,7 @@ class Measurement(models.Model):
         """
         raise NotImplementedError
 
-    def __check_measurements(self):
+    def check_measurements(self):
         """
         Checks measurements and triggers events if deemed necessary
         """
@@ -163,7 +163,7 @@ class MinutelyMeasurement(Measurement):
         minutely_measurement.consumption_c = values_list[37]
         minutely_measurement.total_consumption = values_list[38]
 
-        minutely_measurement.__check_measurements()
+        minutely_measurement.check_measurements()
         minutely_measurement.save()
 
         transductor.last_collection = minutely_measurement.collection_date
@@ -175,22 +175,25 @@ class MinutelyMeasurement(Measurement):
         precary_lower_boundary = used_voltage * .91
         precary_upper_boundary = used_voltage * 1.04
 
-        critical_upper_boundary = used_voltage * .86
         critical_lower_boundary = used_voltage * 1.06
-
+        critical_upper_boundary = used_voltage * .86
 
         # shortened validations for the if statement
-        print((self.__dict__.get('voltage_a')))
-        print((self.voltage_b))
-        print((self.voltage_c))
+        is_precary_lower = self.voltage_a < precary_lower_boundary or \
+            self.voltage_b < precary_lower_boundary or \
+            self.voltage_c < precary_lower_boundary
 
-        is_precary_upper = self.voltage_a > precary_upper_boundary or self.voltage_b > precary_upper_boundary or self.voltage_c > precary_upper_boundary
+        is_precary_upper = self.voltage_a > precary_upper_boundary or \
+            self.voltage_b > precary_upper_boundary or \
+            self.voltage_c > precary_upper_boundary
 
-        is_precary_lower = self.voltage_a < precary_lower_boundary or self.voltage_b < precary_lower_boundary or self.voltage_c < precary_lower_boundary
+        is_critical_lower = self.voltage_a < critical_upper_boundary or \
+            self.voltage_b < critical_upper_boundary or \
+            self.voltage_c < critical_upper_boundary
 
-        is_critical_upper = self.voltage_a > critical_upper_boundary or self.voltage_b > critical_upper_boundary or self.voltage_c > critical_upper_boundary
-
-        is_critical_lower = self.voltage_a < critical_lower_boundary or self.voltage_b < critical_lower_boundary or self.voltage_c < critical_lower_boundary
+        is_critical_upper = self.voltage_a > critical_lower_boundary or \
+            self.voltage_b > critical_lower_boundary or \
+            self.voltage_c > critical_lower_boundary
 
         is_phase_a_down = self.voltage_a < 100   # TODO: find the correct value
         is_phase_b_down = self.voltage_b < 100   # TODO: find the correct value
@@ -198,22 +201,17 @@ class MinutelyMeasurement(Measurement):
 
         if is_phase_a_down or is_phase_b_down or is_phase_c_down:
             from events.models import PhaseDropEvent
-            PhaseDropEvent.save_event(self)
-            print('chegou aqui')
+            evt1 = PhaseDropEvent.save_event(self)
+            return
+
+        if is_critical_lower or is_critical_upper:
+            from events.models import CriticalVoltageEvent
+            evt2 = CriticalVoltageEvent.save_event(self)
             return
 
         if is_precary_upper or is_precary_lower:
-            # all criticals and down phases are precary,
-            # but not all precary are criticals
-            if is_critical_lower or is_critical_upper:
-                from events.models import CriticalVoltageEvent
-                CriticalVoltageEvent.save_event(self)
-                print('chegou aqui xd')
-                return
-
             from events.models import PrecariousVoltageEvent
-            PrecariousVoltageEvent.save_event(self)
-            print('chegou aqui xxxxxxx')
+            evt3 = PrecariousVoltageEvent.save_event(self)
 
 
 class QuarterlyMeasurement(Measurement):
@@ -268,10 +266,10 @@ class QuarterlyMeasurement(Measurement):
         quarterly_measurement.capacitive_power_peak_time = values_list[12]
         quarterly_measurement.capacitive_power_off_peak_time = values_list[13]
 
-        quarterly_measurement.__check_measurements()
+        quarterly_measurement.check_measurements()
         quarterly_measurement.save()
 
-    def __check_measurements(self):
+    def check_measurements(self):
         pass
 
 
@@ -371,10 +369,10 @@ class MonthlyMeasurement(Measurement):
         measurement.reactive_max_power_list_off_peak_time = \
             measurement._get_list_data(30, 40, values_list)
 
-        measurement.__check_measurements()
+        measurement.check_measurements()
         measurement.save()
 
-    def __check_measurements(self):
+    def check_measurements(self):
         pass
 
     def _get_year(self, year, month):
