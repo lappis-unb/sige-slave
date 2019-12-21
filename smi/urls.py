@@ -19,10 +19,11 @@ from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from django.urls import path, include
-from django.conf.urls import url    
+from django.conf.urls import url
 
 from transductor import views as energy_transductor_views
 from measurement import views as measurements_views
+from events.views import EventViewSet
 
 
 router = DefaultRouter()
@@ -58,6 +59,12 @@ router.register(
     r'monthly_measurements',
     measurements_views.MonthlyMeasurementViewSet,
     basename='monthlymeasurement',
+)
+
+router.register(
+    r'events',
+    EventViewSet,
+    basename='events'
 )
 
 urlpatterns = [
