@@ -4,6 +4,7 @@ coverage==4.5.2
 Django==2.1.5
 django-boogie==0.11.1
 django-environ==0.4.4
+django-polymorphic==2.0.3
 djangorestframework==3.9.0
 mccabe==0.6.1
 mock==2.0.0

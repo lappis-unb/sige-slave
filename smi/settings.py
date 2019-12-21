@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django_cron',
+    'polymorphic',
     'rest_framework',
     'events',
     'transductor',

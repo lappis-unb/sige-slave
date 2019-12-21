@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-
+import os
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField, HStoreField
 from django.core import serializers
@@ -170,51 +170,73 @@ class MinutelyMeasurement(Measurement):
         transductor.save(update_fields=['last_collection'])
 
     def check_measurements(self):
-        used_voltage = 220
+        used_voltage = float(os.getenv('CONTRACTED_VOLTAGE'))
 
-        precary_lower_boundary = used_voltage * .91
+        precary_lower_boundary = used_voltage * 0.91
         precary_upper_boundary = used_voltage * 1.04
 
         critical_lower_boundary = used_voltage * 1.06
-        critical_upper_boundary = used_voltage * .86
+        critical_upper_boundary = used_voltage * 0.86
 
         # shortened validations for the if statement
-        is_precary_lower = self.voltage_a < precary_lower_boundary or \
-            self.voltage_b < precary_lower_boundary or \
-            self.voltage_c < precary_lower_boundary
+        measurements = [
+            ['voltage_a', self.voltage_a],
+            ['voltage_b', self.voltage_b],
+            ['voltage_c', self.voltage_c]
+        ]
+        precarious_lower_list = []
+        precarious_upper_list = []
+        critical_lower_list = []
+        critical_upper_list = []
 
-        is_precary_upper = self.voltage_a > precary_upper_boundary or \
-            self.voltage_b > precary_upper_boundary or \
-            self.voltage_c > precary_upper_boundary
+        from events.models import CriticalVoltageEvent
+        from events.models import PrecariousVoltageEvent
 
-        is_critical_lower = self.voltage_a < critical_upper_boundary or \
-            self.voltage_b < critical_upper_boundary or \
-            self.voltage_c < critical_upper_boundary
+        for measurement in measurements:
+            if measurement[1] < critical_lower_boundary:
+                critical_lower_list.append([measurement[0], measurement[1]])
+            elif measurement[1] > critical_upper_boundary:
+                critical_upper_list.append([measurement[0], measurement[1]])
+            elif measurement[1] < precary_lower_boundary:
+                precarious_lower_list.append([measurement[0], measurement[1]])
+            elif measurement[1] > precary_upper_boundary:
+                precarious_upper_list.append([measurement[0], measurement[1]])
 
-        is_critical_upper = self.voltage_a > critical_lower_boundary or \
-            self.voltage_b > critical_lower_boundary or \
-            self.voltage_c > critical_lower_boundary
+        is_phase_a_down = self.voltage_a < (used_voltage * 0.8)
+        is_phase_b_down = self.voltage_b < (used_voltage * 0.8)
+        is_phase_c_down = self.voltage_c < (used_voltage * 0.8)
 
-        is_phase_a_down = self.voltage_a < 100   # TODO: find the correct value
-        is_phase_b_down = self.voltage_b < 100   # TODO: find the correct value
-        is_phase_c_down = self.voltage_c < 100   # TODO: find the correct value
+        from events.models import PhaseDropEvent
+        list_down_phases = []
 
-        if is_phase_a_down or is_phase_b_down or is_phase_c_down:
-            from events.models import PhaseDropEvent
+        if is_phase_a_down:
+            list_down_phases.append(['voltage_a', self.voltage_a])
+
+        if is_phase_b_down:
+            list_down_phases.append(['voltage_b', self.voltage_b])
+
+        if is_phase_c_down:
+            list_down_phases.append(['voltage_c', self.voltage_c])
+
+        if list_down_phases:
             evt = PhaseDropEvent()
-            evt.save_event(self)
-            return
+            evt.save_event(self.transductor, list_down_phases)
 
-        if is_critical_lower or is_critical_upper:
-            from events.models import CriticalVoltageEvent
+        if critical_lower_list:
             evt = CriticalVoltageEvent()
-            evt.save_event(self)
-            return
+            evt.save_event(self.transductor, critical_lower_list)
 
-        if is_precary_upper or is_precary_lower:
-            from events.models import PrecariousVoltageEvent
+        if critical_upper_list:
+            evt = CriticalVoltageEvent()
+            evt.save_event(self.transductor, critical_upper_list)
+
+        if precarious_lower_list:
             evt = PrecariousVoltageEvent()
-            evt.save_event(self)
+            evt.save_event(self.transductor, precarious_lower_list)
+
+        if precarious_upper_list:
+            evt = PrecariousVoltageEvent()
+            evt.save_event(self.transductor, precarious_upper_list)
 
 
 class QuarterlyMeasurement(Measurement):
