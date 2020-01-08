@@ -1,14 +1,30 @@
 from rest_framework import serializers
-from .models import Event
+from .models import VoltageRelatedEvent
+from .models import FailedConnectionTransductorEvent
 
-class EventSerializer(serializers.HyperlinkedModelSerializer):
-    measures = serializers.ListField(child=serializers.ListField())
+class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
+    measures = serializers.DictField()
     type = serializers.CharField()
+    ip_address = serializers.CharField()
 
     class Meta:
-        model = Event
+        model = VoltageRelatedEvent
         fields = (
             'measures',
             'type',
+            'ip_address',
+            'created_at'
+        )
+
+
+class FailedConnectionTransductorEventSerializer(serializers.HyperlinkedModelSerializer):
+    type = serializers.CharField()
+    ip_address = serializers.CharField()
+
+    class Meta:
+        model = FailedConnectionTransductorEvent
+        fields = (
+            'type',
+            'ip_address',
             'created_at'
         )
