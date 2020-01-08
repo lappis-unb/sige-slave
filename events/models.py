@@ -14,7 +14,6 @@ class Event(PolymorphicModel):
     """
     settings.USE_TZ = False
     created_at = models.DateTimeField(default=timezone.now)
-    measures = JSONField()
 
     transductor = models.ForeignKey(
         EnergyTransductor,
@@ -34,7 +33,15 @@ class Event(PolymorphicModel):
         raise NotImplementedError
 
 
-class FailedConnectionEvent(Event):
+class VoltageRelatedEvent(Event):
+    """
+    Defines a new event related to a voltage metric
+    """
+
+    measures = JSONField()
+
+
+class FailedConnectionTransductorEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
     """
@@ -43,15 +50,14 @@ class FailedConnectionEvent(Event):
         """
         Saves a failed connection event related to a transductor
         """
-        new_event = FailedConnectionEvent()
+        new_event = FailedConnectionTransductorEvent()
         new_event.transductor = transductor
-        new_event.measures = {}
 
         new_event.save()
         return new_event
 
 
-class CriticalVoltageEvent(Event):
+class CriticalVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a critical voltage measurement
     """
@@ -68,7 +74,7 @@ class CriticalVoltageEvent(Event):
         return new_event
 
 
-class PrecariousVoltageEvent(Event):
+class PrecariousVoltageEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a precarious voltage measurement
     """
@@ -85,7 +91,7 @@ class PrecariousVoltageEvent(Event):
         return new_event
 
 
-class PhaseDropEvent(Event):
+class PhaseDropEvent(VoltageRelatedEvent):
     """
     Defines a new event related to a drop on the triphasic voltage measurement
     """
