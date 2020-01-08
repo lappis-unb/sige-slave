@@ -1,4 +1,4 @@
-from datetime import datetime
+FailedConnectionTransductorEventfrom datetime import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
@@ -25,12 +25,12 @@ class EventTestCase(TestCase):
         )
 
     def test_create_failed_connection_event(self):
-        before = len(FailedConnectionEvent.objects.all())
+        before = len(FailedConnectionTransductorEvent.objects.all())
 
         self.transductor.set_broken(True)
-        event = FailedConnectionEvent.objects.last()
+        event = FailedConnectionTransductorEvent.objects.last()
 
-        self.assertEqual(before + 1, len(FailedConnectionEvent.objects.all()))
+        self.assertEqual(before + 1, len(FailedConnectionTransductorEvent.objects.all()))
         self.assertEqual(self.transductor.ip_address, event.transductor_ip)
 
     def test_create_critical_voltage_event(self):

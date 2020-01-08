@@ -101,8 +101,9 @@ class EnergyTransductor(Transductor):
 
     def set_broken(self, broken):
         if broken is True:
-            from events.models import FailedConnectionEvent
-            FailedConnectionEvent.save_event(self)
+            from events.models import FailedConnectionTransductorEvent
+            event = FailedConnectionTransductorEvent()
+            event.save_event(self)
 
         self.broken = broken
         self.save(update_fields=['broken'])

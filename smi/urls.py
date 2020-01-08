@@ -23,7 +23,8 @@ from django.conf.urls import url
 
 from transductor import views as energy_transductor_views
 from measurement import views as measurements_views
-from events.views import EventViewSet
+from events.views import VoltageRelatedEventViewSet
+from events.views import FailedConnectionTransductorEventViewSet
 
 
 router = DefaultRouter()
@@ -31,8 +32,7 @@ router = DefaultRouter()
 router.register(
     r'energy_transductors',
     energy_transductor_views.EnergyTransductorViewSet,
-    basename='energytransductor',
-
+    basename='energytransductor'
 )
 router.register(
     r'active_transductors',
@@ -54,17 +54,20 @@ router.register(
     measurements_views.QuarterlyMeasurementViewSet,
     basename='quarterlymeasurement',
 )
-
 router.register(
     r'monthly_measurements',
     measurements_views.MonthlyMeasurementViewSet,
     basename='monthlymeasurement',
 )
-
 router.register(
-    r'events',
-    EventViewSet,
-    basename='events'
+    r'voltage-events',
+    VoltageRelatedEventViewSet,
+    basename='voltage-events'
+)
+router.register(
+    r'failed-connection-events',
+    FailedConnectionTransductorEventViewSet,
+    basename='failed-connection-events'
 )
 
 urlpatterns = [
