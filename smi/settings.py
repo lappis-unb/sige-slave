@@ -79,6 +79,7 @@ TEMPLATES = [
 ]
 
 CRON_CLASSES = [
+    "data_reader.cronjob.DataRescueCronJob",
     "data_reader.cronjob.MinutelyCollectCronJob",
     "data_reader.cronjob.QuarterlyCollectCronJob",
     "data_reader.cronjob.MonthlyCollectCronJob",
