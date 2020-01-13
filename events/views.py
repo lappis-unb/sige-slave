@@ -54,6 +54,7 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
 
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
+            data['ended_at'] = event.ended_at
             data['type'] = event.__class__.__name__
             events.append(data)
 
@@ -89,6 +90,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
             data = {}
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
+            data['ended_at'] = event.ended_at
             data['type'] = event.__class__.__name__
             events.append(data)
 

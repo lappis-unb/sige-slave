@@ -14,7 +14,7 @@ class Event(PolymorphicModel):
     """
     settings.USE_TZ = False
     created_at = models.DateTimeField(default=timezone.now)
-
+    ended_at = models.DateTimeField(null=True, blank=True)
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",

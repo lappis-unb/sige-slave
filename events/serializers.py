@@ -13,7 +13,8 @@ class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
             'measures',
             'type',
             'ip_address',
-            'created_at'
+            'created_at',
+            'ended_at'
         )
 
 
@@ -26,5 +27,6 @@ class FailedConnectionTransductorEventSerializer(serializers.HyperlinkedModelSer
         fields = (
             'type',
             'ip_address',
-            'created_at'
+            'created_at',
+            'ended_at'
         )
