@@ -29,10 +29,10 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         # measurement related is defined by each minute too.
         now = timezone.now()
         start_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour-1, now.minute, 0, 0
+            now.year, now.month, now.day, now.hour - 1, now.minute, 0, 0
         )
         end_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour-1, now.minute, 59, 999999
+            now.year, now.month, now.day, now.hour - 1, now.minute, 59, 999999
         )
 
         if start_date and end_date:
@@ -62,9 +62,9 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
 
 
 class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
-                                   mixins.DestroyModelMixin,
-                                   mixins.ListModelMixin,
-                                   viewsets.GenericViewSet):
+                                              mixins.DestroyModelMixin,
+                                              mixins.ListModelMixin,
+                                              viewsets.GenericViewSet):
     serializer_class = FailedConnectionTransductorEventSerializer
     queryset = FailedConnectionTransductorEvent.objects.all()
 

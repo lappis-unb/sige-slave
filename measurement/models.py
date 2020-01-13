@@ -175,8 +175,8 @@ class MinutelyMeasurement(Measurement):
         precary_lower_boundary = used_voltage * 0.91
         precary_upper_boundary = used_voltage * 1.04
 
-        critical_lower_boundary = used_voltage * 1.06
-        critical_upper_boundary = used_voltage * 0.86
+        critical_lower_boundary = used_voltage * 0.86
+        critical_upper_boundary = used_voltage * 1.06
 
         # shortened validations for the if statement
         measurements = [

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import VoltageRelatedEvent
 from .models import FailedConnectionTransductorEvent
 
+
 class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
     measures = serializers.DictField()
     type = serializers.CharField()
@@ -18,7 +19,8 @@ class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
         )
 
 
-class FailedConnectionTransductorEventSerializer(serializers.HyperlinkedModelSerializer):
+class FailedConnectionTransductorEventSerializer(
+        serializers.HyperlinkedModelSerializer):
     type = serializers.CharField()
     ip_address = serializers.CharField()
 
