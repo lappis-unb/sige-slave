@@ -22,6 +22,17 @@ from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
 
+def communication_log(status, datetime, type, transductor, errors=[]):
+    print('DateTime:\t', datetime)
+    print('Transductor:\t', transductor.serial_number + '@' + transductor.physical_location, 
+        '(' + transductor.ip_address + ')')
+    print('Type:\t\t', type)
+    print('Status:\t\t', status)
+    if errors:
+        print('Errors:')
+        for error in errors:
+            print('\t\t', error)
+    print('\n')
 
 def get_active_transductors():
     return EnergyTransductor.objects.filter(active=True)
@@ -45,25 +56,45 @@ def single_data_collection(transductor, collection_type, date=None):
     Returns:
         None
     """
-    transductor_model = get_transductor_model(transductor)
-    serial_protocol_instance, \
-        transport_protocol_instance = get_protocols(transductor,
-                                                    transductor_model)
-    messages_to_send = serial_protocol_instance.create_messages(
-        collection_type, date)
+
+    communication_step = ''
     try:
+        communication_step = 'capturing transductor model'
+        transductor_model = get_transductor_model(transductor)
+        serial_protocol_instance, \
+            transport_protocol_instance = get_protocols(transductor,
+                                                        transductor_model)
+        communication_step = 'assembling messages'
+        messages_to_send = serial_protocol_instance.create_messages(
+            collection_type, date)
+        communication_step = 'sending messages'
         received_messages = transport_protocol_instance.send_messages(
             messages_to_send)
+        communication_step = 'parsing response'
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
-        return transductor_model.handle_response(collection_type,
+        communication_step = 'handling response'
+        handled_response = transductor_model.handle_response(collection_type,
                                                  received_messages_content,
                                                  transductor, date)
+        communication_log(
+            status='Success', 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor
+        )
+        return handled_response
     except Exception as e:
         if(collection_type == "Minutely"):
             transductor.set_broken(True)
-        print(collection_type, datetime.now(), "exception:", e)
+        communication_log(
+            status='Failure at ' + communication_step, 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor, 
+            errors=[e]
+        )
         return None
 
 
