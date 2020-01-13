@@ -22,10 +22,14 @@ from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
 
+
 def communication_log(status, datetime, type, transductor, errors=[]):
     print('DateTime:\t', datetime)
-    print('Transductor:\t', transductor.serial_number + '@' + transductor.physical_location, 
-        '(' + transductor.ip_address + ')')
+    print(
+        'Transductor:\t', 
+        transductor.serial_number + '@' + transductor.physical_location, 
+        '(' + transductor.ip_address + ')'
+    )
     print('Type:\t\t', type)
     print('Status:\t\t', status)
     if errors:
@@ -33,6 +37,7 @@ def communication_log(status, datetime, type, transductor, errors=[]):
         for error in errors:
             print('\t\t', error)
     print('\n')
+
 
 def get_active_transductors():
     return EnergyTransductor.objects.filter(active=True)
@@ -75,9 +80,10 @@ def single_data_collection(transductor, collection_type, date=None):
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
         communication_step = 'handling response'
-        handled_response = transductor_model.handle_response(collection_type,
-                                                 received_messages_content,
-                                                 transductor, date)
+        handled_response = transductor_model.handle_response(
+            collection_type,
+            received_messages_content,
+            transductor, date)
         communication_log(
             status='Success', 
             datetime=timezone.datetime.now(), 
