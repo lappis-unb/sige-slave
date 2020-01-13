@@ -218,96 +218,126 @@ class EnergyTransductorModel():
         # Arguments refer to initial positions of response information
         # Further information on transductor's Memory Map
         measurement.active_max_power_list_peak_time = []
-        year = timezone.datetime.today().year
 
-        date = timezone.datetime(year, response[19] // 256, 
-                                 response[19] % 256, response[20] // 256,
-                                 response[20] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[18],
-                                                            date])
+        today = timezone.datetime.today()
 
-        date = timezone.datetime(year, response[22] // 256, 
-                                 response[22] % 256, response[23] // 256,
-                                 response[23] % 256)
+        if(today.month != 1):
+            year = today.year
+        else:
+            year = today.year - 1 
 
-        measurement.active_max_power_list_peak_time.append([response[21],
-                                                            date])
-        date = timezone.datetime(year, response[25] // 256, 
-                                 response[25] % 256, response[26] // 256,
-                                 response[26] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[24],
-                                                            date])
+        try:
+            date = timezone.datetime(year, response[19] // 256, 
+                                     response[19] % 256, response[20] // 256,
+                                     response[20] % 256)  
+            measurement.active_max_power_list_peak_time.append(
+                [response[18], date])
 
-        date = timezone.datetime(year, response[28] // 256, 
-                                 response[28] % 256, response[29] // 256,
-                                 response[29] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[27],
-                                                            date])
+            date = timezone.datetime(year, response[22] // 256, 
+                                     response[22] % 256, response[23] // 256,
+                                     response[23] % 256)
+
+            measurement.active_max_power_list_peak_time.append(
+                [response[21], date])
+            date = timezone.datetime(year, response[25] // 256, 
+                                     response[25] % 256, response[26] // 256,
+                                     response[26] % 256)  
+            measurement.active_max_power_list_peak_time.append(
+                [response[24], date])
+
+            date = timezone.datetime(year, response[28] // 256, 
+                                     response[28] % 256, response[29] // 256,
+                                     response[29] % 256)  
+            measurement.active_max_power_list_peak_time.append(
+                [response[27], date])
+        except ValueError:
+            pass
 
         measurement.active_max_power_list_off_peak_time = []
 
-        date = timezone.datetime(year, response[31] // 256, 
-                                 response[31] % 256, response[32] // 256,
-                                 response[32] % 256)  
-        measurement.active_max_power_list_off_peak_time.append([
-            response[30], 
-            date])
-        date = timezone.datetime(year, response[34] // 256, 
-                                 response[34] % 256, response[35] // 256,
-                                 response[35] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[33], 
-             date])
+        try:
+            date = timezone.datetime(year, response[31] // 256, 
+                                     response[31] % 256, response[32] // 256,
+                                     response[32] % 256)  
+            measurement.active_max_power_list_off_peak_time.append([
+                response[30], date])
 
-        date = timezone.datetime(year, response[37] // 256, 
-                                 response[37] % 256, response[38] // 256,
-                                 response[38] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[36], 
-             date])
-        date = timezone.datetime(year, response[40] // 256, 
-                                 response[40] % 256, response[41] // 256,
-                                 response[41] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[39], 
-             date])
+            date = timezone.datetime(year, response[34] // 256, 
+                                     response[34] % 256, response[35] // 256,
+                                     response[35] % 256)  
+            measurement.active_max_power_list_off_peak_time.append(
+                [response[33], date])
+
+            date = timezone.datetime(year, response[37] // 256, 
+                                     response[37] % 256, response[38] // 256,
+                                     response[38] % 256)  
+            measurement.active_max_power_list_off_peak_time.append(
+                [response[36], date])
+
+            date = timezone.datetime(year, response[40] // 256, 
+                                     response[40] % 256, response[41] // 256,
+                                     response[41] % 256)  
+            measurement.active_max_power_list_off_peak_time.append(
+                [response[39], date])
+        except ValueError:
+            pass
 
         measurement.reactive_max_power_list_peak_time = []
-        date = timezone.datetime(year, response[43] // 256, response[43] % 256,
-                                 response[44] // 256, response[44] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[42], 
-                                                              date])
-        date = timezone.datetime(year, response[46] // 256, response[46] % 256,
-                                 response[47] // 256, response[47] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[45], 
-                                                              date])
-        date = timezone.datetime(year, response[49] // 256, response[49] % 256,
-                                 response[50] // 256, response[50] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[48], 
-                                                              date])
-        date = timezone.datetime(year, response[52] // 256, response[52] % 256,
-                                 response[53] // 256, response[53] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[51], 
-                                                              date])
+        try:
+            date = timezone.datetime(year, response[43] // 256, 
+                                     response[43] % 256, response[44] // 256,
+                                     response[44] % 256)  
+            measurement.reactive_max_power_list_peak_time.append(
+                [response[42], date])
+
+            date = timezone.datetime(year, response[46] // 256, 
+                                     response[46] % 256, response[47] // 256,
+                                     response[47] % 256)  
+            measurement.reactive_max_power_list_peak_time.append(
+                [response[45], date])
+
+            date = timezone.datetime(year, response[49] // 256, 
+                                     response[49] % 256, response[50] // 256,
+                                     response[50] % 256)  
+            measurement.reactive_max_power_list_peak_time.append(
+                [response[48], date])
+
+            date = timezone.datetime(year, response[52] // 256,
+                                     response[52] % 256, response[53] // 256,
+                                     response[53] % 256)  
+            measurement.reactive_max_power_list_peak_time.append(
+                [response[51], date])
+        except ValueError:
+            pass
 
         measurement.reactive_max_power_list_off_peak_time = [] 
 
-        date = timezone.datetime(year, response[55] // 256, response[55] % 256,
-                                 response[56] // 256, response[56] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[54],
-                                                                  date])
-        date = timezone.datetime(year, response[58] // 256, response[58] % 256,
-                                 response[59] // 256, response[59] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[57],
-                                                                  date])
-        date = timezone.datetime(year, response[61] // 256, response[61] % 256,
-                                 response[62] // 256, response[62] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[60],
-                                                                  date])
-        date = timezone.datetime(year, response[64] // 256, response[64] % 256,
-                                 response[65] // 256, response[65] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[63],
-                                                                  date])
+        try:
+            date = timezone.datetime(year, response[55] // 256, 
+                                     response[55] % 256, response[56] // 256, 
+                                     response[56] % 256)  
+            measurement.reactive_max_power_list_off_peak_time.append(
+                [response[54], date])
+
+            date = timezone.datetime(year, response[58] // 256, 
+                                     response[58] % 256, response[59] // 256, 
+                                     response[59] % 256)  
+            measurement.reactive_max_power_list_off_peak_time.append(
+                [response[57], date])
+
+            date = timezone.datetime(year, response[61] // 256, 
+                                     response[61] % 256, response[62] // 256, 
+                                     response[62] % 256)  
+            measurement.reactive_max_power_list_off_peak_time.append(
+                [response[60], date])
+                
+            date = timezone.datetime(year, response[64] // 256, 
+                                     response[64] % 256, response[65] // 256,
+                                     response[65] % 256)  
+            measurement.reactive_max_power_list_off_peak_time.append(
+                [response[63], date])
+        except ValueError:
+            pass
 
         measurement.save()
 
