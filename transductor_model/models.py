@@ -232,9 +232,9 @@ class EnergyTransductorModel():
             for i in range(18, 28, 3):
                 measurement.active_max_power_list_peak_time.append(
                     timezone.datetime(
-                        year, response[i+1] // 256, 
-                        response[i+1] % 256, response[i+2] // 256,
-                        response[i+2] % 256))
+                        year, response[i + 1] // 256, 
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
                 measurement.active_max_power_list_peak.append(response[i])
 
         except ValueError:
@@ -247,9 +247,9 @@ class EnergyTransductorModel():
             for i in range(30, 40, 3):
                 measurement.active_max_power_list_off_peak_time.append(
                     timezone.datetime(
-                        year, response[i+1] // 256, 
-                        response[i+1] % 256, response[i+2] // 256,
-                        response[i+2] % 256))
+                        year, response[i + 1] // 256, 
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
                 measurement.active_max_power_list_off_peak.append(response[i])
 
         except ValueError:
@@ -262,9 +262,9 @@ class EnergyTransductorModel():
             for i in range(42, 52, 3):
                 measurement.reactive_max_power_list_peak_time.append(
                     timezone.datetime(
-                        year, response[i+1] // 256, 
-                        response[i+1] % 256, response[i+2] // 256,
-                        response[i+2] % 256))
+                        year, response[i + 1] // 256, 
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
                 measurement.reactive_max_power_list_peak.append(response[i])
 
         except ValueError:
@@ -278,9 +278,9 @@ class EnergyTransductorModel():
             for i in range(54, 64, 3):
                 measurement.reactive_max_power_list_off_peak_time.append(
                     timezone.datetime(
-                        year, response[i+1] // 256, 
-                        response[i+1] % 256, response[i+2] // 256,
-                        response[i+2] % 256))
+                        year, response[i + 1] // 256, 
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
                 measurement.reactive_max_power_list_off_peak.append(response[i])
 
         except ValueError:
