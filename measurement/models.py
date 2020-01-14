@@ -124,17 +124,32 @@ class MonthlyMeasurement(Measurement):
         default=0
     )
 
+    active_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
+    )
     active_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
+    )
+    
+    active_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
     )
     active_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
+    )
+    
+    reactive_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
     )
     reactive_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
+    )
+
+    reactive_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
     )
     reactive_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
     )
 
     def _get_year(self, year, month):
