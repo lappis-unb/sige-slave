@@ -442,7 +442,7 @@ class MD30(EnergyTransductorModel):
         was_broken = transductor.broken
         if transductor.broken:
             collect_old_data_thread.start()
-            transductor.broken = False
+            transductor.set_broken(False)
 
         transductor.last_collection = date
         transductor.save()

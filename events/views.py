@@ -73,7 +73,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
         now = timezone.now()
-        start_date = now - timezone.timedelta(minutes=1)
+        start_date = now - timezone.timedelta(minutes=1000)
         end_date = now
 
         if start_date and end_date:
@@ -86,6 +86,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
             self.queryset = self.queryset.instance_of(self.models[type])
 
         events = []
+
         for event in self.queryset:
             data = {}
             data['ip_address'] = event.transductor.ip_address

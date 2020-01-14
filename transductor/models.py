@@ -1,11 +1,13 @@
 import json
-from datetime import datetime
-from itertools import chain
 
-from django.contrib.postgres.fields import ArrayField
-from django.core.validators import RegexValidator
+from itertools import chain
+from datetime import datetime
+
 from django.db import models
 from django.utils import timezone
+from django.core.validators import RegexValidator
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.postgres.fields import ArrayField
 
 
 class Transductor(models.Model):
@@ -99,13 +101,35 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self, broken):
-        if broken is True:
-            from events.models import FailedConnectionTransductorEvent
-            event = FailedConnectionTransductorEvent()
-            event.save_event(self)
+    def set_broken(self, new_status):
+        from events.models import FailedConnectionTransductorEvent
 
-        self.broken = broken
+        old_status = self.broken
+
+        if old_status == new_status:
+            print("manteve a msm merda")
+
+        if old_status is True and new_status is False:
+            print("old_status is True and new_status is False")
+            try:
+                related_event = FailedConnectionTransductorEvent.objects.filter(
+                    transductor=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except FailedConnectionTransductorEvent.DoesNotExist as e:
+                print("except FailedConnectionTransductorEvent.DoesNotExist() as e:")
+                pass
+
+        elif old_status is False and new_status is True:
+            print("elif old_status is False and new_status is True:")
+            evt = FailedConnectionTransductorEvent()
+            evt.save_event(self)
+
+        print("qq um outro lugar")
+        self.broken = new_status
         self.save(update_fields=['broken'])
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
