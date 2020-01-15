@@ -107,11 +107,15 @@ class EnergyTransductor(Transductor):
 
         if old_status is True and new_status is False:
             last_time_interval = self.timeintervals.last()
+
             if last_time_interval is not None:
                 last_time_interval.end_interval()
 
             else:
-                raise Exception
+                self.broken = new_status
+                self.save(update_fields=['broken'])
+                raise Exception(
+                    'There is no time intervals open on this transducer!')
 
             try:
                 related_event = FailedConnectionTransductorEvent.objects.filter(
