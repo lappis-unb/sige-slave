@@ -25,6 +25,7 @@ from transductor import views as energy_transductor_views
 from measurement import views as measurements_views
 from events.views import VoltageRelatedEventViewSet
 from events.views import FailedConnectionTransductorEventViewSet
+from measurement import urls as measurements_routes
 
 
 router = DefaultRouter()
@@ -69,6 +70,8 @@ router.register(
     FailedConnectionTransductorEventViewSet,
     basename='failed-connection-events'
 )
+
+router.registry.extend(measurements_routes.router.registry)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

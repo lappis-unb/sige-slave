@@ -50,7 +50,6 @@ class Transductor(models.Model):
             ),
         ])
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
-    last_collection = models.DateTimeField(blank=True, null=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
@@ -107,6 +106,13 @@ class EnergyTransductor(Transductor):
         old_status = self.broken
 
         if old_status is True and new_status is False:
+            last_time_interval = self.timeintervals.last()
+            if last_time_interval is not None:
+                last_time_interval.end_interval()
+
+            else:
+                raise Exception
+
             try:
                 related_event = FailedConnectionTransductorEvent.objects.filter(
                     transductor=self,
@@ -121,6 +127,7 @@ class EnergyTransductor(Transductor):
         elif old_status is False and new_status is True:
             evt = FailedConnectionTransductorEvent()
             evt.save_event(self)
+            TimeInterval.begin_interval(self)
 
         self.broken = new_status
         self.save(update_fields=['broken'])
@@ -151,3 +158,40 @@ class EnergyTransductor(Transductor):
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()
+
+
+class TimeInterval(models.Model):
+
+    begin = models.DateTimeField(null=False)
+    end = models.DateTimeField(null=True)
+
+    # TODO Change related name
+
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        models.CASCADE,
+        related_name='timeintervals',
+    )
+
+    @staticmethod
+    def begin_interval(transductor):
+        time_interval = TimeInterval()
+        time_interval.begin = timezone.datetime.now()
+        time_interval.transductor = transductor
+        time_interval.save()
+
+    def end_interval(self):
+        self.end = timezone.datetime.now()
+        self.save(update_fields=['end'])
+
+    def change_interval(self, time):
+        self.begin = time + timezone.timedelta(minutes=1)
+
+        status = (self.end - time) >= timezone.timedelta(minutes=1)
+
+        if(status):
+            self.save(update_fields=['begin'])
+        else:
+            self.delete()
+
+        return status

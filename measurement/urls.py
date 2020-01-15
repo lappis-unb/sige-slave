@@ -1,6 +1,7 @@
 from .views import MinutelyMeasurementViewSet
 from .views import QuarterlyMeasurementViewSet
 from .views import MonthlyMeasurementViewSet
+from .views import RealTimeMeasurementViewSet
 
 from rest_framework import routers
 
@@ -11,5 +12,4 @@ router = routers.DefaultRouter()
 router.register(r'minutely_measurements', MinutelyMeasurementViewSet)
 router.register(r'quarterly_measurements', QuarterlyMeasurementViewSet)
 router.register(r'monthly_measurements', MonthlyMeasurementViewSet)
-
-urlpatterns = []
+router.register(r'realtime_measurements', RealTimeMeasurementViewSet)
