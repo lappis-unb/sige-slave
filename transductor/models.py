@@ -101,6 +101,10 @@ class EnergyTransductor(Transductor):
         return self.serial_number
 
     def set_broken(self, new_status):
+        """
+        Set the broken atribute's new status to match the param. If toggled to True,
+        creates a failed connection event
+        """
         from events.models import FailedConnectionTransductorEvent
 
         old_status = self.broken
