@@ -246,8 +246,7 @@ class MonthlyMeasurement(Measurement):
 
             if values_list[initial_date_position][0 + i] != 0:
                 value_result = values_list[value + count]
-                timestamp =
-                timezone.datetime(
+                timestamp = timezone.datetime(
                     current_year,
                     values_list[initial_date_position][0 + i],
                     values_list[initial_date_position][1 + i],
