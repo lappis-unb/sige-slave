@@ -12,9 +12,6 @@ class EnergyTransductorModel():
     transport_protocol = "UdpProtocol"
     serial_protocol = "ModbusRTU"
 
-    read_register = 3
-    preset_multiple_register = 16
-
     registers = {
         "Minutely": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
@@ -45,13 +42,8 @@ class EnergyTransductorModel():
         "CorrectDate": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1]
         ],
-        "DataRescuePost": [
-            [160, 4]
-        ],
-        "DataRescueGet": [
-            [200, 22]
-        ]
-
+        "DataRescuePost": [[160, 4]],
+        "DataRescueGet": [[200, 22]]
     }
 
     def collection_functions(self):
@@ -60,8 +52,6 @@ class EnergyTransductorModel():
             "Quarterly": self.quarterly_collection,
             "Monthly": self.monthly_collection,
             "CorrectDate": self.correct_date,
-            "DataRescuePost": self.data_rescue_post,
-            "DataRescueGet": self.data_rescue_get,
         }
 
     def handle_response_functions(self):
@@ -70,8 +60,6 @@ class EnergyTransductorModel():
             "Quarterly": self.save_quarterly_measurement,
             "Monthly": self.save_monthly_measurement,
             "CorrectDate": self.verify_rescue_collection_date,
-            "DataRescuePost": self.verify_rescue_collection_date,
-            "DataRescueGet": self.save_rescued_data,
         }
 
     def data_collection(self, type, date=None):
@@ -82,38 +70,39 @@ class EnergyTransductorModel():
             return collection_dict[type](date)
 
     def minutely_collection(self):
-        return (self.read_register, self.registers['Minutely'])
+        return ("ReadHoldingRegisters", self.registers['Minutely'])
 
     def quarterly_collection(self):
-        return (self.read_register, self.registers['Quarterly'])
+        return ("ReadHoldingRegisters", self.registers['Quarterly'])
 
     def monthly_collection(self):
-        return (self.read_register, self.registers['Monthly'])
+        return ("ReadHoldingRegisters", self.registers['Monthly'])
 
     def correct_date(self):
         date = timezone.datetime.now()
         payload = [date.year, date.month, date.day, date.hour, date.minute, 
                    date.second]
-        return (self.preset_multiple_register, self.registers['CorrectDate'],
+        return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
 
     def data_rescue_post(self, date):
         timestamp = int(timezone.datetime.timestamp(date))
         payload = [timestamp]
-        return (self.preset_multiple_register, self.registers['DataRescuePost'],
+        return ("PresetMultipleRegisters", self.registers['DataRescuePost'],
                 payload)
 
-    def data_rescue_get(self):
-        return (self.read_register, self.registers['DataRescueGet'])
+    def data_rescue_get(self, date):
+        return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
-    def handle_response(self, collection_type, response, transductor):
+    def handle_response(self, collection_type, response, transductor,
+                        date=None):
         response_dict = self.handle_response_functions()
         try:
-            return response_dict[collection_type](response, transductor)
+            return response_dict[collection_type](response, transductor, date)
         except Exception as e:
             print("Error:", e)
 
-    def save_minutely_measurement(self, response, transductor):
+    def save_minutely_measurement(self, response, transductor, date=None):
         from data_reader.utils import perform_data_rescue
 
         self.verify_collection_date(response, transductor)
@@ -167,19 +156,9 @@ class EnergyTransductorModel():
         minutely_measurement.total_consumption = response[38]
 
         minutely_measurement.save()
-        if transductor.broken:
-            collect_old_data_thread = Thread(
-                target=perform_data_rescue,
-                args=(transductor, transductor.last_collection,
-                      date)
-            )
-            collect_old_data_thread.start()
-            transductor.broken = False
+        return minutely_measurement.collection_date
 
-        transductor.last_collection = minutely_measurement.collection_date 
-        transductor.save()
-
-    def save_quarterly_measurement(self, response, transductor):
+    def save_quarterly_measurement(self, response, transductor, date=None):
         quarterly_measurement = QuarterlyMeasurement()
         quarterly_measurement.transductor = transductor
 
@@ -206,7 +185,7 @@ class EnergyTransductorModel():
 
         quarterly_measurement.save()
 
-    def save_monthly_measurement(self, response, transductor):
+    def save_monthly_measurement(self, response, transductor, date=None):
         measurement = MonthlyMeasurement()
         measurement.transductor = transductor
 
@@ -334,13 +313,18 @@ class EnergyTransductorModel():
 
         measurement.save()
 
-    def verify_rescue_collection_date(self, response, transductor):
+    def verify_rescue_collection_date(self, response, transductor, date=None):
         pass
 
-    def save_rescued_data(self, response, transductor):
+    def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
         if(MinutelyMeasurement.objects.filter(
                 collection_date=response[0][0]).__len__() != 0):
+            return response[0][0]
+        time_diference = date - response[0][0]
+        max_delay_acceptable = 30
+
+        if(abs(time_diference.seconds) > max_delay_acceptable):
             return response[0][0]
         measurement.collection_date = response[0][0]       
         measurement.voltage_a = response[0][1]
@@ -378,3 +362,87 @@ class EnergyTransductorModel():
             measurements[3] = real_date.hour
             measurements[4] = real_date.minute
             measurements[5] = real_date.second
+
+
+class MD30(EnergyTransductorModel):
+    transport_protocol = "TcpProtocol"
+    serial_protocol = "ModbusTCP"
+
+    registers = {
+        "Minutely": [
+            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [66, 2],
+            [68, 2], [70, 2], [72, 2], [74, 2], [76, 2], [78, 2], [80, 2],
+            [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [92, 2], [94, 2],
+            [96, 2], [98, 2], [100, 2], [102, 2], [104, 2], [106, 2], [108, 2],
+            [110, 2], [112, 2], [114, 2], [116, 2], [118, 2], [120, 2], 
+            [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
+        ],
+        "Quarterly": [
+            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
+            [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
+            [284, 2]
+        ],
+        "Monthly": [
+            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
+            [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2], 
+            [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
+            [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2], 
+            [518, 1], [522, 1], [426, 2], [519, 1], [523, 1], [428, 2],
+            [524, 1], [528, 1], [430, 2], [525, 1], [529, 1], [432, 2],
+            [526, 1], [530, 1], [434, 2], [527, 1], [531, 1], [444, 2],
+            [540, 1], [544, 1], [446, 2], [541, 1], [545, 1], [448, 2],
+            [542, 1], [546, 1], [450, 2], [543, 1], [547, 1], [452, 2],
+            [548, 1], [552, 1], [454, 2], [549, 1], [553, 1], [456, 2],
+            [550, 1], [554, 1], [458, 2], [551, 1], [555, 1]
+        ],
+        "CorrectDate": [
+            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1]
+        ],
+        "DataRescuePost": [[160, 4]],
+        "DataRescueGet": [[200, 22]]
+    }
+
+    def collection_functions(self):
+        return {
+            "Minutely": self.minutely_collection,
+            "Quarterly": self.quarterly_collection,
+            "Monthly": self.monthly_collection,
+            "CorrectDate": self.correct_date,
+            "DataRescuePost": self.data_rescue_post,
+            "DataRescueGet": self.data_rescue_get,
+        }
+
+    def handle_response_functions(self):
+        return {
+            "Minutely": self.save_minutely_measurement,
+            "Quarterly": self.save_quarterly_measurement,
+            "Monthly": self.save_monthly_measurement,
+            "CorrectDate": self.verify_rescue_collection_date,
+            "DataRescuePost": self.verify_rescue_collection_date,
+            "DataRescueGet": self.save_rescued_data,
+        }
+
+    def save_minutely_measurement(self, response, transductor, date=None):
+        from data_reader.utils import perform_data_rescue
+        date = super().save_minutely_measurement(response, transductor, date)
+        collect_old_data_thread = Thread(
+            target=perform_data_rescue,
+            args=(transductor, transductor.last_collection,
+                  date)
+        )
+        was_broken = transductor.broken
+        if transductor.broken:
+            collect_old_data_thread.start()
+            transductor.broken = False
+
+        transductor.last_collection = date
+        transductor.save()
+        if was_broken:
+            collect_old_data_thread.join()
+
+
+class TR4020(EnergyTransductorModel):
+    def save_minutely_measurement(self, response, transductor):
+        date = super().save_minutely_measurement(response, transductor)
+        transductor.last_collection = date
+        transductor.save()

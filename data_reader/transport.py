@@ -30,7 +30,7 @@ class TransportProtocol(metaclass=ABCMeta):
 
     def send_messages(self, messages):
         response_messages = []
-        self.open_socket
+        self.open_socket()
         for message in messages:
             response_messages.append(self.send_message(message))
         self.socket.close()
@@ -100,15 +100,14 @@ class UdpProtocol(TransportProtocol):
         return received_message[0]
 
 
-def TcpProtocol(TransportProtocol):
+class TcpProtocol(TransportProtocol):
 
     def open_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(timeout)
-        self.socket.connect((self.transductor.ip_address, port))
+        self.socket.settimeout(1)
+        self.socket.connect((self.transductor.ip_address, 1001))
 
     def send_message(self, message):
-        self.socket.sendto(message)
-        received_message = self.socket.recvfrom(256)
-        self.serial_protocol._check_crc(received_message[0])
+        self.socket.send(message)
+        received_message = self.socket.recvfrom(1024)
         return received_message[0]
