@@ -28,12 +28,8 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
         now = timezone.now()
-        start_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour - 1, now.minute, 0, 0
-        )
-        end_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour - 1, now.minute, 59, 999999
-        )
+        start_date = now - timezone.timedelta(minutes=1)
+        end_date = now
 
         if start_date and end_date:
             self.queryset = self.queryset.filter(
@@ -73,7 +69,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
         now = timezone.now()
-        start_date = now - timezone.timedelta(days=3)
+        start_date = now - timezone.timedelta(minutes=1)
         end_date = now
 
         if start_date and end_date:
