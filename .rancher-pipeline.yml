@@ -10,11 +10,11 @@ stages:
 
 - name: Deploy Staging
   when:
-    branch: master
+    branch: development
   steps:
   - applyYamlConfig:
       path: ./deploy/staging/deployment-slave.yaml
 
 branch:
-  include: [ master ]
+  include: [ development, master ]
 notification: {}
