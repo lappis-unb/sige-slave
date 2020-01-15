@@ -89,29 +89,42 @@ class EnergyMeasurementTestCase(TestCase):
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
+            active_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
+            ],
             active_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            active_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             active_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+            reactive_max_power_list_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
+            ],
+
+            reactive_max_power_list_off_peak=[
+                0.0, 0.0, 0.0, 0.0
             ],
             reactive_max_power_list_off_peak_time=[
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"},
-                {"value": 0.0, "timestamp": "2019-02-05 14:00:00"}
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0),
+                timezone.datetime(2019, 2, 5, 14, 0, 0)
             ]
         )
 
@@ -312,9 +325,13 @@ class EnergyMeasurementTestCase(TestCase):
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
+        monthly_en_measurement.active_max_power_list_peak = []
         monthly_en_measurement.active_max_power_list_off_peak_time = []
+        monthly_en_measurement.active_max_power_list_off_peak = []
         monthly_en_measurement.reactive_max_power_list_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_peak = []
         monthly_en_measurement.reactive_max_power_list_off_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_off_peak = []
 
         self.assertIsNone(monthly_en_measurement.save())
         self.assertEqual(size + 1, len(MonthlyMeasurement.objects.all()))
@@ -339,9 +356,13 @@ class EnergyMeasurementTestCase(TestCase):
         monthly_en_measurement.reactive_max_power_peak_time = 9
         monthly_en_measurement.reactive_max_power_off_peak_time = 9
         monthly_en_measurement.active_max_power_list_peak_time = []
+        monthly_en_measurement.active_max_power_list_peak = []
         monthly_en_measurement.active_max_power_list_off_peak_time = []
+        monthly_en_measurement.active_max_power_list_off_peak = []
         monthly_en_measurement.reactive_max_power_list_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_peak = []
         monthly_en_measurement.reactive_max_power_list_off_peak_time = []
+        monthly_en_measurement.reactive_max_power_list_off_peak = []
 
         self.assertIsNone(monthly_en_measurement.save())
         self.assertEqual(size + 1, len(MonthlyMeasurement.objects.all()))
@@ -359,9 +380,13 @@ class EnergyMeasurementTestCase(TestCase):
                 serial_number=87654321
             )
         monthly_energy_measurement.active_max_power_list_peak_time = []
+        monthly_energy_measurement.active_max_power_list_peak = []
         monthly_energy_measurement.active_max_power_list_off_peak_time = []
+        monthly_energy_measurement.active_max_power_list_off_peak = []
         monthly_energy_measurement.reactive_max_power_list_peak_time = []
+        monthly_energy_measurement.reactive_max_power_list_peak = []
         monthly_energy_measurement.reactive_max_power_list_off_peak_time = []
+        monthly_energy_measurement.reactive_max_power_list_off_peak = []
         monthly_energy_measurement.save()
 
         monthly_energy_measurement.generated_energy_peak_time = 9
