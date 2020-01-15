@@ -106,11 +106,7 @@ class EnergyTransductor(Transductor):
 
         old_status = self.broken
 
-        if old_status == new_status:
-            print("manteve a msm merda")
-
         if old_status is True and new_status is False:
-            print("old_status is True and new_status is False")
             try:
                 related_event = FailedConnectionTransductorEvent.objects.filter(
                     transductor=self,
@@ -120,15 +116,12 @@ class EnergyTransductor(Transductor):
                 related_event.save()
 
             except FailedConnectionTransductorEvent.DoesNotExist as e:
-                print("except FailedConnectionTransductorEvent.DoesNotExist() as e:")
                 pass
 
         elif old_status is False and new_status is True:
-            print("elif old_status is False and new_status is True:")
             evt = FailedConnectionTransductorEvent()
             evt.save_event(self)
 
-        print("qq um outro lugar")
         self.broken = new_status
         self.save(update_fields=['broken'])
 
