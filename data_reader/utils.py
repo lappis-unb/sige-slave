@@ -66,6 +66,7 @@ def single_data_collection(transductor, collection_type, date=None):
     try:
         communication_step = 'capturing transductor model'
         transductor_model = get_transductor_model(transductor)
+        communication_step = "capturing serial and transport protocols"
         serial_protocol_instance, \
             transport_protocol_instance = get_protocols(transductor,
                                                         transductor_model)
@@ -90,10 +91,13 @@ def single_data_collection(transductor, collection_type, date=None):
             type=collection_type, 
             transductor=transductor
         )
+        if not handled_response:
+            handled_response = True
         return handled_response
     except Exception as e:
-        if(collection_type == "Minutely"):
+        if (collection_type == "Minutely"):
             transductor.set_broken(True)
+        
         communication_log(
             status='Failure at ' + communication_step, 
             datetime=timezone.datetime.now(), 
@@ -104,7 +108,7 @@ def single_data_collection(transductor, collection_type, date=None):
         return None
 
 
-def perform_data_rescue(transductor):
+def perform_minutely_data_rescue(transductor):
     interval = transductor.timeintervals.first()
     if (interval is None or interval.end is None):
         return
@@ -128,10 +132,40 @@ def perform_data_rescue(transductor):
         time.sleep(0.1)
 
 
-def perform_all_data_rescue():
+def perform_periodic_data_rescue(transductor, rescue_type):
+    attribute = get_rescue_attribute(rescue_type)
+    if transductor.__dict__[attribute] is True:
+        return
+    if single_data_collection(transductor, rescue_type) is None:
+        transductor.__dict__[attribute] = False
+    else:
+        transductor.__dict__[attribute] = True
+    transductor.save(update_fields=[attribute])
+
+
+def get_rescue_function(rescue_type):
+    if rescue_type == 'Minutely':
+        return perform_minutely_data_rescue
+    else:
+        return perform_periodic_data_rescue
+
+
+def get_rescue_attribute(rescue_type):
+    if rescue_type == 'Quarterly':
+        return 'quarterly_data_rescued'
+    if rescue_type == 'Monthly':
+        return 'monthly_data_rescued'
+    return None
+
+
+def perform_all_data_rescue(rescue_type):
     transductors = get_active_transductors()
+    rescue_function = get_rescue_function(rescue_type)
     for transductor in transductors:
-        perform_data_rescue(transductor)
+        if rescue_type is "Minutely":
+            rescue_function(transductor)
+        else:
+            rescue_function(transductor, rescue_type)
 
 
 def get_protocols(transductor, transductor_model):

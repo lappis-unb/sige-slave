@@ -53,6 +53,8 @@ class Transductor(models.Model):
     firmware_version = models.CharField(max_length=20)
     installation_date = models.DateTimeField(blank=True, null=True)
     physical_location = models.CharField(max_length=30, default='')
+    quarterly_data_rescued = models.BooleanField(default=False)
+    monthly_data_rescued = models.BooleanField(default=False)
     geolocation_longitude = models.DecimalField(
         max_digits=15,
         decimal_places=10
