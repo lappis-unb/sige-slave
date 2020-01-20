@@ -28,12 +28,8 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
         now = timezone.now()
-        start_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour - 1, now.minute, 0, 0
-        )
-        end_date = timezone.datetime(
-            now.year, now.month, now.day, now.hour - 1, now.minute, 59, 999999
-        )
+        start_date = now - timezone.timedelta(minutes=1)
+        end_date = now
 
         if start_date and end_date:
             self.queryset = self.queryset.filter(
@@ -47,10 +43,10 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         events = []
         for event in self.queryset:
             data = {}
-            data['measures'] = {}
+            data['data'] = {}
             for measure in event.measures.keys():
-                data['measures'].setdefault(measure)
-                data['measures'].update({measure: event.measures[measure]})
+                data['data'].setdefault(measure)
+                data['data'].update({measure: event.measures[measure]})
 
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
@@ -73,7 +69,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
         now = timezone.now()
-        start_date = now - timezone.timedelta(days=3)
+        start_date = now - timezone.timedelta(minutes=1)
         end_date = now
 
         if start_date and end_date:
@@ -89,6 +85,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
 
         for event in self.queryset:
             data = {}
+            data['data'] = event.data
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
             data['ended_at'] = event.ended_at

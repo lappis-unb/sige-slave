@@ -91,6 +91,8 @@ class UdpProtocol(TransportProtocol):
                 if(receive_attemps == self.max_receive_attempts):
                     raise NumberOfAttempsReachedException(
                         "Maximum attempts reached!")
+                    self.transductor.set_broken(True)
+                    self.transductor.save()
                 pass
             except CRCInvalidException as e:
                 crc_errors += 1
