@@ -43,10 +43,10 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         events = []
         for event in self.queryset:
             data = {}
-            data['measures'] = {}
+            data['data'] = {}
             for measure in event.measures.keys():
-                data['measures'].setdefault(measure)
-                data['measures'].update({measure: event.measures[measure]})
+                data['data'].setdefault(measure)
+                data['data'].update({measure: event.measures[measure]})
 
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
@@ -85,6 +85,7 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
 
         for event in self.queryset:
             data = {}
+            data['data'] = event.data
             data['ip_address'] = event.transductor.ip_address
             data['created_at'] = event.created_at
             data['ended_at'] = event.ended_at

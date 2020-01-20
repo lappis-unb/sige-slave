@@ -219,7 +219,7 @@ class MonthlyMeasurement(Measurement):
     active_max_power_list_peak_time = ArrayField(
         models.DateTimeField(), default=None
     )
-    
+
     active_max_power_list_off_peak = ArrayField(
         models.FloatField(), default=None
     )
@@ -227,7 +227,7 @@ class MonthlyMeasurement(Measurement):
     active_max_power_list_off_peak_time = ArrayField(
         models.DateTimeField(), default=None
     )
-    
+
     reactive_max_power_list_peak = ArrayField(
         models.FloatField(), default=None
     )
