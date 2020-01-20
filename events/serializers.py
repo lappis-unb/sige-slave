@@ -4,14 +4,13 @@ from .models import FailedConnectionTransductorEvent
 
 
 class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
-    measures = serializers.DictField()
     type = serializers.CharField()
     ip_address = serializers.CharField()
 
     class Meta:
         model = VoltageRelatedEvent
         fields = (
-            'measures',
+            'data',
             'type',
             'ip_address',
             'created_at',
@@ -27,6 +26,7 @@ class FailedConnectionTransductorEventSerializer(
     class Meta:
         model = FailedConnectionTransductorEvent
         fields = (
+            'data',
             'type',
             'ip_address',
             'created_at',
