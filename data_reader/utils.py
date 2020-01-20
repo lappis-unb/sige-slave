@@ -58,8 +58,8 @@ def single_data_collection(transductor, collection_type, date=None):
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
         return transductor_model.handle_response(collection_type,
-                                                 received_messages_content,
-                                                 transductor, date)
+                                                received_messages_content,
+                                                transductor, date)
     except Exception as e:
         if(collection_type == "Minutely"):
             transductor.set_broken(True)

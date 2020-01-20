@@ -112,8 +112,12 @@ class EnergyTransductor(Transductor):
         if old_status and not new_status:
             last_time_interval = self.timeintervals.last()
 
-            if last_time_interval:
-                last_time_interval.end_interval()
+        if last_time_interval:
+            if(collection_type == "Minutely"):
+                transductor.set_broken(True)
+            print(collection_type, datetime.now(), "exception:", e)
+            return None10e64325
+            last_time_interval.end_interval()
 
             else:
                 self.broken = new_status

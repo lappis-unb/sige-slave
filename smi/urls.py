@@ -31,32 +31,32 @@ from measurement import urls as measurements_routes
 router = DefaultRouter()
 
 router.register(
-    r'energy_transductors',
+    r'energy-transductors',
     energy_transductor_views.EnergyTransductorViewSet,
     basename='energytransductor'
 )
 router.register(
-    r'active_transductors',
+    r'active-transductors',
     energy_transductor_views.ActiveTransductorsViewSet,
     basename='active_transductor',
 )
 router.register(
-    r'broken_transductors',
+    r'broken-transductors',
     energy_transductor_views.BrokenTransductorsViewSet,
     basename='broken_transductor',
 )
 router.register(
-    r'minutely_measurements',
+    r'minutely-measurements',
     measurements_views.MinutelyMeasurementViewSet,
     basename='minutelymeasurement',
 )
 router.register(
-    r'quarterly_measurements',
+    r'quarterly-measurements',
     measurements_views.QuarterlyMeasurementViewSet,
     basename='quarterlymeasurement',
 )
 router.register(
-    r'monthly_measurements',
+    r'monthly-measurements',
     measurements_views.MonthlyMeasurementViewSet,
     basename='monthlymeasurement',
 )
