@@ -109,15 +109,11 @@ class EnergyTransductor(Transductor):
 
         old_status = self.broken
 
-        if old_status and not new_status:
+        if old_status is True and new_status is False:
             last_time_interval = self.timeintervals.last()
 
-        if last_time_interval:
-            if(collection_type == "Minutely"):
-                transductor.set_broken(True)
-            print(collection_type, datetime.now(), "exception:", e)
-            return None10e64325
-            last_time_interval.end_interval()
+            if last_time_interval is not None:
+                last_time_interval.end_interval()
 
             else:
                 self.broken = new_status
@@ -137,7 +133,7 @@ class EnergyTransductor(Transductor):
                 print('There is no element in queryset filtered.')
                 pass
 
-        elif not old_status and new_status:
+        elif old_status is False and new_status is True:
             evt = FailedConnectionTransductorEvent()
             evt.save_event(self)
             TimeInterval.begin_interval(self)
