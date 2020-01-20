@@ -127,12 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
               '.NumericPasswordValidator')}
 ]
 
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': ('measurement.pagination'
-                                 '.PostPageNumberPagination'),
-    'PAGE_SIZE': 50
-}
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
