@@ -55,6 +55,12 @@ class FailedConnectionTransductorEvent(Event):
     Defines a new event related to a failed connection with a transductor
     """
 
+    def save_event(self, transductor, list_data=[]):
+        self.transductor = transductor
+        self.data = {}
+        self.save()
+        return self
+
 
 class CriticalVoltageEvent(VoltageRelatedEvent):
     """
