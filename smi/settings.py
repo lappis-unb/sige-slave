@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django_cron',
+    'polymorphic',
     'rest_framework',
+    'events',
+    'transductor',
     'measurement',
     'transductor_model',
-    'transductor',
 ]
 
 MIDDLEWARE = [
@@ -124,12 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': ('django.contrib.auth.password_validation'
               '.NumericPasswordValidator')}
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': ('measurement.pagination'
-                                 '.PostPageNumberPagination'),
-    'PAGE_SIZE': 50
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
