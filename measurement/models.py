@@ -1,11 +1,12 @@
-import json
-from datetime import datetime
 import os
-from django.conf import settings
-from django.contrib.postgres.fields import ArrayField, HStoreField
-from django.core import serializers
+import json
+
 from django.db import models
+from datetime import datetime
+from django.conf import settings
 from django.utils import timezone
+from django.core import serializers
+from django.contrib.postgres.fields import ArrayField, HStoreField
 
 from transductor.models import EnergyTransductor
 
