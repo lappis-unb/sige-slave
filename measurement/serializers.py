@@ -78,9 +78,32 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'active_max_power_off_peak_time',
                   'reactive_max_power_peak_time',
                   'reactive_max_power_off_peak_time',
+                  'active_max_power_list_peak',
                   'active_max_power_list_peak_time',
+                  'active_max_power_list_off_peak',
                   'active_max_power_list_off_peak_time',
+                  'reactive_max_power_list_peak',
                   'reactive_max_power_list_peak_time',
+                  'reactive_max_power_list_off_peak',
                   'reactive_max_power_list_off_peak_time',
                   'transductor',
+                  'url')
+
+
+class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = MinutelyMeasurement
+        fields = ('id',
+                  'transductor_id',
+                  'collection_date',
+                  'voltage_a',
+                  'voltage_b',
+                  'voltage_c',
+                  'current_a',
+                  'current_b',
+                  'current_c',
+                  'total_active_power',
+                  'total_reactive_power',
+                  'total_power_factor',
                   'url')

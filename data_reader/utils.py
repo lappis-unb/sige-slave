@@ -23,8 +23,24 @@ from measurement.models import *
 import time
 
 
-def get_transductors():
-    return EnergyTransductor.objects.all()
+def communication_log(status, datetime, type, transductor, errors=[]):
+    print('DateTime:\t', datetime)
+    print(
+        'Transductor:\t', 
+        transductor.serial_number + '@' + transductor.physical_location, 
+        '(' + transductor.ip_address + ')'
+    )
+    print('Type:\t\t', type)
+    print('Status:\t\t', status)
+    if errors:
+        print('Errors:')
+        for error in errors:
+            print('\t\t', error)
+    print('\n')
+
+
+def get_active_transductors():
+    return EnergyTransductor.objects.filter(active=True)
 
 
 def get_transductor_model(transductor):
@@ -45,39 +61,78 @@ def single_data_collection(transductor, collection_type, date=None):
     Returns:
         None
     """
-    transductor_model = get_transductor_model(transductor)
-    serial_protocol_instance, \
-        transport_protocol_instance = get_protocols(transductor,
-                                                    transductor_model)
 
-    messages_to_send = serial_protocol_instance.create_messages(
-        collection_type, date)
+    communication_step = ''
     try:
+        communication_step = 'capturing transductor model'
+        transductor_model = get_transductor_model(transductor)
+        serial_protocol_instance, \
+            transport_protocol_instance = get_protocols(transductor,
+                                                        transductor_model)
+        communication_step = 'assembling messages'
+        messages_to_send = serial_protocol_instance.create_messages(
+            collection_type, date)
+        communication_step = 'sending messages'
         received_messages = transport_protocol_instance.send_messages(
             messages_to_send)
+        communication_step = 'parsing response'
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
-
-        return transductor_model.handle_response(collection_type,
-                                                 received_messages_content,
-                                                 transductor, date)
+        communication_step = 'handling response'
+        handled_response = transductor_model.handle_response(
+            collection_type,
+            received_messages_content,
+            transductor, date)
+        communication_log(
+            status='Success', 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor
+        )
+        return handled_response
     except Exception as e:
-        transductor.set_broken(True)
-        print(collection_type, datetime.now(), "exception:", e)
+        if(collection_type == "Minutely"):
+            transductor.set_broken(True)
+        communication_log(
+            status='Failure at ' + communication_step, 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor, 
+            errors=[e]
+        )
+        return None
+
+
+def perform_data_rescue(transductor):
+    interval = transductor.timeintervals.first()
+    if (interval is None or interval.end is None):
         return
-
-
-def perform_data_rescue(transductor, begin_date, end_date):
-    max_acceptable_difference = 30
-    while((end_date - begin_date).total_seconds() > max_acceptable_difference):
-        time.sleep(0.1)
-        single_data_collection(transductor, "DataRescuePost", begin_date)
-        time.sleep(0.1)
-        date = single_data_collection(transductor, "DataRescueGet", begin_date)
-        if(date is None):
+    while(True):
+        if(single_data_collection(transductor, "DataRescuePost",
+                                  interval.begin) is None):
             return
-        begin_date = date + timezone.timedelta(minutes=1)
+        time.sleep(0.1)
+
+        measurement = single_data_collection(transductor, "DataRescueGet")
+        if(measurement is None):
+            return
+
+        inside_interval = interval.change_interval(
+            measurement.collection_date)
+
+        if(inside_interval):
+            measurement.check_measurements()
+            measurement.save()
+        else:
+            return
+        time.sleep(0.1)
+
+
+def perform_all_data_rescue():
+    transductors = get_active_transductors()
+    for transductor in transductors:
+        perform_data_rescue(transductor)
 
 
 def get_protocols(transductor, transductor_model):
@@ -104,17 +159,16 @@ def perform_all_data_collection(collection_type):
     """
     threads = []
 
-    transductors = get_transductors()
+    transductors = get_active_transductors()
     for transductor in transductors:
-        if(transductor.active):
-            collection_thread = Thread(
-                target=single_data_collection,
-                args=(transductor, collection_type)
-            )
+        collection_thread = Thread(
+            target=single_data_collection,
+            args=(transductor, collection_type)
+        )
 
-            collection_thread.start()
+        collection_thread.start()
 
-            threads.append(collection_thread)
+        threads.append(collection_thread)
 
     for thread in threads:
         thread.join()

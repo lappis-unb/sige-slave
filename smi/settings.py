@@ -44,10 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django_cron',
+    'polymorphic',
     'rest_framework',
+    'events',
+    'transductor',
     'measurement',
     'transductor_model',
-    'transductor',
 ]
 
 MIDDLEWARE = [
@@ -79,6 +81,7 @@ TEMPLATES = [
 ]
 
 CRON_CLASSES = [
+    "data_reader.cronjob.DataRescueCronJob",
     "data_reader.cronjob.MinutelyCollectCronJob",
     "data_reader.cronjob.QuarterlyCollectCronJob",
     "data_reader.cronjob.MonthlyCollectCronJob",
@@ -115,12 +118,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': ('django.contrib.auth.password_validation'
               '.NumericPasswordValidator')}
 ]
-
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': ('measurement.pagination'
-                                 '.PostPageNumberPagination'),
-    'PAGE_SIZE': 50
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/

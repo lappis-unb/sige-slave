@@ -20,6 +20,7 @@ itypes==1.1.0
 Jinja2==2.10.3
 Markdown==3.0.1
 MarkupSafe==1.1.1
+django-polymorphic==2.1.2
 mccabe==0.6.1
 mock==2.0.0
 more-itertools==5.0.0

@@ -19,46 +19,59 @@ from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from django.urls import path, include
-from django.conf.urls import url    
+from django.conf.urls import url
 
 from transductor import views as energy_transductor_views
 from measurement import views as measurements_views
+from events.views import VoltageRelatedEventViewSet
+from events.views import FailedConnectionTransductorEventViewSet
+from measurement import urls as measurements_routes
 
 
 router = DefaultRouter()
 
 router.register(
-    r'energy_transductors',
+    r'energy-transductors',
     energy_transductor_views.EnergyTransductorViewSet,
-    basename='energytransductor',
-
+    basename='energytransductor'
 )
 router.register(
-    r'active_transductors',
+    r'active-transductors',
     energy_transductor_views.ActiveTransductorsViewSet,
     basename='active_transductor',
 )
 router.register(
-    r'broken_transductors',
+    r'broken-transductors',
     energy_transductor_views.BrokenTransductorsViewSet,
     basename='broken_transductor',
 )
 router.register(
-    r'minutely_measurements',
+    r'minutely-measurements',
     measurements_views.MinutelyMeasurementViewSet,
     basename='minutelymeasurement',
 )
 router.register(
-    r'quarterly_measurements',
+    r'quarterly-measurements',
     measurements_views.QuarterlyMeasurementViewSet,
     basename='quarterlymeasurement',
 )
-
 router.register(
-    r'monthly_measurements',
+    r'monthly-measurements',
     measurements_views.MonthlyMeasurementViewSet,
     basename='monthlymeasurement',
 )
+router.register(
+    r'voltage-events',
+    VoltageRelatedEventViewSet,
+    basename='voltage-events'
+)
+router.register(
+    r'failed-connection-events',
+    FailedConnectionTransductorEventViewSet,
+    basename='failed-connection-events'
+)
+
+router.registry.extend(measurements_routes.router.registry)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
