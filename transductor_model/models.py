@@ -6,6 +6,7 @@ from measurement.models import MonthlyMeasurement
 from threading import Thread
 from django.utils import timezone
 from data_reader.exceptions import InvalidDateException
+from utils import is_datetime_in_sync
 
 
 class EnergyTransductorModel():
@@ -322,13 +323,8 @@ class EnergyTransductorModel():
         second = measurements[5]
         collected_date = timezone.datetime(year, month, day, hour,
                                            minute, second, 0)
-        real_date = timezone.datetime.now()        
-        time_diference1 = collected_date - real_date
-        time_diference2 = real_date - collected_date
-        time_diference = min(time_diference1.seconds, time_diference2.seconds)
-        max_delay_acceptable = 30  # seconds
-
-        if(time_diference > max_delay_acceptable):    
+ 
+        if(is_datetime_in_sync(collected_date)):        
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = real_date.year
             measurements[1] = real_date.month
