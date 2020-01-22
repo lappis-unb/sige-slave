@@ -39,6 +39,11 @@ class VoltageRelatedEvent(Event):
     Defines a new event related to a voltage metric
     """
 
+    non_polymorphic = models.Manager()
+
+    class Meta:
+        base_manager_name = 'non_polymorphic'
+
     def save_event(self, transductor, list_data=[]):
         self.transductor = transductor
         self.data = {}

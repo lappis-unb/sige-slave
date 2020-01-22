@@ -25,6 +25,10 @@ class EventTestCase(TestCase):
             installation_date=datetime.now()
         )
 
+        self.measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor
+        )
+
     def test_create_failed_connection_event(self):
         before = len(FailedConnectionTransductorEvent.objects.all())
 
@@ -50,7 +54,7 @@ class EventTestCase(TestCase):
 
         b = MinutelyMeasurement()
         b.voltage_a = 220
-        b.voltage_b = 110
+        b.voltage_b = 180
         b.voltage_c = 200
         b.transductor = self.transductor
         b.check_measurements()

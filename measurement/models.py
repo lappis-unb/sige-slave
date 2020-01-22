@@ -116,12 +116,18 @@ class MinutelyMeasurement(Measurement):
         precarious_upper_list = []
         critical_lower_list = []
         critical_upper_list = []
+        list_down_phases = []
 
         from events.models import CriticalVoltageEvent
         from events.models import PrecariousVoltageEvent
+        from events.models import PhaseDropEvent
+
+        limit_phase_drop = (used_voltage * 0.8)
 
         for measurement in measurements:
-            if measurement[1] < critical_lower_boundary:
+            if measurement[1] < limit_phase_drop:
+                list_down_phases.append([measurement[0], measurement[1]])
+            elif measurement[1] < critical_lower_boundary:
                 critical_lower_list.append([measurement[0], measurement[1]])
             elif measurement[1] > critical_upper_boundary:
                 critical_upper_list.append([measurement[0], measurement[1]])
@@ -129,22 +135,6 @@ class MinutelyMeasurement(Measurement):
                 precarious_lower_list.append([measurement[0], measurement[1]])
             elif measurement[1] > precary_upper_boundary:
                 precarious_upper_list.append([measurement[0], measurement[1]])
-
-        is_phase_a_down = self.voltage_a < (used_voltage * 0.8)
-        is_phase_b_down = self.voltage_b < (used_voltage * 0.8)
-        is_phase_c_down = self.voltage_c < (used_voltage * 0.8)
-
-        from events.models import PhaseDropEvent
-        list_down_phases = []
-
-        if is_phase_a_down:
-            list_down_phases.append(['voltage_a', self.voltage_a])
-
-        if is_phase_b_down:
-            list_down_phases.append(['voltage_b', self.voltage_b])
-
-        if is_phase_c_down:
-            list_down_phases.append(['voltage_c', self.voltage_c])
 
         if list_down_phases:
             evt = PhaseDropEvent()
