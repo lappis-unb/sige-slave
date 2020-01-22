@@ -10,4 +10,3 @@ def is_datetime_in_sync(collected_date):
         return True
     else:
         return False
-
