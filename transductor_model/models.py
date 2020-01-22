@@ -321,12 +321,14 @@ class EnergyTransductorModel():
         minute = measurements[4]
         second = measurements[5]
         collected_date = timezone.datetime(year, month, day, hour,
-                                           minute, second)
-        real_date = timezone.datetime.now()
-        time_diference = real_date - collected_date
-        max_delay_acceptable = 30
+                                           minute, second, 0)
+        real_date = timezone.datetime.now()        
+        time_diference1 = collected_date - real_date
+        time_diference2 = real_date - collected_date
+        time_diference_seconds = min(time_diference1.seconds, time_diference2.seconds)
+        max_delay_acceptable = 30 # seconds
 
-        if(abs(time_diference.seconds > max_delay_acceptable)):
+        if(time_diference_seconds > max_delay_acceptable):    
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = real_date.year
             measurements[1] = real_date.month
