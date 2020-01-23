@@ -1,13 +1,12 @@
 from django.utils import timezone
 
 
-def is_datetime_in_sync(collected_date):
+def is_datetime_similar(date1, date2):
     max_delay_acceptable = 30  # seconds
-    current_date = timezone.datetime.now()
 
-    time_difference = abs(collected_date - current_date)
+    time_difference = abs(date1 - date2)
 
-    if(time_difference.seconds > max_delay_acceptable):
+    if(time_difference.seconds < max_delay_acceptable):
         return True
     else:
         return False
