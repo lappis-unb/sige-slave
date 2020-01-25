@@ -54,6 +54,12 @@ class Measurement(models.Model):
         """
         raise NotImplementedError
 
+    def reset_measurement_filter(self):
+        """
+        Clears any related filter data if deemed necessary
+        """
+        raise NotImplementedError
+
 
 class MinutelyMeasurement(Measurement):
 
@@ -120,46 +126,76 @@ class MinutelyMeasurement(Measurement):
         list_down_phases = []
 
         from events.models import CriticalVoltageEvent
-        from events.models import PrecariousVoltageEvent
         from events.models import PhaseDropEvent
+        from events.models import PrecariousVoltageEvent
+        from events.models import VoltageEventDebouncer
 
-        limit_phase_drop = (used_voltage * 0.8)
+        # Create a voltage event debouncer per phase
+        debouncer_a = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, measurements[0][0])
+        debouncer_b = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, measurements[1][0])
+        debouncer_c = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, measurements[2][0])
 
-        for measurement in measurements:
-            if measurement[1] < limit_phase_drop:
-                list_down_phases.append([measurement[0], measurement[1]])
-            elif measurement[1] < critical_lower_boundary:
-                critical_lower_list.append([measurement[0], measurement[1]])
-            elif measurement[1] > critical_upper_boundary:
-                critical_upper_list.append([measurement[0], measurement[1]])
-            elif measurement[1] < precary_lower_boundary:
-                precarious_lower_list.append([measurement[0], measurement[1]])
-            elif measurement[1] > precary_upper_boundary:
-                precarious_upper_list.append([measurement[0], measurement[1]])
+        voltage_parameters = [used_voltage,
+                              precary_lower_boundary,
+                              precary_upper_boundary,
+                              critical_lower_boundary,
+                              critical_upper_boundary]
 
-        if list_down_phases:
+        debouncer_a.add_data(measurements[0][0], measurements[0][1])
+        debouncer_b.add_data(measurements[1][0], measurements[1][1])
+        debouncer_c.add_data(measurements[2][0], measurements[2][1])
+
+        debouncer_a.populate_voltage_event_lists(voltage_parameters)
+        debouncer_b.populate_voltage_event_lists(voltage_parameters)
+        debouncer_c.populate_voltage_event_lists(voltage_parameters)
+
+        events_lists = [[], [], [], [], []]
+        events_from_a = VoltageEventDebouncer.get_event_lists(debouncer_a.id)
+        events_from_b = VoltageEventDebouncer.get_event_lists(debouncer_b.id)
+        events_from_c = VoltageEventDebouncer.get_event_lists(debouncer_c.id)
+
+        for i in range(len(events_lists)):
+            events_lists[i] = \
+                events_lists[i] + events_from_a[i] +\
+                events_from_b[i] + events_from_c[i]
+
+        if events_lists[0] != []:
             evt = PhaseDropEvent()
-            evt.save_event(self.transductor, list_down_phases)
+            evt.save_event(self.transductor, events_lists[0])
 
-        if critical_lower_list:
+        if events_lists[1] != []:
             evt = CriticalVoltageEvent()
-            evt.save_event(self.transductor, critical_lower_list)
+            evt.save_event(self.transductor, events_lists[1])
 
-        if critical_upper_list:
+        if events_lists[2] != []:
             evt = CriticalVoltageEvent()
-            evt.save_event(self.transductor, critical_upper_list)
+            evt.save_event(self.transductor, events_lists[2])
 
-        if precarious_lower_list:
+        if events_lists[3] != []:
             evt = PrecariousVoltageEvent()
-            evt.save_event(self.transductor, precarious_lower_list)
+            evt.save_event(self.transductor, events_lists[3])
 
-        if precarious_upper_list:
+        if events_lists[4] != []:
             evt = PrecariousVoltageEvent()
-            evt.save_event(self.transductor, precarious_upper_list)
+            evt.save_event(self.transductor, events_lists[4])
+
+    def reset_filter(self):
+        from events.models import VoltageEventDebouncer
+        debouncer_a = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, 'voltage_a')
+        debouncer_a.reset_filter()
+        debouncer_b = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, 'voltage_b')
+        debouncer_b.reset_filter()
+        debouncer_c = VoltageEventDebouncer.get_voltage_debouncer(
+            self.transductor, 'voltage_c')
+        debouncer_c.reset_filter()
 
 
 class QuarterlyMeasurement(Measurement):
-
     def __str__(self):
         return '%s' % self.transductor_collection_date
 
@@ -177,6 +213,9 @@ class QuarterlyMeasurement(Measurement):
 
     # TODO
     def check_measurements(self):
+        pass
+
+    def reset_measurement_filter(self):
         pass
 
 
