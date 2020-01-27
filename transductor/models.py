@@ -9,6 +9,8 @@ from django.core.validators import RegexValidator
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.postgres.fields import ArrayField
 
+from utils import is_datetime_similar
+
 
 class Transductor(models.Model):
     """
@@ -196,11 +198,10 @@ class TimeInterval(models.Model):
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
 
-        status = (self.end - time) >= timezone.timedelta(minutes=1)
-
-        if(status):
-            self.save(update_fields=['begin'])
-        else:
+        # Verifies if collected date is inside the recovery interval
+        if(self.end < time or is_datetime_similar(self.end, time)):
             self.delete()
-
-        return status
+            return False
+        else:
+            self.save(update_fields=['begin'])
+            return True
