@@ -59,7 +59,8 @@ class TransportProtocol(metaclass=ABCMeta):
                 unpacked_received_message = pickle.loads(received_message[0])
                 if(unpacked_received_message['status'] == 0):
                     raise Exception(unpacked_received_message['content'])
-                self._check_all_messages_crc(unpacked_received_message['content'])
+                self._check_all_messages_crc(
+                    unpacked_received_message['content'])
             except socket.timeout:
                 receive_attemps += 1
                 if(receive_attemps == max_receive_attempts):

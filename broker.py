@@ -31,7 +31,8 @@ def send_udp_messages(messages, address, response=True):
         received_message.append(send_udp_message(message, address, s, response))
     return received_message
 
-def send_udp_message(message, address, s = None, response=True):
+
+def send_udp_message(message, address, s=None, response=True):
     if(s is None):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(1)
@@ -39,6 +40,7 @@ def send_udp_message(message, address, s = None, response=True):
     if(response):
         received_message, transductor = s.recvfrom(MAX_MSG_SIZE)
         return received_message
+
 
 def send_tcp_messages(messages, address):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -51,6 +53,7 @@ def send_tcp_messages(messages, address):
         responses.append(response)
     s.close()
     return responses
+
 
 def worker(message_queue):
     while(True):
@@ -80,9 +83,10 @@ def worker(message_queue):
             response['content'] = e
         response = pickle.dumps(response)
         try:
-            send_udp_message(response, sender,response=False) 
-        except:
+            send_udp_message(response, sender, response=False) 
+        except Exception:
             pass
+
 
 if __name__ == '__main__':
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
