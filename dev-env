@@ -6,3 +6,6 @@ POSTGRES_HOST=slave-db
 SLAVE_SECRET_KEY=some-random-stuff
 ENVIRONMENT=development
 ALLOWED_HOSTS=*
+BROKER_IP=slave-broker
+BROKER_PORT=6071
+MAX_MSG_SIZE=1024

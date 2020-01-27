@@ -52,7 +52,7 @@ def single_data_collection(transductor, collection_type, date=None):
     messages_to_send = serial_protocol_instance.create_messages(
         collection_type, date)
     try:
-        received_messages = transport_protocol_instance.send_messages(
+        received_messages = transport_protocol_instance.send_message(
             messages_to_send)
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
