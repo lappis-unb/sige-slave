@@ -85,8 +85,8 @@ class TransportProtocol(metaclass=ABCMeta):
             if(self.serial_protocol._check_crc(message)):
                 pass
             else:
-                return False
-        return True
+                error_message = 'The received message contains an invalid CRC'
+                raise CRCInvalidException(error_message)
 
     @abstractmethod
     def _create_message(self, message):
