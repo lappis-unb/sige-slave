@@ -2,10 +2,11 @@ from data_reader.transport import UdpProtocol
 from data_reader.communication import ModbusRTU
 from measurement.models import MinutelyMeasurement
 from measurement.models import QuarterlyMeasurement
-from measurement.models import MonthlyMeasurement 
+from measurement.models import MonthlyMeasurement
 from threading import Thread
 from django.utils import timezone
 from data_reader.exceptions import InvalidDateException
+from utils import is_datetime_similar
 
 
 class EnergyTransductorModel():
@@ -18,7 +19,7 @@ class EnergyTransductorModel():
             [68, 2], [70, 2], [72, 2], [74, 2], [76, 2], [78, 2], [80, 2],
             [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [92, 2], [94, 2],
             [96, 2], [98, 2], [100, 2], [102, 2], [104, 2], [106, 2], [108, 2],
-            [110, 2], [112, 2], [114, 2], [116, 2], [118, 2], [120, 2], 
+            [110, 2], [112, 2], [114, 2], [116, 2], [118, 2], [120, 2],
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
@@ -28,9 +29,9 @@ class EnergyTransductorModel():
         ],
         "Monthly": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
-            [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2], 
+            [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
             [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
-            [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2], 
+            [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
             [518, 1], [522, 1], [426, 2], [519, 1], [523, 1], [428, 2],
             [524, 1], [528, 1], [430, 2], [525, 1], [529, 1], [432, 2],
             [526, 1], [530, 1], [434, 2], [527, 1], [531, 1], [444, 2],
@@ -80,7 +81,7 @@ class EnergyTransductorModel():
 
     def correct_date(self):
         date = timezone.datetime.now()
-        payload = [date.year, date.month, date.day, date.hour, date.minute, 
+        payload = [date.year, date.month, date.day, date.hour, date.minute,
                    date.second]
         return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
@@ -143,6 +144,7 @@ class EnergyTransductorModel():
         minutely_measurement.consumption_c = response[37]
         minutely_measurement.total_consumption = response[38]
 
+        minutely_measurement.check_measurements()
         minutely_measurement.save()
         transductor.set_broken(False)
         return minutely_measurement.collection_date
@@ -172,6 +174,7 @@ class EnergyTransductorModel():
         quarterly_measurement.capacitive_power_peak_time = response[12]
         quarterly_measurement.capacitive_power_off_peak_time = response[13]
 
+        quarterly_measurement.check_measurements()
         quarterly_measurement.save()
 
     def data_rescue_post(self, date):
@@ -217,97 +220,74 @@ class EnergyTransductorModel():
 
         # Arguments refer to initial positions of response information
         # Further information on transductor's Memory Map
+
+        today = timezone.datetime.today()
+
+        if(today.month != 1):
+            year = today.year
+        else:
+            year = today.year - 1
+
         measurement.active_max_power_list_peak_time = []
-        year = timezone.datetime.today().year
+        measurement.active_max_power_list_peak = []
 
-        date = timezone.datetime(year, response[19] // 256, 
-                                 response[19] % 256, response[20] // 256,
-                                 response[20] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[18],
-                                                            date])
+        try:
+            for i in range(18, 28, 3):
+                measurement.active_max_power_list_peak_time.append(
+                    timezone.datetime(
+                        year, response[i + 1] // 256,
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
+                measurement.active_max_power_list_peak.append(response[i])
 
-        date = timezone.datetime(year, response[22] // 256, 
-                                 response[22] % 256, response[23] // 256,
-                                 response[23] % 256)
-
-        measurement.active_max_power_list_peak_time.append([response[21],
-                                                            date])
-        date = timezone.datetime(year, response[25] // 256, 
-                                 response[25] % 256, response[26] // 256,
-                                 response[26] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[24],
-                                                            date])
-
-        date = timezone.datetime(year, response[28] // 256, 
-                                 response[28] % 256, response[29] // 256,
-                                 response[29] % 256)  
-        measurement.active_max_power_list_peak_time.append([response[27],
-                                                            date])
+        except ValueError:
+            pass
 
         measurement.active_max_power_list_off_peak_time = []
+        measurement.active_max_power_list_off_peak = []
 
-        date = timezone.datetime(year, response[31] // 256, 
-                                 response[31] % 256, response[32] // 256,
-                                 response[32] % 256)  
-        measurement.active_max_power_list_off_peak_time.append([
-            response[30], 
-            date])
-        date = timezone.datetime(year, response[34] // 256, 
-                                 response[34] % 256, response[35] // 256,
-                                 response[35] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[33], 
-             date])
+        try:
+            for i in range(30, 40, 3):
+                measurement.active_max_power_list_off_peak_time.append(
+                    timezone.datetime(
+                        year, response[i + 1] // 256,
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
+                measurement.active_max_power_list_off_peak.append(response[i])
 
-        date = timezone.datetime(year, response[37] // 256, 
-                                 response[37] % 256, response[38] // 256,
-                                 response[38] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[36], 
-             date])
-        date = timezone.datetime(year, response[40] // 256, 
-                                 response[40] % 256, response[41] // 256,
-                                 response[41] % 256)  
-        measurement.active_max_power_list_off_peak_time.append(
-            [response[39], 
-             date])
+        except ValueError:
+            pass
 
         measurement.reactive_max_power_list_peak_time = []
-        date = timezone.datetime(year, response[43] // 256, response[43] % 256,
-                                 response[44] // 256, response[44] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[42], 
-                                                              date])
-        date = timezone.datetime(year, response[46] // 256, response[46] % 256,
-                                 response[47] // 256, response[47] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[45], 
-                                                              date])
-        date = timezone.datetime(year, response[49] // 256, response[49] % 256,
-                                 response[50] // 256, response[50] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[48], 
-                                                              date])
-        date = timezone.datetime(year, response[52] // 256, response[52] % 256,
-                                 response[53] // 256, response[53] % 256)  
-        measurement.reactive_max_power_list_peak_time.append([response[51], 
-                                                              date])
+        measurement.reactive_max_power_list_peak = []
+        try:
 
-        measurement.reactive_max_power_list_off_peak_time = [] 
+            for i in range(42, 52, 3):
+                measurement.reactive_max_power_list_peak_time.append(
+                    timezone.datetime(
+                        year, response[i + 1] // 256,
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
+                measurement.reactive_max_power_list_peak.append(response[i])
 
-        date = timezone.datetime(year, response[55] // 256, response[55] % 256,
-                                 response[56] // 256, response[56] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[54],
-                                                                  date])
-        date = timezone.datetime(year, response[58] // 256, response[58] % 256,
-                                 response[59] // 256, response[59] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[57],
-                                                                  date])
-        date = timezone.datetime(year, response[61] // 256, response[61] % 256,
-                                 response[62] // 256, response[62] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[60],
-                                                                  date])
-        date = timezone.datetime(year, response[64] // 256, response[64] % 256,
-                                 response[65] // 256, response[65] % 256)  
-        measurement.reactive_max_power_list_off_peak_time.append([response[63],
-                                                                  date])
+        except ValueError:
+            pass
+
+        measurement.reactive_max_power_list_off_peak_time = []
+        measurement.reactive_max_power_list_off_peak = []
+
+        try:
+
+            for i in range(54, 64, 3):
+                measurement.reactive_max_power_list_off_peak_time.append(
+                    timezone.datetime(
+                        year, response[i + 1] // 256,
+                        response[i + 1] % 256, response[i + 2] // 256,
+                        response[i + 2] % 256))
+                measurement.reactive_max_power_list_off_peak.append(response[i])
+
+        except ValueError:
+            pass
 
         measurement.save()
 
@@ -316,15 +296,19 @@ class EnergyTransductorModel():
 
     def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
-        measurement.collection_date = response[0][0]       
+
+        measurement.collection_date = response[0][0]
         measurement.voltage_a = response[0][1]
         measurement.voltage_b = response[0][2]
         measurement.voltage_c = response[0][3]
+
         measurement.current_a = response[0][4]
         measurement.current_b = response[0][5]
         measurement.current_c = response[0][6]
+
         measurement.total_active_power = response[0][7]
         measurement.total_reactive_power = response[0][8]
+
         measurement.transductor = transductor
         return measurement
 
@@ -337,20 +321,18 @@ class EnergyTransductorModel():
         hour = measurements[3]
         minute = measurements[4]
         second = measurements[5]
-        collected_date = timezone.datetime(year, month, day, hour, 
-                                           minute, second)
-        real_date = timezone.datetime.now()
-        time_diference = real_date - collected_date
-        max_delay_acceptable = 30
+        collected_date = timezone.datetime(year, month, day, hour,
+                                           minute, second, 0)
+        current_date = timezone.datetime.now()
 
-        if(abs(time_diference.seconds > max_delay_acceptable)):
+        if(not is_datetime_similar(collected_date, current_date)):        
             single_data_collection(transductor, "CorrectDate")
-            measurements[0] = real_date.year
-            measurements[1] = real_date.month
-            measurements[2] = real_date.day
-            measurements[3] = real_date.hour
-            measurements[4] = real_date.minute
-            measurements[5] = real_date.second
+            measurements[0] = current_date.year
+            measurements[1] = current_date.month
+            measurements[2] = current_date.day
+            measurements[3] = current_date.hour
+            measurements[4] = current_date.minute
+            measurements[5] = current_date.second
 
 
 class MD30(EnergyTransductorModel):
@@ -363,7 +345,7 @@ class MD30(EnergyTransductorModel):
             [68, 2], [70, 2], [72, 2], [74, 2], [76, 2], [78, 2], [80, 2],
             [82, 2], [84, 2], [86, 2], [88, 2], [90, 2], [92, 2], [94, 2],
             [96, 2], [98, 2], [100, 2], [102, 2], [104, 2], [106, 2], [108, 2],
-            [110, 2], [112, 2], [114, 2], [116, 2], [118, 2], [120, 2], 
+            [110, 2], [112, 2], [114, 2], [116, 2], [118, 2], [120, 2],
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
@@ -373,9 +355,9 @@ class MD30(EnergyTransductorModel):
         ],
         "Monthly": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
-            [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2], 
+            [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
             [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
-            [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2], 
+            [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
             [518, 1], [522, 1], [426, 2], [519, 1], [523, 1], [428, 2],
             [524, 1], [528, 1], [430, 2], [525, 1], [529, 1], [432, 2],
             [526, 1], [530, 1], [434, 2], [527, 1], [531, 1], [444, 2],

@@ -78,9 +78,13 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'active_max_power_off_peak_time',
                   'reactive_max_power_peak_time',
                   'reactive_max_power_off_peak_time',
+                  'active_max_power_list_peak',
                   'active_max_power_list_peak_time',
+                  'active_max_power_list_off_peak',
                   'active_max_power_list_off_peak_time',
+                  'reactive_max_power_list_peak',
                   'reactive_max_power_list_peak_time',
+                  'reactive_max_power_list_off_peak',
                   'reactive_max_power_list_off_peak_time',
                   'transductor',
                   'url')

@@ -1,11 +1,14 @@
+import os
+import json
+
 from django.db import models
 from datetime import datetime
-from transductor.models import EnergyTransductor
-from django.contrib.postgres.fields import ArrayField, HStoreField
-import json
-from django.core import serializers
-from django.utils import timezone
 from django.conf import settings
+from django.utils import timezone
+from django.core import serializers
+from django.contrib.postgres.fields import ArrayField, HStoreField
+
+from transductor.models import EnergyTransductor
 
 
 class Measurement(models.Model):
@@ -41,6 +44,12 @@ class Measurement(models.Model):
 
         Returns:
             None
+        """
+        raise NotImplementedError
+
+    def check_measurements(self):
+        """
+        Checks measurements and triggers events if deemed necessary
         """
         raise NotImplementedError
 
@@ -88,6 +97,65 @@ class MinutelyMeasurement(Measurement):
     dht_current_b = models.FloatField(default=0)
     dht_current_c = models.FloatField(default=0)
 
+    def check_measurements(self):
+        used_voltage = float(os.getenv('CONTRACTED_VOLTAGE'))
+
+        precary_lower_boundary = used_voltage * 0.91
+        precary_upper_boundary = used_voltage * 1.04
+
+        critical_lower_boundary = used_voltage * 0.86
+        critical_upper_boundary = used_voltage * 1.06
+
+        # shortened validations for the if statement
+        measurements = [
+            ['voltage_a', self.voltage_a],
+            ['voltage_b', self.voltage_b],
+            ['voltage_c', self.voltage_c]
+        ]
+        precarious_lower_list = []
+        precarious_upper_list = []
+        critical_lower_list = []
+        critical_upper_list = []
+        list_down_phases = []
+
+        from events.models import CriticalVoltageEvent
+        from events.models import PrecariousVoltageEvent
+        from events.models import PhaseDropEvent
+
+        limit_phase_drop = (used_voltage * 0.8)
+
+        for measurement in measurements:
+            if measurement[1] < limit_phase_drop:
+                list_down_phases.append([measurement[0], measurement[1]])
+            elif measurement[1] < critical_lower_boundary:
+                critical_lower_list.append([measurement[0], measurement[1]])
+            elif measurement[1] > critical_upper_boundary:
+                critical_upper_list.append([measurement[0], measurement[1]])
+            elif measurement[1] < precary_lower_boundary:
+                precarious_lower_list.append([measurement[0], measurement[1]])
+            elif measurement[1] > precary_upper_boundary:
+                precarious_upper_list.append([measurement[0], measurement[1]])
+
+        if list_down_phases:
+            evt = PhaseDropEvent()
+            evt.save_event(self.transductor, list_down_phases)
+
+        if critical_lower_list:
+            evt = CriticalVoltageEvent()
+            evt.save_event(self.transductor, critical_lower_list)
+
+        if critical_upper_list:
+            evt = CriticalVoltageEvent()
+            evt.save_event(self.transductor, critical_upper_list)
+
+        if precarious_lower_list:
+            evt = PrecariousVoltageEvent()
+            evt.save_event(self.transductor, precarious_lower_list)
+
+        if precarious_upper_list:
+            evt = PrecariousVoltageEvent()
+            evt.save_event(self.transductor, precarious_upper_list)
+
 
 class QuarterlyMeasurement(Measurement):
 
@@ -96,12 +164,19 @@ class QuarterlyMeasurement(Measurement):
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
+
     consumption_peak_time = models.FloatField(default=0)
     consumption_off_peak_time = models.FloatField(default=0)
+
     inductive_power_peak_time = models.FloatField(default=0)
     inductive_power_off_peak_time = models.FloatField(default=0)
+
     capacitive_power_peak_time = models.FloatField(default=0)
     capacitive_power_off_peak_time = models.FloatField(default=0)
+
+    # TODO
+    def check_measurements(self):
+        pass
 
 
 class MonthlyMeasurement(Measurement):
@@ -111,31 +186,57 @@ class MonthlyMeasurement(Measurement):
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
+
     consumption_peak_time = models.FloatField(default=0)
     consumption_off_peak_time = models.FloatField(default=0)
+
     inductive_power_peak_time = models.FloatField(default=0)
     inductive_power_off_peak_time = models.FloatField(default=0)
+
     capacitive_power_peak_time = models.FloatField(default=0)
     capacitive_power_off_peak_time = models.FloatField(default=0)
+
     active_max_power_peak_time = models.FloatField(default=0)
     active_max_power_off_peak_time = models.FloatField(default=0)
+
     reactive_max_power_peak_time = models.FloatField(default=0)
     reactive_max_power_off_peak_time = models.FloatField(
         default=0
     )
 
+    active_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
+    )
     active_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
     )
+
+    active_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
+    )
+
     active_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
     )
+
+    reactive_max_power_list_peak = ArrayField(
+        models.FloatField(), default=None
+    )
+
     reactive_max_power_list_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
+    )
+
+    reactive_max_power_list_off_peak = ArrayField(
+        models.FloatField(), default=None
     )
     reactive_max_power_list_off_peak_time = ArrayField(
-        HStoreField(), default=None
+        models.DateTimeField(), default=None
     )
+
+    # TODO
+    def check_measurements(self):
+        pass
 
     def _get_year(self, year, month):
         return (year - 1) if (month == 1) else year
@@ -151,14 +252,13 @@ class MonthlyMeasurement(Measurement):
 
             if values_list[initial_date_position][0 + i] != 0:
                 value_result = values_list[value + count]
-                timestamp = \
-                    timezone.datetime(
-                        current_year,
-                        values_list[initial_date_position][0 + i],
-                        values_list[initial_date_position][1 + i],
-                        values_list[initial_date_position + 1][0 + i],
-                        values_list[initial_date_position + 1][1 + i]
-                    )
+                timestamp = timezone.datetime(
+                    current_year,
+                    values_list[initial_date_position][0 + i],
+                    values_list[initial_date_position][1 + i],
+                    values_list[initial_date_position + 1][0 + i],
+                    values_list[initial_date_position + 1][1 + i]
+                )
             else:
                 value_result = values_list[value + count]
                 timestamp = timezone.datetime(1900, 1, 1, 1, 1)

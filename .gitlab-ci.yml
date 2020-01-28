@@ -13,6 +13,7 @@ variables:
   SLAVE_SECRET_KEY: some-random-stuff
   ENVIRONMENT: test
   ALLOWED_HOSTS: "*"
+  CONTRACTED_VOLTAGE: 220
 
 stages:
   - test
