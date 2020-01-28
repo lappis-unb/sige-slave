@@ -23,16 +23,17 @@ import os
 MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
 
 
-def send_udp_messages(messages, address, response=True):
+def send_udp_messages_list(messages, address, response=True):
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(1)
     received_message = []
     for message in messages:
-        received_message.append(send_udp_message(message, address, s, response))
+        received_message.append(send_single_udp_message(message, address,
+                                                        s, response))
     return received_message
 
 
-def send_udp_message(message, address, s=None, response=True):
+def send_single_udp_message(message, address, s=None, response=True):
     if(s is None):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(1)
@@ -42,14 +43,14 @@ def send_udp_message(message, address, s=None, response=True):
         return received_message
 
 
-def send_tcp_messages(messages, address):
+def send_tcp_messages_list(messages, address):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(3)
     s.connect(address)
     responses = []
     for message in messages:
         s.send(message)
-        response, transductor = s.recvfrom(MAX_MSG_SIZE)
+        response = s.recv(MAX_MSG_SIZE)
         responses.append(response)
     s.close()
     return responses
@@ -63,13 +64,13 @@ def worker(message_queue):
         transductor = (message['ip'], message['port'])
         try:
             if(message['protocol'] == 'UDP'):
-                transductor_response = send_udp_messages(
+                transductor_response = send_udp_messages_list(
                     message['content'], transductor)
                 response = {}
                 response['status'] = 1
                 response['content'] = transductor_response
             elif(message['protocol'] == 'TCP'):
-                transductor_response = send_tcp_messages(
+                transductor_response = send_tcp_messages_list(
                     message['content'], transductor)
                 response = {}
                 response['status'] = 1
@@ -83,7 +84,7 @@ def worker(message_queue):
             response['content'] = e
         response = pickle.dumps(response)
         try:
-            send_udp_message(response, sender, response=False) 
+            send_single_udp_message(response, sender, response=False) 
         except Exception:
             pass
 
