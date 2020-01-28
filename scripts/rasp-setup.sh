@@ -1,11 +1,6 @@
 #!/bin/bash
 
 BRIDGE_FILE=/etc/systemd/network/bridge.network
-REBOOTED=False
-
-if [ $REBOOTED == 'False' ]; then
-
-fi
 
 echo "========== Upgrading pkgs =========="
 
@@ -44,7 +39,6 @@ function show_colored_git_branch_in_prompt() {\n
 
 show_colored_git_branch_in_prompt
 " >> ~/.bashrc
-
 source ~/.bashrc
 
 echo "========== Restarting Network service =========="
@@ -69,9 +63,27 @@ sudo apt-get update
 echo "========== Installing Docker =========="
 sudo apt-get install --no-install-recommends docker-ce
 
-sudo reboot
-
+echo "========== Adding pi to docker group =========="
 sudo usermod -aG docker pi
 
 echo "========== Installing Docker Compose =========="
 sudo pip install docker-compose
+
+echo "========== SUCESSFULLY INSTALLED ALL NEEDED PKGs =========="
+
+echo "========== Cloning SMI-Slave project =========="
+mkdir -p /smi
+git clone https://gitlab.com/lappis-unb/projects/SMI/smi-slave.git /smi/slave
+
+echo "*Successfully cloned SMI-Slave into /smi/slave"
+
+read -p "Do you want to reboot now? Yes | No" INPUT
+if [ $INPUT == 'Yes' ]; then
+    echo "========== Rebooting to apply changes =========="
+    sudo reboot
+if [ $INPUT == 'No' ]; then
+    echo "You must reboot to apply changes!"
+else
+    echo "Type 'Yes' or 'No'"
+fi
+fi
