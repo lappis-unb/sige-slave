@@ -119,7 +119,7 @@ def perform_data_rescue(transductor):
             return
 
         inside_interval = interval.change_interval(
-            measurement.collection_date)
+            measurement.transductor_collection_date)
 
         if(inside_interval):
             measurement.check_measurements()

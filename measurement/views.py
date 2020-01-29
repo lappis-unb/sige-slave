@@ -38,8 +38,8 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
 
         if start_date and end_date:
             self.queryset = self.queryset.filter(
-                collection_date__gte=start_date,
-                collection_date__lte=end_date
+                slave_collection_date__gte=start_date,
+                slave_collection_date__lte=end_date
             )
 
         return self.queryset.reverse()
@@ -76,7 +76,7 @@ class RealTimeMeasurementViewSet(MeasurementViewSet):
         for transductor in transductors:
             measurement = MinutelyMeasurement.objects.filter(
                 transductor=transductor
-            ).order_by('collection_date').last()
+            ).order_by('slave_collection_date').last()
             if measurement:
                 last_measurements.append(measurement)
 

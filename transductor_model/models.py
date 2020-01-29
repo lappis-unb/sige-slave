@@ -108,7 +108,8 @@ class EnergyTransductorModel():
             response[4],
             response[5]
         )
-        minutely_measurement.collection_date = date
+        minutely_measurement.transctor_collection_date = date
+        minutely_measurement.slave_collection_date = timezone.now()
 
         minutely_measurement.frequency_a = response[6]
         minutely_measurement.voltage_a = response[7]
@@ -147,13 +148,13 @@ class EnergyTransductorModel():
         minutely_measurement.check_measurements()
         minutely_measurement.save()
         transductor.set_broken(False)
-        return minutely_measurement.collection_date
+        return minutely_measurement.transductor_collection_date
 
     def save_quarterly_measurement(self, response, transductor, date=None):
         quarterly_measurement = QuarterlyMeasurement()
         quarterly_measurement.transductor = transductor
 
-        quarterly_measurement.collection_date = timezone.datetime(
+        quarterly_measurement.slave_collection_date = timezone.datetime(
             response[0],
             response[1],
             response[2],
@@ -190,7 +191,7 @@ class EnergyTransductorModel():
         measurement = MonthlyMeasurement()
         measurement.transductor = transductor
 
-        measurement.collection_date = timezone.datetime(
+        measurement.slave_collection_date = timezone.datetime(
             response[0],
             response[1],
             response[2],
@@ -297,7 +298,8 @@ class EnergyTransductorModel():
     def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
 
-        measurement.collection_date = response[0][0]
+        measurement.transductor_collection_date = response[0][0]
+        measurement.slave_collection_date = timezone.now()
         measurement.voltage_a = response[0][1]
         measurement.voltage_b = response[0][2]
         measurement.voltage_c = response[0][3]
