@@ -73,7 +73,7 @@ def single_data_collection(transductor, collection_type, date=None):
         messages_to_send = serial_protocol_instance.create_messages(
             collection_type, date)
         communication_step = 'sending messages'
-        received_messages = transport_protocol_instance.send_messages(
+        received_messages = transport_protocol_instance.send_message(
             messages_to_send)
         communication_step = 'parsing response'
         received_messages_content = \
