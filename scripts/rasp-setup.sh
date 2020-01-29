@@ -11,6 +11,28 @@ function_test_internet_connection() {
     fi
 }
 
+fail() {
+  echo $1 >&2
+  exit 1
+}
+
+retry() {
+  local n=1
+  local max=5
+  local delay=15
+  while true; do
+    "$@" && break || {
+      if [[ $n -lt $max ]]; then
+        ((n++))
+        echo "Command failed. Attempt $n/$max:"
+        sleep $delay;
+      else
+        fail "The command has failed after $n attempts."
+      fi
+    }
+  done
+}
+
 function_check_pkg_installed() {
     pkgs=("$@")
     for i in "${pkgs[@]}"
@@ -25,7 +47,8 @@ function_check_pkg_installed() {
 }
 
 echo "========== Upgrading pkgs =========="
-sudo apt-get --assume-yes update && sudo apt-get --assume-yes upgrade
+retry sudo apt-get --assume-yes update
+retry sudo apt-get --assume-yes upgrade
 
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 
@@ -35,7 +58,14 @@ sudo apt-get --assume-yes remove docker \
                                  docker-engine \
                                  docker.io \
                                  containerd \
-                                 runc
+                                 containerd.io \
+                                 runc \
+                                 docker-ce-cli \
+                                 docker-engine-cs \
+                                 lxc-docker \
+                                 lxc-docker-virtual-package
+
+sudo dpkg --purge docker-ce
 
 echo "========== Creating Bridge file =========="
 if [ ! -f "$BRIDGE_FILE" ]; then
@@ -53,13 +83,10 @@ fi
 echo "========== Restarting Network service =========="
 sudo systemctl restart systemd-networkd.service
 
-until function_test_internet_connection; do
-  echo "Network is still unavailable, waiting..."
-  sleep 2
-done
+retry function_test_internet_connection
 
 echo "========== Installing required Docker dependencies =========="
-packages=( "apt-transport-https" "ca-certificates" "curl" "gnupg2" "software-properties-common" )
+packages=( "apt-transport-https" "ca-certificates" "curl" "git" "gnupg2" "software-properties-common" )
 function_check_pkg_installed "${packages[@]}"
 
 if [ ! -f "$DOCKER_SRC_FILE" ]; then
@@ -71,7 +98,8 @@ else
    echo -e "Docker source file already exists...\n"
    echo $DOCKER_SRC_FILE && cat $DOCKER_SRC_FILE
 fi
-sudo apt-get --assume-yes update
+
+retry sudo apt-get --assume-yes update
 
 echo "========== Installing Docker =========="
 function_check_pkg_installed docker-ce
