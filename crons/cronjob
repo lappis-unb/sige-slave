@@ -2,7 +2,5 @@
 0 4 1 * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyCollectCronJob >> /home/communication.log 2>&1
 0 4 * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob >> /home/communication.log 2>&1
 * * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyCollectCronJob >> /home/communication.log 2>&1
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyDataRescueCronJob >> /home/communication.log 2>&1
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyDataRescueCronJob >> /home/communication.log 2>&1
-0 * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob >> /home/communication.log 2>&1
+* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.DataRescueCronJob >> /home/communication.log 2>&1
 # Necessary line at end of file to make cron valid

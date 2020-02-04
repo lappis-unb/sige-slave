@@ -97,7 +97,10 @@ def single_data_collection(transductor, collection_type, date=None):
     except Exception as e:
         if (collection_type == "Minutely"):
             transductor.set_broken(True)
-        
+        else:
+            attribute = get_rescue_attribute(collection_type)
+            transductor.__dict__[attribute] = False
+            transductor.save(update_fields=[attribute])
         communication_log(
             status='Failure at ' + communication_step, 
             datetime=timezone.datetime.now(), 
