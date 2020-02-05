@@ -51,6 +51,7 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    port = models.IntegerField(default=1001)
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)

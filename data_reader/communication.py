@@ -62,7 +62,7 @@ class SerialProtocol(metaclass=ABCMeta):
                 "The bytestring can't be conveted to a float")
         else:
             return number[0]
-            
+
     @staticmethod
     def bytes_to_float(msg):
         """
@@ -102,6 +102,9 @@ class SerialProtocol(metaclass=ABCMeta):
             return x.to_bytes((x.bit_length() + 7) // 8, encryption)
         return x.to_bytes(size, encryption)
 
+    def _check_crc(self, packaged_message):
+        return True
+
 
 class Modbus(SerialProtocol):
     """
@@ -117,6 +120,7 @@ class Modbus(SerialProtocol):
 
     `Modbus reference guide <http://modbus.org/docs/PI_MBUS_300.pdf>`_
     """
+
     def create_messages(self, collection_type, date=None):
         request = self.transductor_model.data_collection(
             collection_type, date)
@@ -175,11 +179,11 @@ class Modbus(SerialProtocol):
         # this line adds two bytes that inform how many 16 bits(2 bytes) 
         # registers should be written.
         message += self.int_to_bytes(message_body[0][1], 2)
-        
+
         # this line adds one bytes that inform size of the "payload" of the
         # message (its the double of the number of registers)
         message += self.int_to_bytes(message_body[0][1] * 2, 1)
-                
+
         # this line adds the payload of the message, in other words the data
         # that will be written in the registers 
         message += self.int_to_bytes(message_body[1], message_body[0][1] * 2)
@@ -233,6 +237,7 @@ class ModbusRTU(Modbus):
 
     `Modbus reference guide <http://modbus.org/docs/PI_MBUS_300.pdf>`_
     """
+
     def __init__(self, transductor, transductor_model):
         super(ModbusRTU, self).__init__(transductor, transductor_model)
 
