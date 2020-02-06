@@ -16,7 +16,7 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
                                  mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
     serializer_class = VoltageRelatedEventSerializer
-    queryset = VoltageRelatedEvent.objects.all()
+    queryset = VoltageRelatedEvent.objects.none()
     models = {
         'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
         'CriticalVoltageEvent': CriticalVoltageEvent,
@@ -24,33 +24,31 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         'PhaseDropEvent': PhaseDropEvent
     }
 
-    def get_queryset(self):
-        type = self.request.query_params.get('type')
+    def list(self, request):
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
-
-        self.queryset = self.queryset.filter(
-            ended_at__isnull=True
-        )
-
-        if type:
-            self.queryset = self.queryset.instance_of(self.models[type])
+        types = list(self.models.keys())
 
         events = []
-        for event in self.queryset:
-            data = {}
-            data['data'] = {}
-            for measure in event.data.keys():
-                data['data'].setdefault(measure)
-                data['data'].update({measure: event.data[measure]})
+        for type in types:
+            last_event = VoltageRelatedEvent.objects.instance_of(
+                self.models[type]
+            ).last()
 
-            data['ip_address'] = event.transductor.ip_address
-            data['created_at'] = event.created_at
-            data['ended_at'] = event.ended_at
-            data['type'] = event.__class__.__name__
-            events.append(data)
+            if last_event:
+                data = {}
+                data['data'] = {}
+                for measure in last_event.data.keys():
+                    data['data'].setdefault(measure)
+                    data['data'].update({measure: last_event.data[measure]})
 
-        return events
+                data['ip_address'] = last_event.transductor.ip_address
+                data['created_at'] = last_event.created_at
+                data['ended_at'] = last_event.ended_at
+                data['type'] = last_event.__class__.__name__
+                events.append(data)
+
+        return Response(events, status=200)
 
 
 class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
