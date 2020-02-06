@@ -23,20 +23,21 @@ from measurement.models import *
 import time
 
 
-def communication_log(status, datetime, type, transductor, errors=[]):
-    print('DateTime:\t', datetime)
+def communication_log(status, datetime, type, transductor, file, errors=[]):
+    print('DateTime:\t', datetime, file=file)
     print(
         'Transductor:\t', 
         transductor.serial_number + '@' + transductor.physical_location, 
-        '(' + transductor.ip_address + ')'
+        '(' + transductor.ip_address + ')',
+        file=file
     )
-    print('Type:\t\t', type)
-    print('Status:\t\t', status)
+    print('Type:\t\t', type, file=file)
+    print('Status:\t\t', status, file=file)
     if errors:
-        print('Errors:')
+        print('Errors:', file=file)
         for error in errors:
-            print('\t\t', error)
-    print('\n')
+            print('\t\t', error, file=file)
+    print('\n', file=file)
 
 
 def get_active_transductors():
@@ -84,23 +85,29 @@ def single_data_collection(transductor, collection_type, date=None):
             collection_type,
             received_messages_content,
             transductor, date)
+        file = open("../home/successful_communication_logs.log", 'a')
         communication_log(
             status='Success', 
             datetime=timezone.datetime.now(), 
             type=collection_type, 
-            transductor=transductor
+            transductor=transductor,
+            file=file
         )
+        file.close()
         return handled_response
     except Exception as e:
         if(collection_type == "Minutely"):
             transductor.set_broken(True)
+        file = open("../home/failed_communication_logs.log", 'a')
         communication_log(
             status='Failure at ' + communication_step, 
             datetime=timezone.datetime.now(), 
             type=collection_type, 
             transductor=transductor, 
-            errors=[e]
+            errors=[e],
+            file=file
         )
+        file.close()
         return None
 
 
