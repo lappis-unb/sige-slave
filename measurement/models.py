@@ -22,6 +22,7 @@ class Measurement(models.Model):
     """
     settings.USE_TZ = False
     slave_collection_date = models.DateTimeField(default=timezone.now)
+    transductor_collection_date = models.DateTimeField(default=timezone.now)
 
 
     transductor = models.ForeignKey(
@@ -59,9 +60,6 @@ class MinutelyMeasurement(Measurement):
 
     def __str__(self):
         return '%s' % self.transductor_collection_date
-
-
-    transductor_collection_date = models.DateTimeField(default=timezone.now)
 
     frequency_a = models.FloatField(default=0)
 

@@ -63,6 +63,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
+            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
@@ -76,6 +77,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
+            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
@@ -250,6 +252,8 @@ class EnergyMeasurementTestCase(TestCase):
         quarterly_en_measurement = QuarterlyMeasurement()
         quarterly_en_measurement.slave_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
+        quarterly_en_measurement.transductor_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         quarterly_en_measurement.transductor = self.transductor
         quarterly_en_measurement.generated_energy_peak_time = 31
         quarterly_en_measurement.generated_energy_off_peak_time = 31
@@ -328,6 +332,8 @@ class EnergyMeasurementTestCase(TestCase):
         monthly_en_measurement = MonthlyMeasurement()
         monthly_en_measurement.slave_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.transductor_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
         monthly_en_measurement.active_max_power_list_peak = []
@@ -346,6 +352,8 @@ class EnergyMeasurementTestCase(TestCase):
 
         monthly_en_measurement = MonthlyMeasurement()
         monthly_en_measurement.slave_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.trasnductor_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.generated_energy_peak_time = 9

@@ -112,7 +112,6 @@ def perform_data_rescue(transductor):
         if(single_data_collection(transductor, "DataRescuePost",
                                   interval.begin) is None):
             return
-        time.sleep(0.1)
 
         measurement = single_data_collection(transductor, "DataRescueGet")
         if(measurement is None):
@@ -126,7 +125,6 @@ def perform_data_rescue(transductor):
             measurement.save()
         else:
             return
-        time.sleep(0.1)
 
 
 def perform_all_data_rescue():
