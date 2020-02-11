@@ -119,11 +119,6 @@ class MinutelyMeasurement(Measurement):
             ['voltage_b', self.voltage_b],
             ['voltage_c', self.voltage_c]
         ]
-        precarious_lower_list = []
-        precarious_upper_list = []
-        critical_lower_list = []
-        critical_upper_list = []
-        list_down_phases = []
 
         from events.models import CriticalVoltageEvent
         from events.models import PhaseDropEvent
@@ -148,39 +143,9 @@ class MinutelyMeasurement(Measurement):
         debouncer_b.add_data(measurements[1][0], measurements[1][1])
         debouncer_c.add_data(measurements[2][0], measurements[2][1])
 
-        debouncer_a.populate_voltage_event_lists(voltage_parameters)
-        debouncer_b.populate_voltage_event_lists(voltage_parameters)
-        debouncer_c.populate_voltage_event_lists(voltage_parameters)
-
-        events_lists = [[], [], [], [], []]
-        events_from_a = VoltageEventDebouncer.get_event_lists(debouncer_a.id)
-        events_from_b = VoltageEventDebouncer.get_event_lists(debouncer_b.id)
-        events_from_c = VoltageEventDebouncer.get_event_lists(debouncer_c.id)
-
-        for i in range(len(events_lists)):
-            events_lists[i] = \
-                events_lists[i] + events_from_a[i] +\
-                events_from_b[i] + events_from_c[i]
-
-        if events_lists[0] != []:
-            evt = PhaseDropEvent()
-            evt.save_event(self.transductor, events_lists[0])
-
-        if events_lists[1] != []:
-            evt = CriticalVoltageEvent()
-            evt.save_event(self.transductor, events_lists[1])
-
-        if events_lists[2] != []:
-            evt = CriticalVoltageEvent()
-            evt.save_event(self.transductor, events_lists[2])
-
-        if events_lists[3] != []:
-            evt = PrecariousVoltageEvent()
-            evt.save_event(self.transductor, events_lists[3])
-
-        if events_lists[4] != []:
-            evt = PrecariousVoltageEvent()
-            evt.save_event(self.transductor, events_lists[4])
+        debouncer_a.raise_event(voltage_parameters, self.transductor)
+        debouncer_b.raise_event(voltage_parameters, self.transductor)
+        debouncer_c.raise_event(voltage_parameters, self.transductor)
 
     def reset_filter(self):
         from events.models import VoltageEventDebouncer
