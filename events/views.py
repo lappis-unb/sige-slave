@@ -1,5 +1,6 @@
 from rest_framework import viewsets
 from rest_framework import mixins
+from rest_framework.response import Response
 from .serializers import VoltageRelatedEventSerializer
 from .serializers import FailedConnectionTransductorEventSerializer
 from .models import VoltageRelatedEvent
@@ -15,7 +16,7 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
                                  mixins.ListModelMixin,
                                  viewsets.GenericViewSet):
     serializer_class = VoltageRelatedEventSerializer
-    queryset = VoltageRelatedEvent.objects.all()
+    queryset = VoltageRelatedEvent.objects.none()
     models = {
         'FailedConnectionTransductorEvent': FailedConnectionTransductorEvent,
         'CriticalVoltageEvent': CriticalVoltageEvent,
@@ -23,38 +24,31 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
         'PhaseDropEvent': PhaseDropEvent
     }
 
-    def get_queryset(self):
-        type = self.request.query_params.get('type')
+    def list(self, request):
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
-        now = timezone.now()
-        start_date = now - timezone.timedelta(minutes=1)
-        end_date = now
-
-        if start_date and end_date:
-            self.queryset = self.queryset.filter(
-                created_at__gte=start_date,
-                created_at__lte=end_date
-            )
-
-        if type:
-            self.queryset = self.queryset.instance_of(self.models[type])
+        types = list(self.models.keys())
 
         events = []
-        for event in self.queryset:
-            data = {}
-            data['data'] = {}
-            for measure in event.data.keys():
-                data['data'].setdefault(measure)
-                data['data'].update({measure: event.data[measure]})
+        for type in types:
+            last_event = VoltageRelatedEvent.objects.instance_of(
+                self.models[type]
+            ).last()
 
-            data['ip_address'] = event.transductor.ip_address
-            data['created_at'] = event.created_at
-            data['ended_at'] = event.ended_at
-            data['type'] = event.__class__.__name__
-            events.append(data)
+            if last_event:
+                data = {}
+                data['data'] = {}
+                for measure in last_event.data.keys():
+                    data['data'].setdefault(measure)
+                    data['data'].update({measure: last_event.data[measure]})
 
-        return events
+                data['ip_address'] = last_event.transductor.ip_address
+                data['created_at'] = last_event.created_at
+                data['ended_at'] = last_event.ended_at
+                data['type'] = last_event.__class__.__name__
+                events.append(data)
+
+        return Response(events, status=200)
 
 
 class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
@@ -62,34 +56,21 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
                                               mixins.ListModelMixin,
                                               viewsets.GenericViewSet):
     serializer_class = FailedConnectionTransductorEventSerializer
-    queryset = FailedConnectionTransductorEvent.objects.all()
+    query = FailedConnectionTransductorEvent.objects.all()
 
-    def get_queryset(self):
-        type = self.request.query_params.get('type')
+    def list(self, request):
+        last_event = None
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
-        now = timezone.now()
-        start_date = now - timezone.timedelta(minutes=1)
-        end_date = now
 
-        if start_date and end_date:
-            self.queryset = self.queryset.filter(
-                created_at__gte=start_date,
-                created_at__lte=end_date
-            )
+        last_event = self.query.last()
 
-        if type:
-            self.queryset = self.queryset.instance_of(self.models[type])
+        data = {}
+        if last_event:
+            data['data'] = last_event.data
+            data['ip_address'] = last_event.transductor.ip_address
+            data['created_at'] = last_event.created_at
+            data['ended_at'] = last_event.ended_at
+            data['type'] = last_event.__class__.__name__
 
-        events = []
-
-        for event in self.queryset:
-            data = {}
-            data['data'] = event.data
-            data['ip_address'] = event.transductor.ip_address
-            data['created_at'] = event.created_at
-            data['ended_at'] = event.ended_at
-            data['type'] = event.__class__.__name__
-            events.append(data)
-
-        return events
+        return Response(data, status=200)

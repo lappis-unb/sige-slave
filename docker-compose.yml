@@ -25,6 +25,17 @@ services:
     depends_on:
       - slave-db
 
+  slave-broker:
+    container_name: slave-broker
+    image: python:3.6
+    env_file: dev-env
+    working_dir: /slave-broker
+    networks:
+      - smi-network
+    volumes:
+      - ./:/slave-broker/
+    command: /bin/bash -c 'python -u broker.py'
+
 volumes:
   pg-data: {}
   pip_cache:
