@@ -14,6 +14,8 @@ from .utils import MeasurementParamsValidator
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it
 #  can't have update and create methods so it only inherits from parts of it
+
+
 class MeasurementViewSet(mixins.RetrieveModelMixin,
                          mixins.DestroyModelMixin,
                          mixins.ListModelMixin,
@@ -39,11 +41,11 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
         self.queryset = self.model.objects
 
         MeasurementParamsValidator.validate_query_params(params)
-        
+
         if serial_number:
             transductor = EnergyTransductor.objects.get(
-                    serial_number=serial_number
-                )
+                serial_number=serial_number
+            )
 
             if start_date:
                 self.queryset = self.queryset.filter(
@@ -51,7 +53,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                     slave_collection_date__gte=start_date,
                     slave_collection_date__lte=end_date
                 )
-            
+
             else:
                 self.queryset = self.queryset.filter(
                     transductor=transductor
@@ -62,7 +64,7 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
                 slave_collection_date__gte=start_date,
                 slave_collection_date__lte=end_date
             )
-        
+
         else:
             self.queryset = self.queryset.all()
 

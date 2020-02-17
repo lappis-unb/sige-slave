@@ -23,14 +23,10 @@ class EnergyTransductorModel():
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
-            [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-            [284, 2]
+            [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+            [282, 2], [284, 2]
         ],
-        # "Quarterly": [
-        #     [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
-        #     [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-        #     [284, 2]
-        # ],
+
         "Monthly": [
             [156, 2],
             [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
@@ -44,19 +40,6 @@ class EnergyTransductorModel():
             [548, 1], [552, 1], [454, 2], [549, 1], [553, 1], [456, 2],
             [550, 1], [554, 1], [458, 2], [551, 1], [555, 1]
         ],
-        # "Monthly": [
-        #     [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
-        #     [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
-        #     [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
-        #     [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
-        #     [518, 1], [522, 1], [426, 2], [519, 1], [523, 1], [428, 2],
-        #     [524, 1], [528, 1], [430, 2], [525, 1], [529, 1], [432, 2],
-        #     [526, 1], [530, 1], [434, 2], [527, 1], [531, 1], [444, 2],
-        #     [540, 1], [544, 1], [446, 2], [541, 1], [545, 1], [448, 2],
-        #     [542, 1], [546, 1], [450, 2], [543, 1], [547, 1], [452, 2],
-        #     [548, 1], [552, 1], [454, 2], [549, 1], [553, 1], [456, 2],
-        #     [550, 1], [554, 1], [458, 2], [551, 1], [555, 1]
-        # ],
         "CorrectDate": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1]
         ],
@@ -176,7 +159,7 @@ class EnergyTransductorModel():
         current_time = quarterly_measurement.slave_collection_date
         quarterly_measurement.transductor_collection_date = \
             current_time - timezone.timedelta(
-                minutes= 15 + (current_time.minute % 15),
+                minutes=15 + (current_time.minute % 15),
                 seconds=current_time.second,
                 microseconds=current_time.microsecond)
 
@@ -218,9 +201,9 @@ class EnergyTransductorModel():
             transductor_collection_month = current_time.month - 1
 
         measurement.transductor_collection_date = timezone.datetime(
-            year = transductor_collection_year,
-            month = transductor_collection_month,
-            day =  1
+            year=transductor_collection_year,
+            month=transductor_collection_month,
+            day=1
         )        
         measurement.generated_energy_peak_time = response[0]
         measurement.generated_energy_off_peak_time = response[1]
@@ -261,8 +244,6 @@ class EnergyTransductorModel():
         except ValueError:
             pass
 
-        print("here")
-        
         measurement.active_max_power_list_off_peak_time = []
         measurement.active_max_power_list_off_peak = []
 
@@ -370,12 +351,12 @@ class MD30(EnergyTransductorModel):
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
-            [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-            [284, 2]
+            [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+            [282, 2], [284, 2]
         ],
+
         "Monthly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
+            [156, 2],
             [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
             [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
             [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
@@ -387,6 +368,7 @@ class MD30(EnergyTransductorModel):
             [548, 1], [552, 1], [454, 2], [549, 1], [553, 1], [456, 2],
             [550, 1], [554, 1], [458, 2], [551, 1], [555, 1]
         ],
+
         "CorrectDate": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1]
         ],

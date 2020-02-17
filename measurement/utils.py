@@ -36,8 +36,8 @@ class MeasurementParamsValidator():
             _('This serial_number does not match with any Transductor'),
         )
         exception.status_code = 400
-        
-        if len(errors) != 0 :
+
+        if len(errors) != 0:
             raise exception
 
     @staticmethod
@@ -55,8 +55,7 @@ class MeasurementParamsValidator():
             timezone.datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = 'The start_date param must be a valid date in '
-            message +=  'the format YYYY-MM-DD HH:MM:SS'
-            print(start_date)
+            message += 'the format YYYY-MM-DD HH:MM:SS'
             raise ValidationException(
                 _(message),
             )
@@ -64,11 +63,10 @@ class MeasurementParamsValidator():
     @staticmethod
     def validate_end_date(end_date):
         try:
-            print(end_date)        
             timezone.datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
         except ValueError:
             message = 'The end_date param must be a valid date in '
-            message +=  'the format YYYY-MM-DD HH:MM:SS'
+            message += 'the format YYYY-MM-DD HH:MM:SS'
             raise ValidationException(
                 _(message),
             )

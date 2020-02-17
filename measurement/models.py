@@ -24,7 +24,6 @@ class Measurement(models.Model):
     slave_collection_date = models.DateTimeField(default=timezone.now)
     transductor_collection_date = models.DateTimeField(default=timezone.now)
 
-
     transductor = models.ForeignKey(
         EnergyTransductor,
         related_name="%(app_label)s_%(class)s",
