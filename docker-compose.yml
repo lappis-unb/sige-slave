@@ -3,6 +3,7 @@ services:
 
   slave-db:
     container_name: slave-db
+    restart: always
     image: postgres:9.6
     env_file: dev-env
     networks:
@@ -12,6 +13,7 @@ services:
 
   slave-api:
     container_name: slave-api
+    restart: always
     build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
@@ -27,6 +29,7 @@ services:
 
   slave-broker:
     container_name: slave-broker
+    restart: always
     image: python:3.6
     env_file: dev-env
     working_dir: /slave-broker
