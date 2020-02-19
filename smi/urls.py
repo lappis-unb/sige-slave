@@ -46,21 +46,6 @@ router.register(
     basename='broken_transductor',
 )
 router.register(
-    r'minutely-measurements',
-    measurements_views.MinutelyMeasurementViewSet,
-    basename='minutelymeasurement',
-)
-router.register(
-    r'quarterly-measurements',
-    measurements_views.QuarterlyMeasurementViewSet,
-    basename='quarterlymeasurement',
-)
-router.register(
-    r'monthly-measurements',
-    measurements_views.MonthlyMeasurementViewSet,
-    basename='monthlymeasurement',
-)
-router.register(
     r'voltage-events',
     VoltageRelatedEventViewSet,
     basename='voltage-events'
