@@ -10,3 +10,9 @@ def is_datetime_similar(date1, date2):
         return True
     else:
         return False
+
+
+class ValidationException(Exception):
+    def __init__(self, message):
+        super(ValidationException, self).__init__(message)
+        self.message = message

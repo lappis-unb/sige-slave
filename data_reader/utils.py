@@ -112,21 +112,19 @@ def perform_data_rescue(transductor):
         if(single_data_collection(transductor, "DataRescuePost",
                                   interval.begin) is None):
             return
-        time.sleep(0.1)
 
         measurement = single_data_collection(transductor, "DataRescueGet")
         if(measurement is None):
             return
 
         inside_interval = interval.change_interval(
-            measurement.collection_date)
+            measurement.transductor_collection_date)
 
         if(inside_interval):
             measurement.check_measurements()
             measurement.save()
         else:
             return
-        time.sleep(0.1)
 
 
 def perform_all_data_rescue():

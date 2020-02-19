@@ -21,7 +21,8 @@ class Measurement(models.Model):
 
     """
     settings.USE_TZ = False
-    collection_date = models.DateTimeField(default=timezone.now)
+    slave_collection_date = models.DateTimeField(default=timezone.now)
+    transductor_collection_date = models.DateTimeField(default=timezone.now)
 
     transductor = models.ForeignKey(
         EnergyTransductor,
@@ -57,7 +58,7 @@ class Measurement(models.Model):
 class MinutelyMeasurement(Measurement):
 
     def __str__(self):
-        return '%s' % self.collection_date
+        return '%s' % self.transductor_collection_date
 
     frequency_a = models.FloatField(default=0)
 
@@ -160,7 +161,7 @@ class MinutelyMeasurement(Measurement):
 class QuarterlyMeasurement(Measurement):
 
     def __str__(self):
-        return '%s' % self.collection_date
+        return '%s' % self.transductor_collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
@@ -182,7 +183,7 @@ class QuarterlyMeasurement(Measurement):
 class MonthlyMeasurement(Measurement):
 
     def __str__(self):
-        return '%s' % self.collection_date
+        return '%s' % self.transductor_collection_date
 
     generated_energy_peak_time = models.FloatField(default=0)
     generated_energy_off_peak_time = models.FloatField(default=0)
