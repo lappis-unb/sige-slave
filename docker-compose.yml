@@ -3,6 +3,7 @@ services:
 
   slave-db:
     container_name: slave-db
+    restart: always
     image: postgres:9.6
     env_file: dev-env
     networks:
@@ -12,6 +13,7 @@ services:
 
   slave-api:
     container_name: slave-api
+    restart: always
     build: .
     env_file: dev-env
     command: ["sh", "scripts/start.sh"]
@@ -24,6 +26,18 @@ services:
       - pip_cache:/usr/local/lib/python3.6/site-packages
     depends_on:
       - slave-db
+
+  slave-broker:
+    container_name: slave-broker
+    restart: always
+    image: python:3.6
+    env_file: dev-env
+    working_dir: /slave-broker
+    networks:
+      - smi-network
+    volumes:
+      - ./:/slave-broker/
+    command: /bin/bash -c 'python -u broker.py'
 
 volumes:
   pg-data: {}

@@ -1,11 +1,15 @@
-from django.db import models
-from datetime import datetime
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import ArrayField
-# from transductor_model.models import TransductorModel
-from django.utils import timezone
 import json
+
 from itertools import chain
+from datetime import datetime
+
+from django.db import models
+from django.utils import timezone
+from django.core.validators import RegexValidator
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.postgres.fields import ArrayField
+
+from utils import is_datetime_similar
 
 
 class Transductor(models.Model):
@@ -47,6 +51,7 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    port = models.IntegerField(default=1001)
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
@@ -101,18 +106,43 @@ class EnergyTransductor(Transductor):
         return self.serial_number
 
     def set_broken(self, new_status):
-        if self.broken == new_status:
-            return
-        if new_status:
-            TimeInterval.begin_interval(self)
-        else:
+        """
+        Set the broken atribute's new status to match the param.
+        If toggled to True, creates a failed connection event
+        """
+        from events.models import FailedConnectionTransductorEvent
+
+        old_status = self.broken
+
+        if old_status is True and new_status is False:
             last_time_interval = self.timeintervals.last()
+
             if last_time_interval is not None:
                 last_time_interval.end_interval()
-            
+
             else:
-                raise Exception
-        
+                self.broken = new_status
+                self.save(update_fields=['broken'])
+                raise Exception(
+                    'There is no time intervals open on this transducer!')
+
+            try:
+                related_event = FailedConnectionTransductorEvent.objects.filter(
+                    transductor=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except Exception as e:
+                print('There is no element in queryset filtered.')
+                pass
+
+        elif old_status is False and new_status is True:
+            evt = FailedConnectionTransductorEvent()
+            evt.save_event(self)
+            TimeInterval.begin_interval(self)
+
         self.broken = new_status
         self.save(update_fields=['broken'])
 
@@ -158,7 +188,7 @@ class TimeInterval(models.Model):
     )
 
     @staticmethod
-    def begin_interval(transductor):   
+    def begin_interval(transductor):
         time_interval = TimeInterval()
         time_interval.begin = timezone.datetime.now()
         time_interval.transductor = transductor
@@ -171,11 +201,10 @@ class TimeInterval(models.Model):
     def change_interval(self, time):
         self.begin = time + timezone.timedelta(minutes=1)
 
-        status = (self.end - time) >= timezone.timedelta(minutes=1)
-
-        if(status):
-            self.save(update_fields=['begin'])
-        else:
+        # Verifies if collected date is inside the recovery interval
+        if(self.end < time or is_datetime_similar(self.end, time)):
             self.delete()
-
-        return status
+            return False
+        else:
+            self.save(update_fields=['begin'])
+            return True

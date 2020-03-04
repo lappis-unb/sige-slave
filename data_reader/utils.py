@@ -74,7 +74,7 @@ def single_data_collection(transductor, collection_type, date=None):
         messages_to_send = serial_protocol_instance.create_messages(
             collection_type, date)
         communication_step = 'sending messages'
-        received_messages = transport_protocol_instance.send_messages(
+        received_messages = transport_protocol_instance.send_message(
             messages_to_send)
         communication_step = 'parsing response'
         received_messages_content = \
@@ -116,23 +116,22 @@ def perform_minutely_data_rescue(transductor):
     if (interval is None or interval.end is None):
         return
     while(True):
-        if(single_data_collection(transductor, "DataRescuePost", 
+        if(single_data_collection(transductor, "DataRescuePost",
                                   interval.begin) is None):
             return
-        time.sleep(0.1)
 
         measurement = single_data_collection(transductor, "DataRescueGet")
         if(measurement is None):
             return
 
         inside_interval = interval.change_interval(
-            measurement.collection_date)
+            measurement.transductor_collection_date)
 
         if(inside_interval):
+            measurement.check_measurements()
             measurement.save()
         else:
             return
-        time.sleep(0.1)
 
 
 def perform_periodic_data_rescue(transductor, rescue_type):
