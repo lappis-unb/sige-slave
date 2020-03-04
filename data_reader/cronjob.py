@@ -40,4 +40,3 @@ class DataRescueCronJob(CronJobBase):
         perform_all_data_rescue('Minutely')
         perform_all_data_rescue('Monthly')
         perform_all_data_rescue('Quarterly')
-
