@@ -92,8 +92,6 @@ class EnergyTransductorModel():
         return response_dict[collection_type](response, transductor, date)
 
     def save_minutely_measurement(self, response, transductor, date=None):
-        from data_reader.utils import perform_data_rescue
-
         self.verify_collection_date(response, transductor)
 
         minutely_measurement = MinutelyMeasurement()
