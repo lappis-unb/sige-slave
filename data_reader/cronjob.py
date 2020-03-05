@@ -13,15 +13,6 @@ class MinutelyCollectCronJob(CronJobBase):
         perform_all_data_collection('Minutely')
 
 
-class DataRescueCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0
-    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.DataRescueCronJob'
-
-    def do(self):
-        perform_all_data_rescue()
-
-
 class QuarterlyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
@@ -38,3 +29,14 @@ class MonthlyCollectCronJob(CronJobBase):
 
     def do(self):
         perform_all_data_collection('Monthly')
+
+
+class DataRescueCronJob(CronJobBase):
+    RUN_EVERY_MINS = 0
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'data_reader.cronjob.DataRescueCronJob'
+
+    def do(self):
+        perform_all_data_rescue('Minutely')
+        perform_all_data_rescue('Monthly')
+        perform_all_data_rescue('Quarterly')

@@ -28,7 +28,8 @@ class EnergyMeasurementTestCase(TestCase):
             installation_date=datetime.now()
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
-            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             frequency_a=8,
             voltage_a=8,
@@ -62,7 +63,8 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
-            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
             generated_energy_off_peak_time=8,
@@ -75,7 +77,8 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
-            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
             generated_energy_off_peak_time=8,
@@ -145,7 +148,9 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MinutelyMeasurement.objects.all())
 
         minutely_en_measurement = MinutelyMeasurement()
-        minutely_en_measurement.collection_date = \
+        minutely_en_measurement.slave_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
+        minutely_en_measurement.transductor_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         minutely_en_measurement.transductor = self.transductor
         minutely_en_measurement.frequency_a = 666
@@ -208,7 +213,8 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_delete_minutely_measurement(self):
         size = len(MinutelyMeasurement.objects.all())
-        MinutelyMeasurement.objects.filter(total_power_factor='8').delete()
+        value = '8'
+        MinutelyMeasurement.objects.filter(total_power_factor=value).delete()
 
         self.assertEqual(size - 1, len(MinutelyMeasurement.objects.all()))
 
@@ -217,14 +223,14 @@ class EnergyMeasurementTestCase(TestCase):
         value = '8'
 
         MinutelyMeasurement.objects.get(
-            total_power_factor=8
+            total_power_factor=value
         ).delete()
 
         self.assertEqual(size - 1, len(MinutelyMeasurement.objects.all()))
 
         with self.assertRaises(MinutelyMeasurement.DoesNotExist):
             MinutelyMeasurement.objects.get(
-                total_power_factor=8
+                total_power_factor=value
             ).delete()
 
     """
@@ -244,7 +250,9 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(QuarterlyMeasurement.objects.all())
 
         quarterly_en_measurement = QuarterlyMeasurement()
-        quarterly_en_measurement.collection_date = \
+        quarterly_en_measurement.slave_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
+        quarterly_en_measurement.transductor_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         quarterly_en_measurement.transductor = self.transductor
         quarterly_en_measurement.generated_energy_peak_time = 31
@@ -292,8 +300,9 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_delete_quarterly_measurement(self):
         size = len(QuarterlyMeasurement.objects.all())
+        value = '8'
         QuarterlyMeasurement.objects.filter(
-            generated_energy_peak_time='8'
+            generated_energy_peak_time=value
         ).delete()
 
         self.assertEqual(size - 1, len(QuarterlyMeasurement.objects.all()))
@@ -303,14 +312,14 @@ class EnergyMeasurementTestCase(TestCase):
         value = '8'
 
         QuarterlyMeasurement.objects.get(
-            generated_energy_peak_time=8
+            generated_energy_peak_time=value
         ).delete()
 
         self.assertEqual(size - 1, len(QuarterlyMeasurement.objects.all()))
 
         with self.assertRaises(QuarterlyMeasurement.DoesNotExist):
             QuarterlyMeasurement.objects.get(
-                generated_energy_peak_time=8
+                generated_energy_peak_time=value
             ).delete()
 
     """
@@ -321,7 +330,9 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
-        monthly_en_measurement.collection_date = \
+        monthly_en_measurement.slave_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.transductor_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
@@ -340,7 +351,9 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
-        monthly_en_measurement.collection_date = \
+        monthly_en_measurement.slave_collection_date = \
+            timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.trasnductor_collection_date = \
             timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.generated_energy_peak_time = 9
@@ -404,8 +417,9 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_delete_monthly_measurement(self):
         size = len(MonthlyMeasurement.objects.all())
+        value = '8'
         MonthlyMeasurement.objects.filter(
-            generated_energy_peak_time='8'
+            generated_energy_peak_time=value
         ).delete()
 
         self.assertEqual(size - 1, len(MonthlyMeasurement.objects.all()))
@@ -415,7 +429,7 @@ class EnergyMeasurementTestCase(TestCase):
         value = '8'
 
         MonthlyMeasurement.objects.get(
-            generated_energy_peak_time=8
+            generated_energy_peak_time=value
         ).delete()
 
         self.assertEqual(size - 1, len(MonthlyMeasurement.objects.all()))

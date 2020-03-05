@@ -23,12 +23,12 @@ class EnergyTransductorModel():
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
-            [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-            [284, 2]
+            [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+            [282, 2], [284, 2]
         ],
+
         "Monthly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
+            [156, 2],
             [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
             [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
             [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
@@ -92,8 +92,6 @@ class EnergyTransductorModel():
         return response_dict[collection_type](response, transductor, date)
 
     def save_minutely_measurement(self, response, transductor, date=None):
-        from data_reader.utils import perform_data_rescue
-
         self.verify_collection_date(response, transductor)
 
         minutely_measurement = MinutelyMeasurement()
@@ -108,7 +106,8 @@ class EnergyTransductorModel():
             response[4],
             response[5]
         )
-        minutely_measurement.collection_date = date
+        minutely_measurement.transctor_collection_date = date
+        minutely_measurement.slave_collection_date = timezone.now()
 
         minutely_measurement.frequency_a = response[6]
         minutely_measurement.voltage_a = response[7]
@@ -147,32 +146,32 @@ class EnergyTransductorModel():
         minutely_measurement.check_measurements()
         minutely_measurement.save()
         transductor.set_broken(False)
-        return minutely_measurement.collection_date
+        return minutely_measurement.transductor_collection_date
 
     def save_quarterly_measurement(self, response, transductor, date=None):
         quarterly_measurement = QuarterlyMeasurement()
         quarterly_measurement.transductor = transductor
 
-        quarterly_measurement.collection_date = timezone.datetime(
-            response[0],
-            response[1],
-            response[2],
-            response[3],
-            response[4],
-            response[5]
-        )
+        quarterly_measurement.slave_collection_date = timezone.now()
 
-        quarterly_measurement.generated_energy_peak_time = response[6]
-        quarterly_measurement.generated_energy_off_peak_time = response[7]
+        current_time = quarterly_measurement.slave_collection_date
+        quarterly_measurement.transductor_collection_date = \
+            current_time - timezone.timedelta(
+                minutes=15 + (current_time.minute % 15),
+                seconds=current_time.second,
+                microseconds=current_time.microsecond)
 
-        quarterly_measurement.consumption_peak_time = response[8]
-        quarterly_measurement.consumption_off_peak_time = response[9]
+        quarterly_measurement.generated_energy_peak_time = response[0]
+        quarterly_measurement.generated_energy_off_peak_time = response[1]
 
-        quarterly_measurement.inductive_power_peak_time = response[10]
-        quarterly_measurement.inductive_power_off_peak_time = response[11]
+        quarterly_measurement.consumption_peak_time = response[2]
+        quarterly_measurement.consumption_off_peak_time = response[3]
 
-        quarterly_measurement.capacitive_power_peak_time = response[12]
-        quarterly_measurement.capacitive_power_off_peak_time = response[13]
+        quarterly_measurement.inductive_power_peak_time = response[4]
+        quarterly_measurement.inductive_power_off_peak_time = response[5]
+
+        quarterly_measurement.capacitive_power_peak_time = response[6]
+        quarterly_measurement.capacitive_power_off_peak_time = response[7]
 
         quarterly_measurement.check_measurements()
         quarterly_measurement.save()
@@ -190,49 +189,49 @@ class EnergyTransductorModel():
         measurement = MonthlyMeasurement()
         measurement.transductor = transductor
 
-        measurement.collection_date = timezone.datetime(
-            response[0],
-            response[1],
-            response[2],
-            response[3],
-            response[4],
-            response[5]
-        )
+        measurement.slave_collection_date = timezone.now()
+        current_time = measurement.slave_collection_date
+        if(current_time.month == 1):
+            transductor_collection_year = current_time.year - 1
+            transductor_collection_month = 12
+        else:
+            transductor_collection_year = current_time.year
+            transductor_collection_month = current_time.month - 1
 
-        measurement.generated_energy_peak_time = response[6]
-        measurement.generated_energy_off_peak_time = response[7]
+        measurement.transductor_collection_date = timezone.datetime(
+            year=transductor_collection_year,
+            month=transductor_collection_month,
+            day=1
+        )        
+        measurement.generated_energy_peak_time = response[0]
+        measurement.generated_energy_off_peak_time = response[1]
 
-        measurement.consumption_peak_time = response[8]
-        measurement.consumption_off_peak_time = response[9]
+        measurement.consumption_peak_time = response[2]
+        measurement.consumption_off_peak_time = response[3]
 
         # FIXME - This 2 measurements comming as NaN from the transductor
-        measurement.inductive_power_peak_time = 0
-        measurement.inductive_power_off_peak_time = 0
+        measurement.inductive_power_peak_time = response[4]
+        measurement.inductive_power_off_peak_time = response[5]
 
-        measurement.capacitive_power_peak_time = 0
-        measurement.capacitive_power_off_peak_time = 0
+        measurement.capacitive_power_peak_time = response[6]
+        measurement.capacitive_power_off_peak_time = response[7]
 
-        measurement.active_max_power_peak_time = response[14]
-        measurement.active_max_power_off_peak_time = response[15]
+        measurement.active_max_power_peak_time = response[8]
+        measurement.active_max_power_off_peak_time = response[9]
 
-        measurement.reactive_max_power_peak_time = response[16]
-        measurement.reactive_max_power_off_peak_time = response[17]
+        measurement.reactive_max_power_peak_time = response[10]
+        measurement.reactive_max_power_off_peak_time = response[11]
 
         # Arguments refer to initial positions of response information
         # Further information on transductor's Memory Map
 
-        today = timezone.datetime.today()
-
-        if(today.month != 1):
-            year = today.year
-        else:
-            year = today.year - 1
+        year = measurement.transductor_collection_date.year
 
         measurement.active_max_power_list_peak_time = []
         measurement.active_max_power_list_peak = []
 
         try:
-            for i in range(18, 28, 3):
+            for i in range(12, 22, 3):
                 measurement.active_max_power_list_peak_time.append(
                     timezone.datetime(
                         year, response[i + 1] // 256,
@@ -247,7 +246,7 @@ class EnergyTransductorModel():
         measurement.active_max_power_list_off_peak = []
 
         try:
-            for i in range(30, 40, 3):
+            for i in range(24, 34, 3):
                 measurement.active_max_power_list_off_peak_time.append(
                     timezone.datetime(
                         year, response[i + 1] // 256,
@@ -262,7 +261,7 @@ class EnergyTransductorModel():
         measurement.reactive_max_power_list_peak = []
         try:
 
-            for i in range(42, 52, 3):
+            for i in range(36, 46, 3):
                 measurement.reactive_max_power_list_peak_time.append(
                     timezone.datetime(
                         year, response[i + 1] // 256,
@@ -278,7 +277,7 @@ class EnergyTransductorModel():
 
         try:
 
-            for i in range(54, 64, 3):
+            for i in range(48, 58, 3):
                 measurement.reactive_max_power_list_off_peak_time.append(
                     timezone.datetime(
                         year, response[i + 1] // 256,
@@ -297,7 +296,8 @@ class EnergyTransductorModel():
     def save_rescued_data(self, response, transductor, date=None):
         measurement = MinutelyMeasurement()
 
-        measurement.collection_date = response[0][0]
+        measurement.transductor_collection_date = response[0][0]
+        measurement.slave_collection_date = timezone.now()
         measurement.voltage_a = response[0][1]
         measurement.voltage_b = response[0][2]
         measurement.voltage_c = response[0][3]
@@ -349,12 +349,12 @@ class MD30(EnergyTransductorModel):
             [122, 2], [132, 2], [134, 2], [136, 2], [138, 2]
         ],
         "Quarterly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [264, 2],
-            [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], [282, 2],
-            [284, 2]
+            [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+            [282, 2], [284, 2]
         ],
+
         "Monthly": [
-            [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1], [156, 2],
+            [156, 2],
             [158, 2], [162, 2], [164, 2], [168, 2], [170, 2], [174, 2],
             [176, 2], [180, 2], [182, 2], [186, 2], [188, 2], [420, 2],
             [516, 1], [520, 1], [422, 2], [517, 1], [521, 1], [424, 2],
@@ -366,6 +366,7 @@ class MD30(EnergyTransductorModel):
             [548, 1], [552, 1], [454, 2], [549, 1], [553, 1], [456, 2],
             [550, 1], [554, 1], [458, 2], [551, 1], [555, 1]
         ],
+
         "CorrectDate": [
             [10, 1], [11, 1], [14, 1], [15, 1], [16, 1], [17, 1]
         ],
