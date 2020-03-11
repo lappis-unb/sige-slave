@@ -318,7 +318,6 @@ class VoltageEventDebouncer():
         """
         if VoltageEventDebouncer.debouncers_dictionary.get(
                 transductor.serial_number + measurement_phase) is None:
-
             VoltageEventDebouncer.debouncers_dictionary[
                 transductor.serial_number + measurement_phase] = \
                 VoltageEventDebouncer(
@@ -326,6 +325,31 @@ class VoltageEventDebouncer():
 
         return VoltageEventDebouncer.debouncers_dictionary.get(
             transductor.serial_number + measurement_phase)
+
+    def __raise_event_logic(self, transductor, event_index, event_function):
+        should_raise_new_event = False
+        previous_event = None
+
+        # Check whether there were similar entries in the event list
+        if not VoltageEventDebouncer.\
+                event_lists_dictionary[self.id][event_index]:
+            # In the first time populate the event list
+            VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
+            VoltageEventDebouncer.event_lists_dictionary[
+                self.id][event_index].append(
+                [self.measurement_type, self.last_measurement]
+            )
+            should_raise_new_event = True
+
+        if should_raise_new_event:
+            # Close the previous open event
+            if self.raised_event is not None:
+                self.raised_event.ended_at = timezone.datetime.now()
+                previous_event = self.raised_event
+                self.raised_event = None
+            self.raised_event = event_function()
+
+        return previous_event, self.raised_event
 
     def raise_event(self, voltage_parameters, transductor):
         """
@@ -349,201 +373,63 @@ class VoltageEventDebouncer():
         critical_lower_boundary = voltage_parameters[3]
         critical_upper_boundary = voltage_parameters[4]
 
+        previous_raised_event = None
+        cur_raised_event = None
+        event_index = -1
+
         if self.check_phase_down(used_voltage):
-            self.raised_event = transductor.events_event.instance_of(
-                PhaseDropEvent
-            ).filter(ended_at__isnull=True).last()
-            if VoltageEventDebouncer.event_lists_dictionary[self.id][0] == []:
-                VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
-                VoltageEventDebouncer.event_lists_dictionary[self.id][0].append(
-                    [self.measurement_type, self.last_measurement]
-                )
-                if self.raised_event is not None:
-                    self.raised_event.data.pop(self.measurement_type)
-
-                    if self.raised_event.data == {}:
-                        self.raised_event.ended_at = timezone.datetime.now()
-                        self.raised_event.save()
-            else:
-                if self.raised_event is not None and \
-                   self.raised_event.ended_at is None:
-
-                    self.raised_event.data[self.measurement_type] = (
-                        self.last_measurement
-                    )
-                    self.raised_event.save()
-                else:
-                    self.raised_event = PhaseDropEvent()
-                    self.raised_event.save_event(
-                        transductor,
-                        (
-                            VoltageEventDebouncer
-                            .event_lists_dictionary[self.id][0]
-                        )
-                    )
+            (previous_raised_event, cur_raised_event) = \
+                self.__raise_event_logic(transductor, 0, PhaseDropEvent)
             self.is_below_lower_precarious_level = False
             self.is_below_lower_critical_level = False
             self.is_above_upper_precarious_level = False
             self.is_above_upper_critical_level = False
+            event_index = 0
         elif self.check_critical_upper_voltage_with_hysteresis(
                 critical_upper_boundary):
-            self.raised_event = transductor.events_event.instance_of(
-                CriticalVoltageEvent
-            ).filter(ended_at__isnull=True).last()
-            if VoltageEventDebouncer.event_lists_dictionary[self.id][2] == []:
-                VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
-                VoltageEventDebouncer.event_lists_dictionary[self.id][2].append(
-                    [self.measurement_type, self.last_measurement]
-                )
-                if self.raised_event is not None:
-                    self.raised_event.data.pop(self.measurement_type)
-
-                    if self.raised_event.data == {}:
-                        self.raised_event.ended_at = timezone.datetime.now()
-                        self.raised_event.save()
-            else:
-                if self.raised_event is not None and \
-                   self.raised_event.ended_at is None:
-
-                    self.raised_event.data[self.measurement_type] = (
-                        self.last_measurement
-                    )
-                    self.raised_event.save()
-                else:
-                    self.raised_event = CriticalVoltageEvent()
-                    self.raised_event.save_event(
-                        transductor,
-                        (
-                            VoltageEventDebouncer
-                            .event_lists_dictionary[self.id][2]
-                        )
-                    )
+            (previous_raised_event, cur_raised_event) = \
+                self.__raise_event_logic(transductor, 2, CriticalVoltageEvent)
             self.is_below_lower_precarious_level = False
             self.is_below_lower_critical_level = False
             self.is_above_upper_precarious_level = False
             self.is_phase_down = False
+            event_index = 2
         elif self.check_critical_lower_voltage_with_hysteresis(
                 critical_lower_boundary):
-            self.raised_event = transductor.events_event.instance_of(
-                CriticalVoltageEvent
-            ).filter(ended_at__isnull=True).last()
-            if VoltageEventDebouncer.event_lists_dictionary[self.id][1] == []:
-                VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
-                VoltageEventDebouncer.event_lists_dictionary[self.id][1].append(
-                    [self.measurement_type, self.last_measurement]
-                )
-                if self.raised_event is not None:
-                    self.raised_event.data.pop(self.measurement_type)
-
-                    if self.raised_event.data == {}:
-                        self.raised_event.ended_at = timezone.datetime.now()
-                        self.raised_event.save()
-            else:
-                if self.raised_event is not None and \
-                   self.raised_event.ended_at is None:
-
-                    self.raised_event.data[self.measurement_type] = (
-                        self.last_measurement
-                    )
-                    self.raised_event.save()
-                else:
-                    self.raised_event = CriticalVoltageEvent()
-                    self.raised_event.save_event(
-                        transductor,
-                        (
-                            VoltageEventDebouncer
-                            .event_lists_dictionary[self.id][1]
-                        )
-                    )
+            (previous_raised_event, cur_raised_event) = \
+                self.__raise_event_logic(transductor, 1, CriticalVoltageEvent)
             self.is_below_lower_precarious_level = False
             self.is_phase_down = False
             self.is_above_upper_precarious_level = False
             self.is_above_upper_critical_level = False
+            event_index = 1
         elif self.check_precarious_upper_voltage_with_hysteresis(
                 precary_upper_boundary):
-            self.raised_event = transductor.events_event.instance_of(
-                PrecariousVoltageEvent
-            ).filter(ended_at__isnull=True).last()
-            if VoltageEventDebouncer.event_lists_dictionary[self.id][
-                    4] == [] and self.raised_event is None:
-                VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
-                VoltageEventDebouncer.event_lists_dictionary[self.id][4].append(
-                    [self.measurement_type, self.last_measurement]
-                )
-                if self.raised_event is not None:
-                    self.raised_event.data.pop(self.measurement_type)
-                    print('raised event: %s' % self.raised_event.data)
-                    if self.raised_event.data == {}:
-                        print('Enter here!')
-                        self.raised_event.ended_at = timezone.datetime.now()
-                        self.raised_event.save()
-            else:
-                if self.raised_event is not None and \
-                   self.raised_event.ended_at is None:
-
-                    self.raised_event.data[self.measurement_type] = (
-                        self.last_measurement
-                    )
-                    self.raised_event.save()
-                else:
-                    self.raised_event = PrecariousVoltageEvent()
-                    self.raised_event.save_event(
-                        transductor,
-                        (
-                            VoltageEventDebouncer
-                            .event_lists_dictionary[self.id][4]
-                        )
-                    )
+            (previous_raised_event, cur_raised_event) = \
+                self.__raise_event_logic(transductor, 4, PrecariousVoltageEvent)
             self.is_below_lower_precarious_level = False
             self.is_below_lower_critical_level = False
             self.is_phase_down = False
             self.is_above_upper_critical_level = False
+            event_index = 4
         elif self.check_precarious_lower_voltage_with_hysteresis(
                 precary_lower_boundary):
-            self.raised_event = transductor.events_event.instance_of(
-                PrecariousVoltageEvent
-            ).filter(ended_at__isnull=True).last()
-            if VoltageEventDebouncer.event_lists_dictionary[self.id][
-                    3] == [] and (
-                    self.is_phase_down or self.raised_event is None):
-                VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
-                VoltageEventDebouncer.event_lists_dictionary[self.id][3].append(
-                    [self.measurement_type, self.last_measurement]
-                )
-                if self.raised_event is not None:
-                    self.raised_event.data.pop(self.measurement_type)
-                    if self.raised_event.data == {}:
-                        self.raised_event.ended_at = timezone.datetime.now()
-                        self.raised_event.save()
-            else:
-                if self.raised_event is not None and \
-                   self.raised_event.ended_at is None:
-
-                    self.raised_event.data[self.measurement_type] = (
-                        self.last_measurement
-                    )
-                    self.raised_event.save()
-                else:
-                    self.raised_event = PrecariousVoltageEvent()
-                    self.raised_event.save_event(
-                        transductor,
-                        (
-                            VoltageEventDebouncer
-                            .event_lists_dictionary[self.id][3]
-                        )
-                    )
+            (previous_raised_event, cur_raised_event) = \
+                self.__raise_event_logic(transductor, 3, PrecariousVoltageEvent)
             self.is_phase_down = False
             self.is_below_lower_critical_level = False
             self.is_above_upper_precarious_level = False
             self.is_above_upper_critical_level = False
+            event_index = 3
         else:
             if self.raised_event is not None:
                 self.raised_event.ended_at = timezone.datetime.now()
-                self.raised_event.save()
-                self.raised_event = None
+                cur_raised_event = self.raised_event
             self.is_phase_down = False
             self.is_below_lower_precarious_level = False
             self.is_below_lower_critical_level = False
             self.is_above_upper_precarious_level = False
             self.is_above_upper_critical_level = False
+            event_index = -1
             VoltageEventDebouncer.remove_entries_in_event_lists(self.id)
+        return (event_index, previous_raised_event, cur_raised_event)

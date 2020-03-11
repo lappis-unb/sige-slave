@@ -7,6 +7,7 @@ from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
                                 QuarterlyMeasurement)
 from transductor.models import EnergyTransductor
 from events.models import *
+from events.models import VoltageEventDebouncer
 from datetime import datetime
 
 
@@ -59,6 +60,7 @@ class EventTestCase(TestCase):
         from events.models import VoltageEventDebouncer
         deb = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor1, 'voltage_a')
+        voltage_parameters = [220, 200.2, 228.8, 189.2, 233.2]
         deb.reset_filter()
         deb.add_data('voltage_a', 220)
         deb.add_data('voltage_a', 230)
@@ -74,7 +76,6 @@ class EventTestCase(TestCase):
             deb.get_average_filter_value(),
             (220 + 230 + 400 + 380) / 4.0)
 
-        voltage_parameters = [220, 200.2, 228.8, 189.2, 233.2]
         deb.raise_event(voltage_parameters, self.transductor1)
         events_list = VoltageEventDebouncer.get_event_lists(deb.id)
 
@@ -104,7 +105,7 @@ class EventTestCase(TestCase):
 
         deb.reset_filter()
         deb.add_data('voltage_a', 40)
-
+        print(deb.get_average_filter_value())
         deb.raise_event(voltage_parameters, self.transductor1)
         self.assertFalse(deb.raised_event is None)
         if deb.raised_event is not None:
@@ -185,6 +186,19 @@ class EventTestCase(TestCase):
 
         self.assertEqual(before + 1, len(PhaseDropEvent.objects.all()))
 
+    def test_create_repeated_voltage_event(self):
+        before = len(VoltageRelatedEvent.objects.all())
+
+        a = MinutelyMeasurement()
+        a.voltage_a = 400
+        a.voltage_b = 999
+        a.voltage_c = 10
+        a.transductor = self.transductor1
+        a.reset_filter()
+        a.check_measurements()
+
+        self.assertEqual(before + 2, len(VoltageRelatedEvent.objects.all()))
+
     def test_create_multiple_events_in_series(self):
         before = len(VoltageRelatedEvent.objects.all())
 
@@ -212,12 +226,12 @@ class EventTestCase(TestCase):
         self.assertEqual(before + 1, len(VoltageRelatedEvent.objects.all()))
         for evt in VoltageRelatedEvent.objects.all():
             self.assertNotEqual(evt.ended_at, None)
-        a.voltage_a = 70
+        a.voltage_a = 90
         for i in range(20):
             a.check_measurements()
         self.assertEqual(before + 2, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 400
-        for i in range(2):
+        for i in range(5):
             a.check_measurements()
         self.assertEqual(before + 3, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 350
@@ -234,6 +248,7 @@ class EventTestCase(TestCase):
             a.check_measurements()
         for evt in VoltageRelatedEvent.objects.all():
             self.assertNotEqual(evt.ended_at, None)
+
         a.voltage_a = 230
         for i in range(3):
             a.check_measurements()

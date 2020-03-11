@@ -47,7 +47,6 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
                     data['ended_at'] = last_event.ended_at
                     data['type'] = last_event.__class__.__name__
                     events.append(data)
-                    print('h'*100)
 
         return Response(events, status=200)
 
