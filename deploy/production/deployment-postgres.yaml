@@ -13,7 +13,7 @@ spec:
     app: postgres
     tier: database
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -54,7 +54,7 @@ spec:
         - name: POSTGRES_PORT
           value: "5432"
         - name: POSTGRES_DB
-          value: "smi-slave-dev"
+          value: "smi-slave"
         ports:
         - containerPort: 5432
 ---
