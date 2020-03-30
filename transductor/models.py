@@ -1,11 +1,15 @@
-from django.db import models
-from datetime import datetime
-from django.core.validators import RegexValidator
-from django.contrib.postgres.fields import ArrayField
-# from transductor_model.models import TransductorModel
-from django.utils import timezone
 import json
+
 from itertools import chain
+from datetime import datetime
+
+from django.db import models
+from django.utils import timezone
+from django.core.validators import RegexValidator
+from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.postgres.fields import ArrayField
+
+from utils import is_datetime_similar
 
 
 class Transductor(models.Model):
@@ -47,13 +51,15 @@ class Transductor(models.Model):
                 code='invalid_ip_address'
             ),
         ])
+    port = models.IntegerField(default=1001)
     model = models.CharField(max_length=50, default="EnergyTransductorModel")
-    last_collection = models.DateTimeField(blank=True, null=True)
     broken = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     firmware_version = models.CharField(max_length=20)
     installation_date = models.DateTimeField(blank=True, null=True)
     physical_location = models.CharField(max_length=30, default='')
+    quarterly_data_rescued = models.BooleanField(default=False)
+    monthly_data_rescued = models.BooleanField(default=False)
     geolocation_longitude = models.DecimalField(
         max_digits=15,
         decimal_places=10
@@ -99,8 +105,45 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self, broken):
-        self.broken = broken
+    def set_broken(self, new_status):
+        """
+        Set the broken atribute's new status to match the param.
+        If toggled to True, creates a failed connection event
+        """
+        from events.models import FailedConnectionTransductorEvent
+
+        old_status = self.broken
+
+        if old_status is True and new_status is False:
+            last_time_interval = self.timeintervals.last()
+
+            if last_time_interval is not None:
+                last_time_interval.end_interval()
+
+            else:
+                self.broken = new_status
+                self.save(update_fields=['broken'])
+                raise Exception(
+                    'There is no time intervals open on this transducer!')
+
+            try:
+                related_event = FailedConnectionTransductorEvent.objects.filter(
+                    transductor=self,
+                    ended_at__isnull=True
+                ).last()
+                related_event.ended_at = timezone.now()
+                related_event.save()
+
+            except Exception as e:
+                print('There is no element in queryset filtered.')
+                pass
+
+        elif old_status is False and new_status is True:
+            evt = FailedConnectionTransductorEvent()
+            evt.save_event(self)
+            TimeInterval.begin_interval(self)
+
+        self.broken = new_status
         self.save(update_fields=['broken'])
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
@@ -129,3 +172,39 @@ class EnergyTransductor(Transductor):
 
     def get_monthly_measurements(self):
         return self.monthly_measurements.all()
+
+
+class TimeInterval(models.Model):
+
+    begin = models.DateTimeField(null=False)
+    end = models.DateTimeField(null=True)
+
+    # TODO Change related name
+
+    transductor = models.ForeignKey(
+        EnergyTransductor,
+        models.CASCADE,
+        related_name='timeintervals',
+    )
+
+    @staticmethod
+    def begin_interval(transductor):
+        time_interval = TimeInterval()
+        time_interval.begin = timezone.datetime.now()
+        time_interval.transductor = transductor
+        time_interval.save()
+
+    def end_interval(self):
+        self.end = timezone.datetime.now()
+        self.save(update_fields=['end'])
+
+    def change_interval(self, time):
+        self.begin = time + timezone.timedelta(minutes=1)
+
+        # Verifies if collected date is inside the recovery interval
+        if(self.end < time or is_datetime_similar(self.end, time)):
+            self.delete()
+            return False
+        else:
+            self.save(update_fields=['begin'])
+            return True
