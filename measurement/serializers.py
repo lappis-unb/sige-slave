@@ -10,7 +10,7 @@ class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
         model = MinutelyMeasurement
         fields = ('id',
                   'transductor',
-                  'collection_date',
+                  'transductor_collection_date',
                   'frequency_a',
                   'voltage_a',
                   'voltage_b',
@@ -48,7 +48,7 @@ class QuarterlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = QuarterlyMeasurement
         fields = ('id',
-                  'collection_date',
+                  'transductor_collection_date',
                   'generated_energy_peak_time',
                   'generated_energy_off_peak_time',
                   'consumption_peak_time',
@@ -65,7 +65,7 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MonthlyMeasurement
         fields = ('id',
-                  'collection_date',
+                  'transductor_collection_date',
                   'generated_energy_peak_time',
                   'generated_energy_off_peak_time',
                   'consumption_peak_time',
@@ -78,9 +78,32 @@ class MonthlyMeasurementSerializer(serializers.HyperlinkedModelSerializer):
                   'active_max_power_off_peak_time',
                   'reactive_max_power_peak_time',
                   'reactive_max_power_off_peak_time',
+                  'active_max_power_list_peak',
                   'active_max_power_list_peak_time',
+                  'active_max_power_list_off_peak',
                   'active_max_power_list_off_peak_time',
+                  'reactive_max_power_list_peak',
                   'reactive_max_power_list_peak_time',
+                  'reactive_max_power_list_off_peak',
                   'reactive_max_power_list_off_peak_time',
                   'transductor',
+                  'url')
+
+
+class RealTimeMeasurementSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = MinutelyMeasurement
+        fields = ('id',
+                  'transductor_id',
+                  'transductor_collection_date',
+                  'voltage_a',
+                  'voltage_b',
+                  'voltage_c',
+                  'current_a',
+                  'current_b',
+                  'current_c',
+                  'total_active_power',
+                  'total_reactive_power',
+                  'total_power_factor',
                   'url')
