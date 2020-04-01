@@ -12,17 +12,36 @@ from .exceptions import RegisterAddressException
 from .exceptions import CRCInvalidException
 from .exceptions import InvalidDateException
 
-from .transport import UdpProtocol
-from .communication import ModbusRTU
+from .transport import *
+from .communication import *
 
 from transductor_model.models import EnergyTransductorModel
+from transductor_model.models import MD30
+from transductor_model.models import TR4020
 from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
 
 
-def get_transductors():
-    return EnergyTransductor.objects.all()
+def communication_log(status, datetime, type, transductor, file, errors=[]):
+    print('DateTime:\t', datetime, file=file)
+    print(
+        'Transductor:\t', 
+        transductor.serial_number + '@' + transductor.physical_location, 
+        '(' + transductor.ip_address + ')',
+        file=file
+    )
+    print('Type:\t\t', type, file=file)
+    print('Status:\t\t', status, file=file)
+    if errors:
+        print('Errors:', file=file)
+        for error in errors:
+            print('\t\t', error, file=file)
+    print('\n', file=file)
+
+
+def get_active_transductors():
+    return EnergyTransductor.objects.filter(active=True)
 
 
 def get_transductor_model(transductor):
@@ -43,38 +62,119 @@ def single_data_collection(transductor, collection_type, date=None):
     Returns:
         None
     """
-    transductor_model = get_transductor_model(transductor)
-    serial_protocol_instance, \
-        transport_protocol_instance = get_protocols(transductor,
-                                                    transductor_model)
 
-    messages_to_send = serial_protocol_instance.create_messages(
-        collection_type, date)
+    communication_step = ''
     try:
-        received_messages = transport_protocol_instance.send_messages(
+        communication_step = 'capturing transductor model'
+        transductor_model = get_transductor_model(transductor)
+        communication_step = "capturing serial and transport protocols"
+        serial_protocol_instance, \
+            transport_protocol_instance = get_protocols(transductor,
+                                                        transductor_model)
+        communication_step = 'assembling messages'
+        messages_to_send = serial_protocol_instance.create_messages(
+            collection_type, date)
+        communication_step = 'sending messages'
+        received_messages = transport_protocol_instance.send_message(
             messages_to_send)
+        communication_step = 'parsing response'
         received_messages_content = \
             serial_protocol_instance.get_content_from_messages(
                 collection_type, received_messages, date)
-
-        return transductor_model.handle_response(collection_type,
-                                                 received_messages_content,
-                                                 transductor)
+        communication_step = 'handling response'
+        handled_response = transductor_model.handle_response(
+            collection_type,
+            received_messages_content,
+            transductor, date)
+        file = open("../home/successful_communication_logs.log", 'a')
+        communication_log(
+            status='Success', 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor,
+            file=file
+        )
+        file.close()
+        if not handled_response:
+            handled_response = True
+        return handled_response
     except Exception as e:
-        transductor.set_broken(True)
-        print(collection_type, datetime.now(), "exception:", e)
+        file = open("../home/failed_communication_logs.log", 'a')
+        if (collection_type == "Minutely"):
+            transductor.set_broken(True)
+        else:
+            attribute = get_rescue_attribute(collection_type)
+            transductor.__dict__[attribute] = False
+            transductor.save(update_fields=[attribute])
+        communication_log(
+            status='Failure at ' + communication_step, 
+            datetime=timezone.datetime.now(), 
+            type=collection_type, 
+            transductor=transductor, 
+            errors=[e],
+            file=file
+        )
+        file.close()
+        return None
+
+
+def perform_minutely_data_rescue(transductor):
+    interval = transductor.timeintervals.first()
+    if (interval is None or interval.end is None):
         return
-
-
-def perform_data_rescue(transductor, begin_date, end_date):
-    max_acceptable_difference = 30
-    while((end_date - begin_date).total_seconds() > max_acceptable_difference):
-        single_data_collection(transductor, "DataRescuePost", begin_date)
-        time.sleep(1)
-        date = single_data_collection(transductor, "DataRescueGet")
-        if(date is None):
+    while(True):
+        if(single_data_collection(transductor, "DataRescuePost",
+                                  interval.begin) is None):
             return
-        begin_date = date + timezone.timedelta(minutes=1)
+
+        measurement = single_data_collection(transductor, "DataRescueGet")
+        if(measurement is None):
+            return
+
+        inside_interval = interval.change_interval(
+            measurement.transductor_collection_date)
+
+        if(inside_interval):
+            measurement.check_measurements()
+            measurement.save()
+        else:
+            return
+
+
+def perform_periodic_data_rescue(transductor, rescue_type):
+    attribute = get_rescue_attribute(rescue_type)
+    if transductor.__dict__[attribute] is True:
+        return
+    if single_data_collection(transductor, rescue_type) is None:
+        transductor.__dict__[attribute] = False
+    else:
+        transductor.__dict__[attribute] = True
+    transductor.save(update_fields=[attribute])
+
+
+def get_rescue_function(rescue_type):
+    if rescue_type == 'Minutely':
+        return perform_minutely_data_rescue
+    else:
+        return perform_periodic_data_rescue
+
+
+def get_rescue_attribute(rescue_type):
+    if rescue_type == 'Quarterly':
+        return 'quarterly_data_rescued'
+    if rescue_type == 'Monthly':
+        return 'monthly_data_rescued'
+    return None
+
+
+def perform_all_data_rescue(rescue_type):
+    transductors = get_active_transductors()
+    rescue_function = get_rescue_function(rescue_type)
+    for transductor in transductors:
+        if rescue_type is "Minutely":
+            rescue_function(transductor)
+        else:
+            rescue_function(transductor, rescue_type)
 
 
 def get_protocols(transductor, transductor_model):
@@ -101,17 +201,16 @@ def perform_all_data_collection(collection_type):
     """
     threads = []
 
-    transductors = get_transductors()
+    transductors = get_active_transductors()
     for transductor in transductors:
-        if(transductor.active):
-            collection_thread = Thread(
-                target=single_data_collection,
-                args=(transductor, collection_type)
-            )
+        collection_thread = Thread(
+            target=single_data_collection,
+            args=(transductor, collection_type)
+        )
 
-            collection_thread.start()
+        collection_thread.start()
 
-            threads.append(collection_thread)
+        threads.append(collection_thread)
 
     for thread in threads:
         thread.join()
