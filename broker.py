@@ -94,7 +94,7 @@ if __name__ == '__main__':
     s.bind(('0.0.0.0', int(os.environ['BROKER_PORT'])))
 
     # This is a dict with all the message queues that uses the ip of 
-    # the reciver as key and the queue of messages to that reciver as value
+    # the receiver as key and the queue of messages to that receiver as value
     message_queues = {}
 
     while(True):

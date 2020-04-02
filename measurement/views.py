@@ -35,16 +35,16 @@ class MeasurementViewSet(mixins.RetrieveModelMixin,
             end_date = timezone.now()
             end_date = end_date.strftime("%Y-%m-%d %H:%M:%S")
             params['end_date'] = str(end_date)
-        serial_number = self.request.query_params.get('serial_number')
-        if serial_number:
-            params['serial_number'] = serial_number
+        transductor_id = self.request.query_params.get('id')
+        if transductor_id:
+            params['id'] = transductor_id
         self.queryset = self.model.objects
 
         MeasurementParamsValidator.validate_query_params(params)
 
-        if serial_number:
+        if transductor_id:
             transductor = EnergyTransductor.objects.get(
-                serial_number=serial_number
+                id=transductor_id
             )
 
             if start_date:

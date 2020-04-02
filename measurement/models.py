@@ -60,43 +60,43 @@ class MinutelyMeasurement(Measurement):
     def __str__(self):
         return '%s' % self.transductor_collection_date
 
-    frequency_a = models.FloatField(default=0)
+    frequency_a = models.FloatField(default=Nonei)
 
-    voltage_a = models.FloatField(default=0)
-    voltage_b = models.FloatField(default=0)
-    voltage_c = models.FloatField(default=0)
+    voltage_a = models.FloatField(default=None)
+    voltage_b = models.FloatField(default=None)
+    voltage_c = models.FloatField(default=None)
 
-    current_a = models.FloatField(default=0)
-    current_b = models.FloatField(default=0)
-    current_c = models.FloatField(default=0)
+    current_a = models.FloatField(default=None)
+    current_b = models.FloatField(default=None)
+    current_c = models.FloatField(default=None)
 
-    active_power_a = models.FloatField(default=0)
-    active_power_b = models.FloatField(default=0)
-    active_power_c = models.FloatField(default=0)
-    total_active_power = models.FloatField(default=0)
+    active_power_a = models.FloatField(default=None)
+    active_power_b = models.FloatField(default=None)
+    active_power_c = models.FloatField(default=None)
+    total_active_power = models.FloatField(default=None)
 
-    reactive_power_a = models.FloatField(default=0)
-    reactive_power_b = models.FloatField(default=0)
-    reactive_power_c = models.FloatField(default=0)
-    total_reactive_power = models.FloatField(default=0)
+    reactive_power_a = models.FloatField(default=None)
+    reactive_power_b = models.FloatField(default=None)
+    reactive_power_c = models.FloatField(default=None)
+    total_reactive_power = models.FloatField(default=None)
 
-    apparent_power_a = models.FloatField(default=0)
-    apparent_power_b = models.FloatField(default=0)
-    apparent_power_c = models.FloatField(default=0)
-    total_apparent_power = models.FloatField(default=0)
+    apparent_power_a = models.FloatField(default=None)
+    apparent_power_b = models.FloatField(default=None)
+    apparent_power_c = models.FloatField(default=None)
+    total_apparent_power = models.FloatField(default=None)
 
-    power_factor_a = models.FloatField(default=0)
-    power_factor_b = models.FloatField(default=0)
-    power_factor_c = models.FloatField(default=0)
-    total_power_factor = models.FloatField(default=0)
+    power_factor_a = models.FloatField(default=None)
+    power_factor_b = models.FloatField(default=None)
+    power_factor_c = models.FloatField(default=None)
+    total_power_factor = models.FloatField(default=None)
 
-    dht_voltage_a = models.FloatField(default=0)
-    dht_voltage_b = models.FloatField(default=0)
-    dht_voltage_c = models.FloatField(default=0)
+    dht_voltage_a = models.FloatField(default=None)
+    dht_voltage_b = models.FloatField(default=None)
+    dht_voltage_c = models.FloatField(default=None)
 
-    dht_current_a = models.FloatField(default=0)
-    dht_current_b = models.FloatField(default=0)
-    dht_current_c = models.FloatField(default=0)
+    dht_current_a = models.FloatField(default=None)
+    dht_current_b = models.FloatField(default=None)
+    dht_current_c = models.FloatField(default=None)
 
     def check_measurements(self):
         used_voltage = float(os.getenv('CONTRACTED_VOLTAGE'))
