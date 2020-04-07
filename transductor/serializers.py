@@ -6,9 +6,11 @@ from .models import EnergyTransductor
 
 
 class EnergyTransductorSerializer(serializers.HyperlinkedModelSerializer):
+
     class Meta:
         model = EnergyTransductor
         fields = (
+            'id',
             'serial_number',
             'ip_address',
             'port',
@@ -36,7 +38,7 @@ class ActiveTransductorsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
         fields = (
-            'serial_number',
+            'id',
             'active',
         )
 
@@ -45,6 +47,6 @@ class BrokenTransductorsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = EnergyTransductor
         fields = (
-            'serial_number',
+            'id',
             'broken',
         )
