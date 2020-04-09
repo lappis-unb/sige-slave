@@ -10,8 +10,8 @@ class MeasurementParamsValidator():
 
     @staticmethod
     def get_fields():  
-        return [('serial_number', 
-                 MeasurementParamsValidator.validate_serial_number), 
+        return [('id', 
+                 MeasurementParamsValidator.validate_id), 
                 ('start_date', MeasurementParamsValidator.validate_start_date),
                 ('end_date', MeasurementParamsValidator.validate_end_date)]
 
@@ -33,7 +33,7 @@ class MeasurementParamsValidator():
 
         exception = APIException(
             errors,
-            _('This serial_number does not match with any Transductor'),
+            _('This id does not match with any Transductor'),
         )
         exception.status_code = 400
 
@@ -41,12 +41,12 @@ class MeasurementParamsValidator():
             raise exception
 
     @staticmethod
-    def validate_serial_number(serial_number):
+    def validate_id(transductor_id):
         try:        
-            EnergyTransductor.objects.get(serial_number=serial_number)
+            EnergyTransductor.objects.get(id=transductor_id)
         except EnergyTransductor.DoesNotExist:
             raise ValidationException(
-                _('This serial_number does not match with any Transductor'),
+                _('This id does not match with any Transductor'),
             )
 
     @staticmethod
