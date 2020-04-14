@@ -104,27 +104,11 @@ class MinutelyMeasurement(Measurement):
     dht_current_b = models.FloatField(default=0)
     dht_current_c = models.FloatField(default=0)
 
-    def get_avg_filters_values(self):
-        from events.models import VoltageEventDebouncer
-        from events.models import VoltageEventDebouncer
-        debouncer_a = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_a')
-        debouncer_a.reset_filter()
-        debouncer_b = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_b')
-        debouncer_b.reset_filter()
-        debouncer_c = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_c')
-        return (debouncer_a.get_average_filter_value(),
-                debouncer_b.get_average_filter_value(),
-                debouncer_c.get_average_filter_value())
-
     def check_measurements(self):
+        # Voltage Parameters
         used_voltage = float(os.getenv('CONTRACTED_VOLTAGE'))
-
         precary_lower_boundary = used_voltage * 0.91
         precary_upper_boundary = used_voltage * 1.04
-
         critical_lower_boundary = used_voltage * 0.86
         critical_upper_boundary = used_voltage * 1.06
 
@@ -135,125 +119,38 @@ class MinutelyMeasurement(Measurement):
             ['voltage_c', self.voltage_c]
         ]
 
-        from events.models import CriticalVoltageEvent
-        from events.models import PhaseDropEvent
-        from events.models import PrecariousVoltageEvent
+        # List of Debouncers for each Phase
         from events.models import VoltageEventDebouncer
+        debouncers = [
+            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
+                                                        'voltage_a'),
+            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
+                                                        'voltage_b'),
+            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
+                                                        'voltage_c'),
+        ]
 
-        # Create a voltage event debouncer per phase
-        debouncers = []
-        debouncers.append(VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, measurements[0][0]))
-        debouncers.append(VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, measurements[1][0]))
-        debouncers.append(VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, measurements[2][0]))
-
-        voltage_parameters = [used_voltage,
-                              precary_lower_boundary,
-                              precary_upper_boundary,
-                              critical_lower_boundary,
-                              critical_upper_boundary]
-
-        index = 0
-        for debouncer in debouncers:
-            debouncer.add_data(measurements[index][0], measurements[index][1])
-            index += 1
-
-        prev_evts = []
-        cur_evts = []
-        event_indices = []
-        for debouncer in debouncers:
-            (event_index, prev, cur) = debouncer.raise_event(voltage_parameters,
-                                                             self.transductor)
-            prev_evts.append(prev)
-            cur_evts.append(cur)
-            event_indices.append(event_index)
-
-        # Raise Previous Events
-        # TODO Encapsulate this code snippet in a private method
-        for prev_evt in prev_evts:
-            if prev_evt is not None:
-                data = []
-                for key, value in prev_evt.data.items():
-                    data.append(key)
-                    data.append(value)
-                prev_evt.save_event(self.transductor,
-                                    [data])
-
-        # Raise Current Events and Suppress repeated
-        # TODO Refactor this code snippet for maintenance
-        # TODO Encapsulate this code snippet in a private method
-        if event_indices[0] > -1:
-            cur_evts[0].data = []
-            cur_evts[0].data.append(
-                VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[0].id][event_indices[0]][0]
-            )
-            if event_indices[0] == event_indices[1]:
-                key = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[1].id][event_indices[1]][0][0]
-                value = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[1].id][event_indices[1]][0][1]
-                cur_evts[0].data.append([key, value])
-
-                cur_evts[1] = None
-                event_indices[1] = -1
-            if event_indices[0] == event_indices[2]:
-                key = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[2].id][event_indices[2]][0][0]
-                value = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[2].id][event_indices[2]][0][1]
-                cur_evts[0].data.append([key, value])
-
-                cur_evts[2] = None
-                event_indices[2] = -1
-        if event_indices[1] > -1:
-            cur_evts[1].data = []
-            cur_evts[1].data.append(
-                VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[1].id][event_indices[1]][0])
-            if event_indices[1] == event_indices[2]:
-                key = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[2].id][event_indices[2]][0][0]
-                value = VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[2].id][event_indices[2]][0][1]
-                cur_evts[1].data.append([key, value])
-
-                cur_evts[2] = None
-                event_indices[2] = -1
-        if event_indices[2] > -1:
-            cur_evts[2].data = []
-            cur_evts[2].data.append(
-                VoltageEventDebouncer.event_lists_dictionary[
-                    debouncers[2].id][event_indices[2]][0])
-
+        # Add new measurements in each debouncer (debouncer per phase)
         for i in range(len(debouncers)):
-            if cur_evts[i] is not None:
-                # TODO Refactor this code snippet!!!
-                # TODO Investigate the reason why it changes data type between
-                #  measurements!!!
-                if type(cur_evts[i].data) is dict:
-                    aux_list = []
-                    for key, value in cur_evts[i].data.items():
-                        aux_list.append([key, value])
-                    cur_evts[i].save_event(self.transductor, aux_list)
-                elif type(cur_evts[i].data) is not list:
-                    cur_evts[i].save_event(self.transductor)
-                else:
-                    cur_evts[i].save_event(self.transductor, cur_evts[i].data)
+            debouncers[i].add_new_measurement(measurements[i][0],
+                                              measurements[i][1])
+            debouncers[i].raise_event(self.transductor)
 
-    def reset_filter(self):
+    def reset_debouncers(self):
         from events.models import VoltageEventDebouncer
         debouncer_a = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor, 'voltage_a')
-        debouncer_a.reset_filter()
+        debouncer_a.reset()
         debouncer_b = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor, 'voltage_b')
-        debouncer_b.reset_filter()
+        debouncer_b.reset()
         debouncer_c = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor, 'voltage_c')
-        debouncer_c.reset_filter()
+        debouncer_c.reset()
+
+    def reset_events(self):
+        from events.models import RaisedVoltageEventData
+        RaisedVoltageEventData.reset_transductor_events(self.transductor)
 
 
 class QuarterlyMeasurement(Measurement):

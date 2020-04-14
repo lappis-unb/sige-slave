@@ -60,59 +60,64 @@ class EventTestCase(TestCase):
         from events.models import VoltageEventDebouncer
         deb = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor1, 'voltage_a')
-        voltage_parameters = [220, 200.2, 228.8, 189.2, 233.2]
-        deb.reset_filter()
-        deb.add_data('voltage_a', 220)
-        deb.add_data('voltage_a', 230)
+        deb.reset()
 
+        # Checks avg_filter working
+        deb.add_new_measurement('voltage_a', 220)
+        deb.add_new_measurement('voltage_a', 225)
         self.assertAlmostEqual(
-            deb.get_average_filter_value(),
-            (220 + 230) / 2.0)
-
-        deb.add_data('voltage_a', 380)
-        deb.add_data('voltage_a', 400)
-
+            deb.avg_filter,
+            (220 + 225) / 2.0)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_NORMAL)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_NORMAL,
+                          VoltageEventDebouncer.EVENT_STATE_NORMAL))
+        deb.add_new_measurement('voltage_a', 380)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_NORMAL,
+                          VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER))
+        deb.add_new_measurement('voltage_a', 400)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER,
+                          VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER))
         self.assertAlmostEqual(
-            deb.get_average_filter_value(),
-            (220 + 230 + 400 + 380) / 4.0)
+            deb.avg_filter,
+            (220 + 225 + 400 + 380) / 4.0)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER)
 
-        deb.raise_event(voltage_parameters, self.transductor1)
-        events_list = VoltageEventDebouncer.get_event_lists(deb.id)
-
-        self.assertEqual(len(events_list), 5)
-        self.assertEqual(len(events_list[0]), 0)
-        self.assertEqual(len(events_list[1]), 0)
-        self.assertEqual(len(events_list[2]), 1)
-        self.assertEqual(len(events_list[3]), 0)
-        self.assertEqual(len(events_list[4]), 0)
-        self.assertAlmostEqual(events_list[2][0][1], 400)
-
-        deb.reset_filter()
-        deb.add_data('voltage_a', 50)
-        deb.add_data('voltage_a', 60)
-
-        self.assertAlmostEqual(deb.get_average_filter_value(), (50 + 60) / 2.0)
-
-        deb.raise_event(voltage_parameters, self.transductor1)
-        events_list = VoltageEventDebouncer.get_event_lists(deb.id)
-
-        self.assertEqual(len(events_list), 5)
-        self.assertEqual(len(events_list[0]), 1)
-        self.assertEqual(len(events_list[1]), 0)
-        self.assertEqual(len(events_list[2]), 0)
-        self.assertEqual(len(events_list[3]), 0)
-        self.assertEqual(len(events_list[4]), 0)
-
-        deb.reset_filter()
-        deb.add_data('voltage_a', 40)
-        print(deb.get_average_filter_value())
-        deb.raise_event(voltage_parameters, self.transductor1)
-        self.assertFalse(deb.raised_event is None)
-        if deb.raised_event is not None:
-            deb.raised_event.ended_at = timezone.datetime.now()
-            self.assertFalse(deb.raised_event.ended_at is None)
-
-        deb.reset_filter()
+        deb.reset()
+        deb.add_new_measurement('voltage_a', 40)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_NORMAL,
+                          VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN))
+        deb.add_new_measurement('voltage_a', 50)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN,
+                          VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN))
+        self.assertAlmostEqual(deb.avg_filter, (40 + 50) / 2.0)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN)
+        deb.add_new_measurement('voltage_a', 180)
+        self.assertEqual(deb.last_event_state_transition,
+                         (VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN,
+                          VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER))
+        self.assertAlmostEqual(deb.avg_filter, (40 + 50 + 180) / 3.0)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER)
+        for i in range(5):
+            deb.add_new_measurement('voltage_a', 230)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER)
+        for i in range(5):
+            deb.add_new_measurement('voltage_a', 300)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER)
+        for i in range(15):
+            deb.add_new_measurement('voltage_a', 220)
+        self.assertEqual(deb.current_event_state,
+                         VoltageEventDebouncer.EVENT_STATE_NORMAL)
 
     def test_create_critical_voltage_event(self):
         before = len(CriticalVoltageEvent.objects.all())
@@ -122,8 +127,8 @@ class EventTestCase(TestCase):
         a.voltage_b = 400
         a.voltage_c = 200
         a.transductor = self.transductor1
-        a.reset_filter()
-        a.check_measurements()
+        a.reset_debouncers()
+        a.reset_events()
         a.check_measurements()
         a.check_measurements()
 
@@ -132,14 +137,16 @@ class EventTestCase(TestCase):
         b.voltage_b = 180
         b.voltage_c = 200
         b.transductor = self.transductor2
-        b.reset_filter()
+        b.reset_debouncers()
+        b.reset_events()
         b.check_measurements()
         b.check_measurements()
         b.check_measurements()
 
-        self.assertEqual(before + 2, len(CriticalVoltageEvent.objects.all()))
         for evt in CriticalVoltageEvent.objects.all():
             self.assertTrue(evt.ended_at is None)
+
+        self.assertEqual(before + 2, len(CriticalVoltageEvent.objects.all()))
 
         b.voltage_a = 220
         b.voltage_b = 220
@@ -160,7 +167,9 @@ class EventTestCase(TestCase):
         a.voltage_b = 220
         a.voltage_c = 199
         a.transductor = self.transductor1
-        a.reset_filter()
+        a.reset_debouncers()
+        a.reset_events()
+        a.check_measurements()
         a.check_measurements()
 
         b = MinutelyMeasurement()
@@ -168,7 +177,9 @@ class EventTestCase(TestCase):
         b.voltage_b = 230
         b.voltage_c = 220
         b.transductor = self.transductor2
-        b.reset_filter()
+        b.reset_debouncers()
+        b.reset_events()
+        b.check_measurements()
         b.check_measurements()
 
         self.assertEqual(before + 2, len(PrecariousVoltageEvent.objects.all()))
@@ -181,7 +192,8 @@ class EventTestCase(TestCase):
         a.voltage_b = 220
         a.voltage_c = 220
         a.transductor = self.transductor1
-        a.reset_filter()
+        a.reset_debouncers()
+        a.reset_events()
         a.check_measurements()
 
         self.assertEqual(before + 1, len(PhaseDropEvent.objects.all()))
@@ -194,7 +206,8 @@ class EventTestCase(TestCase):
         a.voltage_b = 999
         a.voltage_c = 10
         a.transductor = self.transductor1
-        a.reset_filter()
+        a.reset_debouncers()
+        a.reset_events()
         a.check_measurements()
 
         self.assertEqual(before + 2, len(VoltageRelatedEvent.objects.all()))
@@ -204,7 +217,8 @@ class EventTestCase(TestCase):
 
         a = MinutelyMeasurement()
         a.transductor = self.transductor1
-        a.reset_filter()
+        a.reset_debouncers()
+        a.reset_events()
 
         a.voltage_a = 50
         a.voltage_b = 220
@@ -223,17 +237,17 @@ class EventTestCase(TestCase):
         a.voltage_a = 220
         for i in range(20):
             a.check_measurements()
-        self.assertEqual(before + 1, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 3, len(VoltageRelatedEvent.objects.all()))
         for evt in VoltageRelatedEvent.objects.all():
             self.assertNotEqual(evt.ended_at, None)
         a.voltage_a = 90
         for i in range(20):
             a.check_measurements()
-        self.assertEqual(before + 2, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 4, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 400
         for i in range(5):
             a.check_measurements()
-        self.assertEqual(before + 3, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 6, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 350
         for i in range(2):
             a.check_measurements()
@@ -248,25 +262,24 @@ class EventTestCase(TestCase):
             a.check_measurements()
         for evt in VoltageRelatedEvent.objects.all():
             self.assertNotEqual(evt.ended_at, None)
-
         a.voltage_a = 230
         for i in range(3):
             a.check_measurements()
         a.voltage_a = 218
         for i in range(3):
             a.check_measurements()
-        self.assertEqual(before + 4, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 10, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 175
         for i in range(3):
             a.check_measurements()
         a.voltage_a = 220
         for i in range(3):
             a.check_measurements()
-        self.assertEqual(before + 5, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 13, len(VoltageRelatedEvent.objects.all()))
         a.voltage_a = 195
         for i in range(3):
             a.check_measurements()
         a.voltage_a = 220
         for i in range(3):
             a.check_measurements()
-        self.assertEqual(before + 6, len(VoltageRelatedEvent.objects.all()))
+        self.assertEqual(before + 14, len(VoltageRelatedEvent.objects.all()))
