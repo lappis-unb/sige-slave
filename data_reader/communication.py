@@ -49,8 +49,7 @@ class SerialProtocol(metaclass=ABCMeta):
     def bytes_to_int(x):
         number = int.from_bytes(x, byteorder='big')
         if(math.isnan(number)):
-            raise NotANumberException(
-                "The bytestring can't be conveted to a integer")
+            return None
         else:
             return number
 
@@ -85,8 +84,7 @@ class SerialProtocol(metaclass=ABCMeta):
 
         value = struct.unpack("1f", new_message)[0]
         if(math.isnan(value)):
-            raise NotANumberException(
-                "The bytestring can't be conveted to a float")
+            return None
         else:
             return value
         return value

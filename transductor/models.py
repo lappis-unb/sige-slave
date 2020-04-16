@@ -38,7 +38,6 @@ class Transductor(models.Model):
     serial_number = models.CharField(
         max_length=8,
         unique=True,
-        primary_key=True
     )
     ip_address = models.CharField(
         max_length=15,
