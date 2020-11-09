@@ -102,7 +102,7 @@ def single_data_collection(transductor, collection_type, date=None):
         file = open("../home/failed_communication_logs.log", 'a')
         if (collection_type == "Minutely"):
             transductor.set_broken(True)
-        else:
+        elif collection_type in ['Quarterly', 'Monthly']:
             attribute = get_rescue_attribute(collection_type)
             transductor.__dict__[attribute] = False
             transductor.save(update_fields=[attribute])
