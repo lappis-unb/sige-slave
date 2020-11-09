@@ -99,13 +99,7 @@ def single_data_collection(transductor, collection_type, date=None):
             handled_response = True
         return handled_response
     except Exception as e:
-        file = open("../home/failed_communication_logs.log", 'a')
-        if (collection_type == "Minutely"):
-            transductor.set_broken(True)
-        elif collection_type in ['Quarterly', 'Monthly']:
-            attribute = get_rescue_attribute(collection_type)
-            transductor.__dict__[attribute] = False
-            transductor.save(update_fields=[attribute])
+        with open("../home/failed_communication_logs.log", 'a') as file:
         communication_log(
             status='Failure at ' + communication_step, 
             datetime=timezone.datetime.now(), 
@@ -114,7 +108,16 @@ def single_data_collection(transductor, collection_type, date=None):
             errors=[e],
             file=file
         )
-        file.close()
+
+        if (collection_type == "Minutely"):
+            transductor.set_broken(True)
+        elif collection_type in ['Quarterly', 'Monthly']:
+            attribute = get_rescue_attribute(collection_type)
+            transductor.__dict__[attribute] = False
+            transductor.save(update_fields=[attribute])
+        else:
+            raise e
+
         return None
 
 
