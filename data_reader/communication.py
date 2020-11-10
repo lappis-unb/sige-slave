@@ -120,11 +120,14 @@ class Modbus(SerialProtocol):
     """
 
     def create_messages(self, collection_type, date=None):
+
         request = self.transductor_model.data_collection(
             collection_type, date)
+
         messages = []
         if(request[0] == "ReadHoldingRegisters"):
-            for register in request[1]:
+            compacted_request = self.compress_request(request)
+            for register in compacted_request[1]:
                 message = self.create_read_holding_registers_message(register)
                 full_message = self.add_complement(message)
                 messages.append(full_message)
@@ -136,6 +139,37 @@ class Modbus(SerialProtocol):
                 full_message = self.add_complement(message)
                 messages.append(full_message)
         return messages
+
+    def memory_limits(self, registers):
+
+        # registers is a list of registers [reg1, reg2 ...]
+        # each register is in the format: [memory_position, bytes_to_read]
+
+        # find initial memory location
+        memory_start = min(registers, key=lambda x: x[0])[0]
+
+        # and the last memory position added with the bytes read:
+        memory_end = max(registers, key=lambda x: x[0] + x[1])
+        memory_end = memory_end[0] + memory_end[1]
+
+        return (memory_start, memory_end)
+
+    def compress_request(self, request):
+
+        request_registers = request[1]
+
+        # we do not need to compact a single register request
+        if len(request_registers) < 2:
+            return request
+
+        memory_limits = self.memory_limits(request_registers)
+
+        compacted_request = (
+            request[0],
+            [[memory_limits[0], memory_limits[1]]]
+        )
+
+        return compacted_request
 
     @abstractmethod
     def add_complement(self, message):
