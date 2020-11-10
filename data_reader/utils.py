@@ -100,14 +100,14 @@ def single_data_collection(transductor, collection_type, date=None):
         return handled_response
     except Exception as e:
         with open("../home/failed_communication_logs.log", 'a') as file:
-        communication_log(
-            status='Failure at ' + communication_step, 
-            datetime=timezone.datetime.now(), 
-            type=collection_type, 
-            transductor=transductor, 
-            errors=[e],
-            file=file
-        )
+            communication_log(
+                status='Failure at ' + communication_step, 
+                datetime=timezone.datetime.now(), 
+                type=collection_type, 
+                transductor=transductor, 
+                errors=[e],
+                file=file
+            )
 
         if (collection_type == "Minutely"):
             transductor.set_broken(True)
