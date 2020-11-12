@@ -99,22 +99,25 @@ def single_data_collection(transductor, collection_type, date=None):
             handled_response = True
         return handled_response
     except Exception as e:
-        file = open("../home/failed_communication_logs.log", 'a')
+        with open("../home/failed_communication_logs.log", 'a') as file:
+            communication_log(
+                status='Failure at ' + communication_step, 
+                datetime=timezone.datetime.now(), 
+                type=collection_type, 
+                transductor=transductor, 
+                errors=[e],
+                file=file
+            )
+
         if (collection_type == "Minutely"):
             transductor.set_broken(True)
-        else:
+        elif collection_type in ['Quarterly', 'Monthly']:
             attribute = get_rescue_attribute(collection_type)
             transductor.__dict__[attribute] = False
             transductor.save(update_fields=[attribute])
-        communication_log(
-            status='Failure at ' + communication_step, 
-            datetime=timezone.datetime.now(), 
-            type=collection_type, 
-            transductor=transductor, 
-            errors=[e],
-            file=file
-        )
-        file.close()
+        else:
+            raise e
+
         return None
 
 
