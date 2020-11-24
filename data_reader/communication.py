@@ -152,7 +152,9 @@ class Modbus(SerialProtocol):
         memory_end = max(registers, key=lambda x: x[0] + x[1])
         memory_end = memory_end[0] + memory_end[1]
 
-        return (memory_start, memory_end)
+        bytes_to_read = memory_end - memory_start
+
+        return (memory_start, bytes_to_read)
 
     def compress_request(self, request):
 
