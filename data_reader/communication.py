@@ -253,17 +253,32 @@ class Modbus(SerialProtocol):
         request = \
             self.transductor_model.data_collection(
                 collection_type, date)
-        messages_registers = zip(recived_messages, request[1])    
+
+        cleaned = False
+
+        if len(recived_messages) < 2:
+            recived_messages = self.decompress_response(request, recived_messages)
+            cleaned = True
+
+        messages_registers = zip(recived_messages, request[1])
         messages_content = []
+        
         for message_register in messages_registers:
+
             messages_content.append(self.get_content_from_message(
                 message_register[0],
-                message_register[1][1]
+                message_register[1][1],
+                cleaned
             ))
+
+
         return messages_content
 
-    def get_content_from_message(self, message, message_type):
-        message = self.remove_complement(message)
+    def get_content_from_message(self, message, message_type, cleaned=False):
+
+        if not cleaned:
+            message = self.remove_complement(message)
+
         if(message_type == 1):
             message_content = self.bytes_to_int(message)
         elif(message_type == 2):
