@@ -173,6 +173,30 @@ class Modbus(SerialProtocol):
 
         return compacted_request
 
+    def decompress_response(self, original_request, memory_block):
+
+        expected_registers = original_request[1]
+        cleaned_memory_block = self.remove_complement(memory_block[0])
+        response_blocks = []
+
+        memory_limits = self.memory_limits(expected_registers)
+       
+        for register in expected_registers:
+    
+            # lower boundary is multiplied by 2 because each byte is composed of 2
+            # position  on the cleaned_memory_block python list.
+            lower_boundary = (register[0] - memory_limits[0]) * 2
+            
+            # the lenght to read is also multiplied by 2 because a byte would be positions
+            # on the list
+            higher_boundary = lower_boundary + (register[1] * 2)
+            
+            data = cleaned_memory_block[lower_boundary:higher_boundary]
+
+            response_blocks.append(data)
+
+        return response_blocks
+
     @abstractmethod
     def add_complement(self, message):
         pass
