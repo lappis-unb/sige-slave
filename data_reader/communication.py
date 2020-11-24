@@ -169,7 +169,7 @@ class Modbus(SerialProtocol):
         # the maximum query size is of 100 registers
         # if memory_limits[1] (bytes_to_read) is greater than that
         # we need to split the request
-        memory_blocks_amount = math.ceil(memory_limits[1]/100)
+        memory_blocks_amount = math.ceil(memory_limits[1] / 100)
         bytes_left = memory_limits[1]
         starting_position = memory_limits[0]
 
@@ -206,12 +206,13 @@ class Modbus(SerialProtocol):
         responses = []      
         for register in expected_registers:
     
-            # lower boundary is multiplied by 2 because each byte is composed of 2
-            # position  on the memory_block python list.
+            # lower boundary is multiplied by 2 because each byte 
+            # is composed of 2 position  on the memory_block 
+            # python list.
             lower_boundary = (register[0] - memory_limits[0]) * 2
             
-            # the lenght to read is also multiplied by 2 because a byte would be positions
-            # on the list
+            # the lenght to read is also multiplied by 2
+            #  because a byte would be positions on the list
             higher_boundary = lower_boundary + (register[1] * 2)
             
             data = memory_block[lower_boundary:higher_boundary]
@@ -277,7 +278,10 @@ class Modbus(SerialProtocol):
             self.transductor_model.data_collection(
                 collection_type, date)
 
-        uncompressed_responses = self.decompress_response(request, recived_messages)
+        uncompressed_responses = self.decompress_response(
+            request,
+            recived_messages
+        )
 
         messages_registers = zip(uncompressed_responses, request[1])
         messages_content = []
@@ -288,7 +292,6 @@ class Modbus(SerialProtocol):
                 message_register[0],
                 message_register[1][1]
             ))
-
 
         return messages_content
 
