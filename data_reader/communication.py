@@ -177,10 +177,12 @@ class Modbus(SerialProtocol):
         while len(memory_blocks_requests_created) < memory_blocks_amount:      
 
             bytes_to_read = min(bytes_left, 100)
-            bytes_left -= bytes_to_read
 
             memory_block_request = [starting_position, bytes_to_read]
             memory_blocks_requests_created.append(memory_block_request)
+
+            bytes_left -= bytes_to_read
+            starting_position += bytes_to_read
 
         return (request[0], memory_blocks_requests_created)
 
