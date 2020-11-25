@@ -340,24 +340,25 @@ class MD30(EnergyTransductorModel):
     serial_protocol = "ModbusTCP"
 
     def collection_functions(self):
-        return {
-            "Minutely": self.minutely_collection,
-            "Quarterly": self.quarterly_collection,
-            "Monthly": self.monthly_collection,
-            "CorrectDate": self.correct_date,
+
+        base_collection_functions = super(EnergyTransductorModel, self).collection_functions()
+
+        return dict(base_collection_functions, **{
             "DataRescuePost": self.data_rescue_post,
             "DataRescueGet": self.data_rescue_get,
-        }
+        })
 
     def handle_response_functions(self):
-        return {
-            "Minutely": self.save_minutely_measurement,
-            "Quarterly": self.save_quarterly_measurement,
-            "Monthly": self.save_monthly_measurement,
-            "CorrectDate": self.verify_rescue_collection_date,
+
+        base_handle_response_functions = super(
+            EnergyTransductorModel, self
+        ).handle_response_functions()
+
+        return dict(base_handle_response_functions, **{
             "DataRescuePost": self.verify_rescue_collection_date,
             "DataRescueGet": self.save_rescued_data,
-        }
+        })
+
 
 
 class TR4020(EnergyTransductorModel):
