@@ -201,7 +201,7 @@ class TimeInterval(models.Model):
         self.begin = time + timezone.timedelta(minutes=1)
 
         # Verifies if collected date is inside the recovery interval
-        if(self.end < time or is_datetime_similar(self.end, time)):
+        if self.end < time or is_datetime_similar(self.end, time):
             self.delete()
             return False
         else:

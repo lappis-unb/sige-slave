@@ -57,19 +57,19 @@ class TransportProtocol(metaclass=ABCMeta):
                 MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
                 received_message = self.socket.recvfrom(MAX_MSG_SIZE)
                 unpacked_received_message = pickle.loads(received_message[0])
-                if(unpacked_received_message['status'] == 0):
+                if unpacked_received_message['status'] == 0:
                     raise Exception(unpacked_received_message['content'])
                 self._check_all_messages_crc(
                     unpacked_received_message['content'])
             except socket.timeout:
                 receive_attemps += 1
-                if(receive_attemps == max_receive_attempts):
+                if receive_attemps == max_receive_attempts:
                     self.socket.close()
                     raise NumberOfAttempsReachedException(
                         "Maximum attempts reached!")
             except CRCInvalidException as e:
                 crc_errors += 1
-                if(crc_errors == max_crc_erros):
+                if crc_errors == max_crc_erros:
                     self.socket.close()
                     raise e
 
@@ -82,7 +82,7 @@ class TransportProtocol(metaclass=ABCMeta):
 
     def _check_all_messages_crc(self, messages):
         for message in messages:
-            if(self.serial_protocol._check_crc(message)):
+            if self.serial_protocol._check_crc(message):
                 pass
             else:
                 error_message = 'The received message contains an invalid CRC'

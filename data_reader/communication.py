@@ -48,7 +48,7 @@ class SerialProtocol(metaclass=ABCMeta):
     @staticmethod
     def bytes_to_int(x):
         number = int.from_bytes(x, byteorder='big')
-        if(math.isnan(number)):
+        if math.isnan(number):
             return None
         else:
             return number
@@ -56,7 +56,7 @@ class SerialProtocol(metaclass=ABCMeta):
     @staticmethod
     def _unpack_float_response(msg):
         number = struct.unpack('>f', msg)
-        if(math.isnan(number[0])):
+        if math.isnan(number[0]):
             raise NotANumberException(
                 "The bytestring can't be conveted to a float")
         else:
@@ -83,7 +83,7 @@ class SerialProtocol(metaclass=ABCMeta):
             new_message.append(msb)
 
         value = struct.unpack("1f", new_message)[0]
-        if(math.isnan(value)):
+        if math.isnan(value):
             return None
         else:
             return value
@@ -96,7 +96,7 @@ class SerialProtocol(metaclass=ABCMeta):
 
     @staticmethod
     def int_to_bytes(x, size=None, encryption='big'):
-        if(size is None):
+        if size is None:
             return x.to_bytes((x.bit_length() + 7) // 8, encryption)
         return x.to_bytes(size, encryption)
 
@@ -123,12 +123,12 @@ class Modbus(SerialProtocol):
         request = self.transductor_model.data_collection(
             collection_type, date)
         messages = []
-        if(request[0] == "ReadHoldingRegisters"):
+        if request[0] == "ReadHoldingRegisters":
             for register in request[1]:
                 message = self.create_read_holding_registers_message(register)
                 full_message = self.add_complement(message)
                 messages.append(full_message)
-        elif(request[0] == "PresetMultipleRegisters"):
+        elif request[0] == "PresetMultipleRegisters":
             messages_bodies = zip(request[1], request[2])    
             for message_body in messages_bodies:
                 message = self.create_preset_multiple_registers_message(
@@ -204,13 +204,13 @@ class Modbus(SerialProtocol):
 
     def get_content_from_message(self, message, message_type):
         message = self.remove_complement(message)
-        if(message_type == 1):
+        if message_type == 1:
             message_content = self.bytes_to_int(message)
-        elif(message_type == 2):
+        elif message_type == 2:
             message_content = self.bytes_to_float(message)
-        elif(message_type == 4):
+        elif message_type == 4:
             message_content = self.bytes_to_int(message)
-        elif(message_type == 22):
+        elif message_type == 22:
             message_content = []
             message_content.append(
                 self.bytes_to_timestamp_to_datetime(message[0:8]))

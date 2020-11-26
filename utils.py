@@ -6,7 +6,7 @@ def is_datetime_similar(date1, date2):
 
     time_difference = abs(date1 - date2)
 
-    if(time_difference.seconds < max_delay_acceptable):
+    if time_difference.seconds < max_delay_acceptable:
         return True
     else:
         return False

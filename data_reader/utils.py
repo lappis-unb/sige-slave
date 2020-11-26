@@ -123,18 +123,18 @@ def perform_minutely_data_rescue(transductor):
     if (interval is None or interval.end is None):
         return
     while(True):
-        if(single_data_collection(transductor, "DataRescuePost",
-                                  interval.begin) is None):
+        if single_data_collection(transductor, "DataRescuePost",
+                                  interval.begin) is None:
             return
 
         measurement = single_data_collection(transductor, "DataRescueGet")
-        if(measurement is None):
+        if measurement is None:
             return
 
         inside_interval = interval.change_interval(
             measurement.transductor_collection_date)
 
-        if(inside_interval):
+        if inside_interval:
             measurement.check_measurements()
             measurement.save()
         else:
