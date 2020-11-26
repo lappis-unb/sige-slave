@@ -525,20 +525,20 @@ class VoltageEventDebouncer():
 
         """
         critical_event_states = [
-            EVENT_STATE_CRITICAL_UPPER,
-            EVENT_STATE_CRITICAL_LOWER
+            VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER,
+            VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER
         ]
 
         precarious_event_states = [
-            EVENT_STATE_PRECARIOUS_UPPER,
-            EVENT_STATE_PRECARIOUS_LOWER
+            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER,
+            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER
         ]
         
         if event_state in critical_event_states:
             return CriticalVoltageEvent.__name__
         elif event_state in precarious_event_states:
             return PrecariousVoltageEvent.__name__
-        elif event_state == EVENT_STATE_PHASE_DOWN:
+        elif event_state == VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN:
             return PhaseDropEvent.__name__
         else:  # Does nothing when its normal state
             return None
