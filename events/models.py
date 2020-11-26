@@ -432,10 +432,7 @@ class VoltageEventDebouncer():
             else:
                 return True
         else:
-            if self.last_measurement < self.critical_lower_voltage:
-                return True
-            else:
-                return False
+            return self.last_measurement < self.critical_lower_voltage
 
     def check_critical_upper_voltage_with_hysteresis(
             self, hysteresis_rate=0.03):
@@ -459,10 +456,7 @@ class VoltageEventDebouncer():
             else:
                 return True
         else:
-            if self.last_measurement > self.critical_upper_voltage:
-                return True
-            else:
-                return False
+            return self.last_measurement > self.critical_upper_voltage
 
     def check_precarious_upper_voltage_with_hysteresis(
             self, hysteresis_rate=0.03):
@@ -486,10 +480,7 @@ class VoltageEventDebouncer():
             else:
                 return True
         else:
-            if self.last_measurement > self.precarious_upper_voltage:
-                return True
-            else:
-                return False
+            return self.last_measurement > self.precarious_upper_voltage
 
     def check_precarious_lower_voltage_with_hysteresis(
             self, hysteresis_rate=0.03):
@@ -513,10 +504,7 @@ class VoltageEventDebouncer():
             else:
                 return True
         else:
-            if self.last_measurement < self.precarious_lower_voltage:
-                return True
-            else:
-                return False
+            return self.last_measurement < self.precarious_lower_voltage:
 
     @staticmethod
     def get_target_event_name(event_state):
