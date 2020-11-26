@@ -65,7 +65,7 @@ class EnergyTransductorModel():
 
     def data_collection(self, type, date=None):
         collection_dict = self.collection_functions()
-        if(date is None):
+        if date is None:
             return collection_dict[type]()
         else:
             return collection_dict[type](date)
@@ -191,7 +191,7 @@ class EnergyTransductorModel():
 
         measurement.slave_collection_date = timezone.now()
         current_time = measurement.slave_collection_date
-        if(current_time.month == 1):
+        if current_time.month == 1:
             transductor_collection_year = current_time.year - 1
             transductor_collection_month = 12
         else:
@@ -325,7 +325,7 @@ class EnergyTransductorModel():
                                            minute, second, 0)
         current_date = timezone.datetime.now()
 
-        if(not is_datetime_similar(collected_date, current_date)):        
+        if not is_datetime_similar(collected_date, current_date):        
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = current_date.year
             measurements[1] = current_date.month
