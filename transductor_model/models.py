@@ -354,7 +354,9 @@ class MD30(EnergyTransductorModel):
 
     def collection_functions(self):
 
-        base_collection_functions = super(EnergyTransductorModel, self).collection_functions()
+        base_collection_functions = super(
+            EnergyTransductorModel, self
+        ).collection_functions()
 
         return dict(base_collection_functions, **{
             "DataRescuePost": self.data_rescue_post,
@@ -371,7 +373,6 @@ class MD30(EnergyTransductorModel):
             "DataRescuePost": self.verify_rescue_collection_date,
             "DataRescueGet": self.save_rescued_data,
         })
-
 
 
 class TR4020(EnergyTransductorModel):
