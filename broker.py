@@ -34,11 +34,11 @@ def send_udp_messages_list(messages, address, response=True):
 
 
 def send_single_udp_message(message, address, s=None, response=True):
-    if(s is None):
+    if s is None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(1)
     s.sendto(message, address)
-    if(response):
+    if response:
         received_message, transductor = s.recvfrom(MAX_MSG_SIZE)
         return received_message
 
@@ -63,13 +63,13 @@ def worker(message_queue):
         sender = aux[1]
         transductor = (message['ip'], message['port'])
         try:
-            if(message['protocol'] == 'UDP'):
+            if message['protocol'] == 'UDP':
                 transductor_response = send_udp_messages_list(
                     message['content'], transductor)
                 response = {}
                 response['status'] = 1
                 response['content'] = transductor_response
-            elif(message['protocol'] == 'TCP'):
+            elif message['protocol'] == 'TCP':
                 transductor_response = send_tcp_messages_list(
                     message['content'], transductor)
                 response = {}
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         message = pickle.loads(message)
         queue_identifier = message['ip']
 
-        if(message_queues.__contains__(message['ip'])):
+        if message_queues.__contains__(message['ip']):
             ip = message_queues[queue_identifier]
             ip.put([message, sender])
 
