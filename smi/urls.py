@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 
 from measurement import urls as measurements_routes
 from transductor import urls as transductors_routes
-from events      import urls as events_routes
+from events import urls as events_routes
 
 router = DefaultRouter()
 
