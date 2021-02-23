@@ -121,7 +121,8 @@ def worker(message_queue):
     Parameters
     ----------
     message_queue : 
-        Dict of messages to send using the socket object, mapping the given ip to a queue of messages
+        Dict of messages to send using the socket object, 
+        mapping the given ip to a queue containing the messages.
     """
     while(True):
         aux = message_queue.get()
