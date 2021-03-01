@@ -168,14 +168,15 @@ class TransductorTestCase(TestCase):
 
         qs = FailedConnectionTransductorEvent.objects.all()
 
-        self.assertFalse(qs.exists(),
+        self.assertFalse(
+            qs.exists(),
             msg="False to false must not create connection failure events"
         )
 
-        self.assertFalse(self.transductor.timeintervals.exists(),
+        self.assertFalse(
+            self.transductor.timeintervals.exists(),
             msg="False to false must not create timeintervals"
         )
-
 
         # false to true
         self.assertTrue(self.transductor.set_broken(True))
@@ -183,30 +184,41 @@ class TransductorTestCase(TestCase):
 
         qs = FailedConnectionTransductorEvent.objects.all()
 
-        self.assertTrue(qs.exists(),
-            msg="Toggle broken attribute to True must create a FailedConnectionTransductorEvent"
+        self.assertTrue(
+            qs.exists(),
+            msg=("Toggle broken attribute to True must create a "
+                 "FailedConnectionTransductorEvent")
         )
 
-        self.assertEqual(qs.count(), 1,
-            msg="Toggle broken attribute to True must create only one FailedConnectionTransductorEvent"
+        self.assertEqual(
+            qs.count(), 1,
+            msg=("Toggle broken attribute to True must create only one "
+                 "FailedConnectionTransductorEvent")
         )
 
-        self.assertIsNone(qs.last().ended_at,
-            msg="Toggle broken attribute to True must create a FailedConnectionTransductorEvent with ended_at attribute equals to None"
+        self.assertIsNone(
+            qs.last().ended_at,
+            msg=("Toggle broken attribute to True must create a "
+                 "FailedConnectionTransductorEvent with ended_at attribute "
+                 "equals to None")
         )
 
-        self.assertEqual(self.transductor.timeintervals.count(), 1,
-            msg="Toggle broken attribute to True must create only one timeinterval"
+        self.assertEqual(
+            self.transductor.timeintervals.count(), 1,
+            msg=("Toggle broken attribute to True must create only one "
+                 "timeinterval")
         )
 
-        self.assertTrue(self.transductor.timeintervals.exists(),
+        self.assertTrue(
+            self.transductor.timeintervals.exists(),
             msg="Toggle broken attribute to True must create an timeinterval"
         )
 
-        self.assertIsNone(self.transductor.timeintervals.last().end,
-            msg="Toggle broken attribute to True must create an timeinterval with end attribute equals to None"
+        self.assertIsNone(
+            self.transductor.timeintervals.last().end,
+            msg=("Toggle broken attribute to True must create an timeinterval "
+                 "with end attribute equals to None")
         )
-
 
         # true to true
         self.assertTrue(self.transductor.set_broken(True))
@@ -214,20 +226,27 @@ class TransductorTestCase(TestCase):
 
         qs = FailedConnectionTransductorEvent.objects.all()
 
-        self.assertEqual(qs.count(), 1,
-            msg="True to True must not create a FailedConnectionTransductorEvent"
+        self.assertEqual(
+            qs.count(), 1,
+            msg=("True to True must not create a "
+                 "FailedConnectionTransductorEvent")
         )
 
-        self.assertEqual(self.transductor.timeintervals.count(), 1,
+        self.assertEqual(
+            self.transductor.timeintervals.count(), 1,
             msg="True to True must not create a timeintervals"
         )
 
-        self.assertIsNone(qs.last().ended_at,
-            msg="True to True must not modify the ended_at attribute of FailedConnectionTransductorEvent"
+        self.assertIsNone(
+            qs.last().ended_at,
+            msg=("True to True must not modify the ended_at attribute of "
+                 "FailedConnectionTransductorEvent")
         )
 
-        self.assertIsNone(self.transductor.timeintervals.last().end,
-            msg="True to True must not modify the end attribute of timeinterval"
+        self.assertIsNone(
+            self.transductor.timeintervals.last().end,
+            msg=("True to True must not modify the end attribute of "
+                 "timeinterval")
         )
 
         # true to false
@@ -236,20 +255,28 @@ class TransductorTestCase(TestCase):
 
         qs = FailedConnectionTransductorEvent.objects.all()
 
-        self.assertEqual(qs.count(), 1,
-            msg="Toggle broken attribute to False must create must not modify the number of FailedConnectionTransductorEvent"
+        self.assertEqual(
+            qs.count(), 1,
+            msg=("Toggle broken attribute to False must create must not modify "
+                 "the number of FailedConnectionTransductorEvent")
         )
 
-        self.assertEqual(self.transductor.timeintervals.count(), 1,
-            msg="Toggle broken attribute to False must create must not modify the number of timeintervals"
+        self.assertEqual(
+            self.transductor.timeintervals.count(), 1,
+            msg=("Toggle broken attribute to False must create must not modify "
+                 "the number of timeintervals")
         )
 
-        self.assertIsNotNone(qs.last().ended_at,
-            msg="Toggle broken attribute to False must modify the ended_at attribute of an existing FailedConnectionTransductorEvent"
+        self.assertIsNotNone(
+            qs.last().ended_at,
+            msg=("Toggle broken attribute to False must modify the ended_at "
+                 "attribute of an existing FailedConnectionTransductorEvent")
         )
 
-        self.assertIsNotNone(self.transductor.timeintervals.last().end,
-            msg="Toggle broken attribute to False must modify the end attribute of an existing timeinterval"
+        self.assertIsNotNone(
+            self.transductor.timeintervals.last().end,
+            msg=("Toggle broken attribute to False must modify the end "
+                 "attribute of an existing timeinterval")
         )
 
     def test_delete_transductor(self):
