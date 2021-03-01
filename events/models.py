@@ -22,7 +22,7 @@ class Event(PolymorphicModel):
         blank=False,
         null=False
     )
-    data = JSONField()
+    data = JSONField(default=dict)
 
     def __str__(self):
         return '%s@%s' % (self.__class__.__name__, self.created_at)
@@ -46,7 +46,7 @@ class VoltageRelatedEvent(Event):
 
     def save_event(self, transductor, list_data=[]):
         self.transductor = transductor
-        self.data = {}
+        self.data = dict()
 
         for phase in list_data:
             self.data[phase[0]] = phase[1]
@@ -62,7 +62,7 @@ class FailedConnectionTransductorEvent(Event):
 
     def save_event(self, transductor, list_data=[]):
         self.transductor = transductor
-        self.data = {}
+        self.data = dict()
         self.save()
         return self
 
@@ -533,7 +533,7 @@ class VoltageEventDebouncer():
             VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER,
             VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER
         ]
-        
+
         if event_state in critical_event_states:
             return CriticalVoltageEvent.__name__
         elif event_state in precarious_event_states:
