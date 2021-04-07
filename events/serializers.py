@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import VoltageRelatedEvent
-from .models import FailedConnectionTransductorEvent
+
+from .models import FailedConnectionTransductorEvent, VoltageRelatedEvent
 
 
 class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):

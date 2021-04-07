@@ -1,11 +1,7 @@
-from data_reader.transport import UdpProtocol
-from data_reader.communication import ModbusRTU
-from measurement.models import MinutelyMeasurement
-from measurement.models import QuarterlyMeasurement
-from measurement.models import MonthlyMeasurement
-from threading import Thread
 from django.utils import timezone
-from data_reader.exceptions import InvalidDateException
+
+from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
+                                QuarterlyMeasurement)
 from utils import is_datetime_similar
 
 
@@ -23,7 +19,7 @@ class EnergyTransductorModel():
     ]
 
     QUARTERLY_REGISTERS = [
-        [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+        [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2],
         [282, 2], [284, 2]
     ]
 
@@ -46,7 +42,7 @@ class EnergyTransductorModel():
     ]
 
     DATA_RESCUE_POST_REGISTERS = [[160, 4]]
-    
+
     DATA_RESCUE_GET_REGISTERS = [[200, 22]]
 
     @property
@@ -215,7 +211,7 @@ class EnergyTransductorModel():
             year=transductor_collection_year,
             month=transductor_collection_month,
             day=1
-        )        
+        )
         measurement.generated_energy_peak_time = response[0]
         measurement.generated_energy_off_peak_time = response[1]
 
@@ -338,7 +334,7 @@ class EnergyTransductorModel():
                                            minute, second, 0)
         current_date = timezone.datetime.now()
 
-        if not is_datetime_similar(collected_date, current_date):        
+        if not is_datetime_similar(collected_date, current_date):
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = current_date.year
             measurements[1] = current_date.month
