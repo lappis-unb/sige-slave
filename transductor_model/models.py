@@ -14,7 +14,6 @@ from utils import is_datetime_similar
 from data_reader.utils import single_data_collection
 
 
-
 class EnergyTransductorModel():
     transport_protocol = "UdpProtocol"
     serial_protocol = "ModbusRTU"
@@ -138,7 +137,7 @@ class EnergyTransductorModel():
     def save_minutely_measurement(self,
                                   response: list,
                                   transductor: EnergyTransductor,
-                                  date: datetime=None):
+                                  date: datetime = None):
         self.verify_collection_date(response, transductor)
 
         minutely_measurement = MinutelyMeasurement()
