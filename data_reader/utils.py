@@ -15,9 +15,7 @@ from .exceptions import InvalidDateException
 from .transport import *
 from .communication import *
 
-from transductor_model.models import EnergyTransductorModel
-from transductor_model.models import MD30
-from transductor_model.models import TR4020
+
 from transductor.models import EnergyTransductor
 from measurement.models import *
 import time
@@ -26,8 +24,8 @@ import time
 def communication_log(status, datetime, type, transductor, file, errors=[]):
     print('DateTime:\t', datetime, file=file)
     print(
-        'Transductor:\t', 
-        transductor.serial_number + '@' + transductor.physical_location, 
+        'Transductor:\t',
+        transductor.serial_number + '@' + transductor.physical_location,
         '(' + transductor.ip_address + ')',
         file=file
     )
@@ -88,9 +86,9 @@ def single_data_collection(transductor, collection_type, date=None):
             transductor, date)
         file = open("../home/successful_communication_logs.log", 'a')
         communication_log(
-            status='Success', 
-            datetime=timezone.datetime.now(), 
-            type=collection_type, 
+            status='Success',
+            datetime=timezone.datetime.now(),
+            type=collection_type,
             transductor=transductor,
             file=file
         )
@@ -101,10 +99,10 @@ def single_data_collection(transductor, collection_type, date=None):
     except Exception as e:
         with open("../home/failed_communication_logs.log", 'a') as file:
             communication_log(
-                status='Failure at ' + communication_step, 
-                datetime=timezone.datetime.now(), 
-                type=collection_type, 
-                transductor=transductor, 
+                status='Failure at ' + communication_step,
+                datetime=timezone.datetime.now(),
+                type=collection_type,
+                transductor=transductor,
                 errors=[e],
                 file=file
             )
