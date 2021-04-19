@@ -40,8 +40,6 @@ class TransportProtocol(metaclass=ABCMeta):
     @retry(stop_max_delay=30000, wait_fixed=2500)
     def socket_communication(self, message_to_send, MAX_MSG_SIZE):
         from datetime import datetime
-        print(datetime.now())
-
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as self.socket:
             self.socket.settimeout(self.timeout)
             self.socket.sendto(message_to_send, self.broker_address)
@@ -64,7 +62,6 @@ class TransportProtocol(metaclass=ABCMeta):
         except socket.timeout:
             raise NumberOfAttempsReachedException
 
-        print('got it')
         return content
 
     def _check_all_messages_crc(self, messages):
