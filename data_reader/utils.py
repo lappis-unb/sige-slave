@@ -132,7 +132,7 @@ def single_data_collection(transductor, collection_type, date=None):
 
 def perform_minutely_data_rescue(transductor):
     interval = transductor.timeintervals.first()
-    if (interval == None or interval.end == None):
+    if (interval is None or interval.end is None):
         return
     while(True):
         response = single_data_collection(
@@ -140,11 +140,11 @@ def perform_minutely_data_rescue(transductor):
             "DataRescuePost",
             interval.begin
         )
-        if(response == None):
+        if(response is None):
             return
 
         measurement = single_data_collection(transductor, "DataRescueGet")
-        if(measurement == None):
+        if(measurement is None):
             return
 
         inside_interval = interval.change_interval(
@@ -159,9 +159,9 @@ def perform_minutely_data_rescue(transductor):
 
 def perform_periodic_data_rescue(transductor, rescue_type):
     attribute = get_rescue_attribute(rescue_type)
-    if transductor.__dict__[attribute] == True:
+    if transductor.__dict__[attribute] is True:
         return
-    if single_data_collection(transductor, rescue_type) == None:
+    if single_data_collection(transductor, rescue_type) is None:
         transductor.__dict__[attribute] = False
     else:
         transductor.__dict__[attribute] = True
@@ -219,14 +219,15 @@ def perform_all_data_collection(collection_type):
 
     transductors = get_active_transductors()
     for transductor in transductors:
-        collection_thread = Thread(
-            target=single_data_collection,
-            args=(transductor, collection_type)
-        )
+        single_data_collection(transductor, collection_type)
+    #     collection_thread = Thread(
+    #         target=single_data_collection,
+    #         args=(transductor, collection_type)
+    #     )
 
-        collection_thread.start()
+    #     collection_thread.start()
 
-        threads.append(collection_thread)
+    #     threads.append(collection_thread)
 
-    for thread in threads:
-        thread.join()
+    # for thread in threads:
+    #     thread.join()
