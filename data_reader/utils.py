@@ -2,9 +2,6 @@ from typing import Tuple
 from threading import Thread
 from importlib import import_module
 
-from .transport import *
-from .communication import *
-
 from .communication import SerialProtocol
 from .transport import TransportProtocol
 
