@@ -1,13 +1,6 @@
-import json
-
-from itertools import chain
-from datetime import datetime
-
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from django.core.validators import RegexValidator
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.postgres.fields import ArrayField
 
 from utils import is_datetime_similar
 
@@ -104,46 +97,61 @@ class EnergyTransductor(Transductor):
     def __str__(self):
         return self.serial_number
 
-    def set_broken(self, new_status):
+    def set_broken(self, new_status: bool) -> bool:
         """
         Set the broken atribute's new status to match the param.
         If toggled to True, creates a failed connection event
+        If toggled to False, closes the created failed connection event
         """
         from events.models import FailedConnectionTransductorEvent
 
+        if new_status == self.broken:
+            return self.broken
+
         old_status = self.broken
-
-        if old_status is True and new_status is False:
-            last_time_interval = self.timeintervals.last()
-
-            if last_time_interval is not None:
-                last_time_interval.end_interval()
-
-            else:
-                self.broken = new_status
-                self.save(update_fields=['broken'])
-                raise Exception(
-                    'There is no time intervals open on this transducer!')
-
-            try:
-                related_event = FailedConnectionTransductorEvent.objects.filter(
-                    transductor=self,
-                    ended_at__isnull=True
-                ).last()
-                related_event.ended_at = timezone.now()
-                related_event.save()
-
-            except Exception as e:
-                print('There is no element in queryset filtered.')
-                pass
-
-        elif old_status is False and new_status is True:
-            evt = FailedConnectionTransductorEvent()
-            evt.save_event(self)
-            TimeInterval.begin_interval(self)
-
         self.broken = new_status
         self.save(update_fields=['broken'])
+
+        # The transductor was working and now is "broken"
+        if old_status is False and new_status is True:
+            FailedConnectionTransductorEvent.objects.create(transductor=self)
+            TimeInterval.objects.create(
+                transductor=self,
+                begin=timezone.datetime.now(),
+            )
+
+        # The transductor was "broken" and now is working
+        elif old_status is True and new_status is False:
+            last_open_interval = self.timeintervals.last()
+
+            if not last_open_interval:
+                raise Exception(
+                    'There are no open time intervals on this transductor!'
+                )
+
+            # closing the last open interval
+            last_open_interval.end = timezone.datetime.now()
+            last_open_interval.save(update_fields=['end'])
+
+            related_event_qs = FailedConnectionTransductorEvent.objects.filter(
+                transductor=self,
+                ended_at__isnull=True
+            )
+
+            # save end time of last connection failure event
+            if related_event_qs.last():
+                last_open_related_event = related_event_qs.last()
+                last_open_related_event.ended_at = timezone.now()
+                last_open_related_event.save(
+                    update_fields=['ended_at']
+                )
+
+            else:
+                print('There is no element in queryset filtered.')
+                # TODO: send to sentry!!!
+                # This is an error, but for now we are ignoring
+
+        return self.broken
 
     def get_minutely_measurements_by_datetime(self, start_date, final_date):
         # dates must match 'yyyy-mm-dd'
@@ -177,8 +185,6 @@ class TimeInterval(models.Model):
 
     begin = models.DateTimeField(null=False)
     end = models.DateTimeField(null=True)
-
-    # TODO Change related name
 
     transductor = models.ForeignKey(
         EnergyTransductor,

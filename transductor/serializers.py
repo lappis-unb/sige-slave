@@ -1,6 +1,5 @@
-from rest_framework import serializers
 import django.utils.timezone
-from datetime import datetime
+from rest_framework import serializers
 
 from .models import EnergyTransductor
 

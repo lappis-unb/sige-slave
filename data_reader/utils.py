@@ -2,8 +2,7 @@ from typing import Tuple
 from threading import Thread
 from importlib import import_module
 
-from .transport import *
-from .communication import *
+from django.utils import timezone
 
 from .communication import SerialProtocol
 from .transport import TransportProtocol
@@ -11,7 +10,6 @@ from .transport import TransportProtocol
 from transductor_model.models import EnergyTransductorModel
 from transductor.models import EnergyTransductor
 from transductor.models import TimeInterval
-from measurement.models import *
 
 
 def communication_log(status, datetime, type, transductor, file, errors=[]):
