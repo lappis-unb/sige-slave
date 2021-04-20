@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
-from .models import MinutelyMeasurement
-from .models import QuarterlyMeasurement
-from .models import MonthlyMeasurement
+from .models import (MinutelyMeasurement, MonthlyMeasurement,
+                     QuarterlyMeasurement)
 
 
 class MinutelyMeasurementSerializer(serializers.HyperlinkedModelSerializer):

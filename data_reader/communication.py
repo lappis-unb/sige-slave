@@ -1,14 +1,10 @@
-from .exceptions import CRCInvalidException
-import importlib
+import math
 import struct
 import sys
-import math
-
 from abc import ABCMeta, abstractmethod
+
 from django.utils import timezone
 
-from .exceptions import RegisterAddressException
-from .exceptions import CRCInvalidException
 from .exceptions import NotANumberException
 
 
@@ -129,7 +125,7 @@ class Modbus(SerialProtocol):
                 full_message = self.add_complement(message)
                 messages.append(full_message)
         elif request[0] == "PresetMultipleRegisters":
-            messages_bodies = zip(request[1], request[2])    
+            messages_bodies = zip(request[1], request[2])
             for message_body in messages_bodies:
                 message = self.create_preset_multiple_registers_message(
                     message_body)
@@ -147,16 +143,16 @@ class Modbus(SerialProtocol):
 
     def create_read_holding_registers_message(self, register):
         # this line adds the slave id, in the TR4020 and MD30 is always 0x01
-        message = self.int_to_bytes(1, 1) 
+        message = self.int_to_bytes(1, 1)
 
-        # this line adds function code, in this case 0x03, the read holding 
+        # this line adds function code, in this case 0x03, the read holding
         # registers code
-        message += self.int_to_bytes(3, 1) 
+        message += self.int_to_bytes(3, 1)
 
         # this line adds two bytes that inform the starting register to be read
         message += self.int_to_bytes(register[0], 2)
 
-        # this line adds two bytes that inform how many bytes should be read 
+        # this line adds two bytes that inform how many bytes should be read
         # from the starting register
         message += self.int_to_bytes(register[1], 2)
 
@@ -164,17 +160,17 @@ class Modbus(SerialProtocol):
 
     def create_preset_multiple_registers_message(self, message_body):
         # this line adds the slave id, in the TR4020 and MD30 is always 0x01.
-        message = self.int_to_bytes(1, 1) 
+        message = self.int_to_bytes(1, 1)
 
-        # this line adds function code, in this case 0x10, the set multiple 
+        # this line adds function code, in this case 0x10, the set multiple
         # registers code.
-        message += self.int_to_bytes(16, 1) 
+        message += self.int_to_bytes(16, 1)
 
-        # this line adds two bytes that inform the starting register to be 
-        # writen. 
+        # this line adds two bytes that inform the starting register to be
+        # writen.
         message += self.int_to_bytes(message_body[0][0], 2)
 
-        # this line adds two bytes that inform how many 16 bits(2 bytes) 
+        # this line adds two bytes that inform how many 16 bits(2 bytes)
         # registers should be written.
         message += self.int_to_bytes(message_body[0][1], 2)
 
@@ -183,7 +179,7 @@ class Modbus(SerialProtocol):
         message += self.int_to_bytes(message_body[0][1] * 2, 1)
 
         # this line adds the payload of the message, in other words the data
-        # that will be written in the registers 
+        # that will be written in the registers
         message += self.int_to_bytes(message_body[1], message_body[0][1] * 2)
 
         return message
@@ -193,7 +189,7 @@ class Modbus(SerialProtocol):
         request = \
             self.transductor_model.data_collection(
                 collection_type, date)
-        messages_registers = zip(recived_messages, request[1])    
+        messages_registers = zip(recived_messages, request[1])
         messages_content = []
         for message_register in messages_registers:
             messages_content.append(self.get_content_from_message(
@@ -257,7 +253,7 @@ class ModbusRTU(Modbus):
 
         Returns:
             bool: True if CRC is valid, False otherwise.
-        """            
+        """
         crc = struct.pack("<H", self._computate_crc(packaged_message[:-2]))
 
         return (crc == packaged_message[-2:])

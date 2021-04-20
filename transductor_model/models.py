@@ -1,11 +1,11 @@
-from data_reader.transport import UdpProtocol
-from data_reader.communication import ModbusRTU
-from measurement.models import MinutelyMeasurement
-from measurement.models import QuarterlyMeasurement
-from measurement.models import MonthlyMeasurement
-from threading import Thread
+from typing import Tuple
+from datetime import datetime
+from transductor.models import EnergyTransductor
+
 from django.utils import timezone
-from data_reader.exceptions import InvalidDateException
+
+from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
+                                QuarterlyMeasurement)
 from utils import is_datetime_similar
 
 
@@ -23,7 +23,7 @@ class EnergyTransductorModel():
     ]
 
     QUARTERLY_REGISTERS = [
-        [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2], 
+        [264, 2], [266, 2], [270, 2], [272, 2], [276, 2], [278, 2],
         [282, 2], [284, 2]
     ]
 
@@ -46,11 +46,12 @@ class EnergyTransductorModel():
     ]
 
     DATA_RESCUE_POST_REGISTERS = [[160, 4]]
-    
+
     DATA_RESCUE_GET_REGISTERS = [[200, 22]]
 
     @property
-    def registers(self):
+    def registers(self) -> dict:
+        """Alias dictionary with register mapping"""
         return {
             "Minutely": self.MINUTELY_REGISTERS,
             "Quarterly": self.QUARTERLY_REGISTERS,
@@ -60,7 +61,13 @@ class EnergyTransductorModel():
             "DataRescueGet": self.DATA_RESCUE_GET_REGISTERS
         }
 
-    def collection_functions(self):
+    def collection_functions(self) -> dict:
+        """
+        Alias dictionary for collection functions.
+
+        These are factory functions that create the data structure that will be
+        sent to the transductors.
+        """
         return {
             "Minutely": self.minutely_collection,
             "Quarterly": self.quarterly_collection,
@@ -68,7 +75,13 @@ class EnergyTransductorModel():
             "CorrectDate": self.correct_date,
         }
 
-    def handle_response_functions(self):
+    def handle_response_functions(self) -> dict:
+        """
+        Alias dictionary for handle functions
+
+        These are functions responsible for interpreting and saving the
+        information sent by the transductors.
+        """
         return {
             "Minutely": self.save_minutely_measurement,
             "Quarterly": self.save_quarterly_measurement,
@@ -76,35 +89,50 @@ class EnergyTransductorModel():
             "CorrectDate": self.verify_rescue_collection_date,
         }
 
-    def data_collection(self, type, date=None):
+    def data_collection(self, type: str, date: datetime = None) -> Tuple:
+        """
+        Factory function that will return the data-structure necessary to
+        collect certain information from a transducer
+        """
         collection_dict = self.collection_functions()
         if date is None:
             return collection_dict[type]()
         else:
             return collection_dict[type](date)
 
-    def minutely_collection(self):
+    def minutely_collection(self) -> Tuple:
         return ("ReadHoldingRegisters", self.registers['Minutely'])
 
-    def quarterly_collection(self):
+    def quarterly_collection(self) -> Tuple:
         return ("ReadHoldingRegisters", self.registers['Quarterly'])
 
-    def monthly_collection(self):
+    def monthly_collection(self) -> Tuple:
         return ("ReadHoldingRegisters", self.registers['Monthly'])
 
-    def correct_date(self):
-        date = timezone.datetime.now()
+    def correct_date(self, date: datetime) -> Tuple:
+        if not date:
+            date = timezone.datetime.now()
         payload = [date.year, date.month, date.day, date.hour, date.minute,
                    date.second]
         return ("PresetMultipleRegisters", self.registers['CorrectDate'],
                 payload)
 
-    def handle_response(self, collection_type, response, transductor,
-                        date=None):
+    def handle_response(self,
+                        collection_type: str,
+                        response: list,
+                        transductor: EnergyTransductor,
+                        date: datetime = None):
+        """
+        Helper function to handle transductor response according to the type
+        of collection.
+        """
         response_dict = self.handle_response_functions()
         return response_dict[collection_type](response, transductor, date)
 
-    def save_minutely_measurement(self, response, transductor, date=None):
+    def save_minutely_measurement(self,
+                                  response: list,
+                                  transductor: EnergyTransductor,
+                                  date: datetime = None):
         self.verify_collection_date(response, transductor)
 
         minutely_measurement = MinutelyMeasurement()
@@ -215,7 +243,7 @@ class EnergyTransductorModel():
             year=transductor_collection_year,
             month=transductor_collection_month,
             day=1
-        )        
+        )
         measurement.generated_energy_peak_time = response[0]
         measurement.generated_energy_off_peak_time = response[1]
 
@@ -326,19 +354,20 @@ class EnergyTransductorModel():
         return measurement
 
     @staticmethod
-    def verify_collection_date(measurements, transductor):
+    def verify_collection_date(measurements: list,
+                               transductor: EnergyTransductor):
         from data_reader.utils import single_data_collection
-        year = measurements[0]
-        month = measurements[1]
-        day = measurements[2]
-        hour = measurements[3]
-        minute = measurements[4]
-        second = measurements[5]
-        collected_date = timezone.datetime(year, month, day, hour,
-                                           minute, second, 0)
+        collected_date = timezone.datetime(
+            year=measurements[0],
+            month=measurements[1],
+            day=measurements[2],
+            hour=measurements[3],
+            minute=measurements[4],
+            second=measurements[5]
+        )
         current_date = timezone.datetime.now()
 
-        if not is_datetime_similar(collected_date, current_date):        
+        if not is_datetime_similar(collected_date, current_date):
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = current_date.year
             measurements[1] = current_date.month

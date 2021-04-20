@@ -1,14 +1,13 @@
 from datetime import datetime
 
-from django.core.exceptions import ObjectDoesNotExist
 from django.test import TestCase
-from django.utils import timezone
-from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
-                                QuarterlyMeasurement)
+
+from events.models import (CriticalVoltageEvent,
+                           FailedConnectionTransductorEvent, PhaseDropEvent,
+                           PrecariousVoltageEvent, VoltageEventDebouncer,
+                           VoltageRelatedEvent)
+from measurement.models import MinutelyMeasurement
 from transductor.models import EnergyTransductor
-from events.models import *
-from events.models import VoltageEventDebouncer
-from datetime import datetime
 
 
 class EventTestCase(TestCase):
@@ -57,7 +56,6 @@ class EventTestCase(TestCase):
         Test responsible for the voltage event debouncer class.
         It both tests its creation as well as its functionalities.
         '''
-        from events.models import VoltageEventDebouncer
         deb = VoltageEventDebouncer.get_voltage_debouncer(
             self.transductor1, 'voltage_a')
         deb.reset()

@@ -1,15 +1,12 @@
-import pytest
-from django.test import TestCase
-from django.conf import settings
+from datetime import datetime
+
 from django.db import IntegrityError
 from django.db.utils import DataError
+from django.test import TestCase
+
+from measurement.models import (MinutelyMeasurement, MonthlyMeasurement,
+                                QuarterlyMeasurement)
 from transductor.models import EnergyTransductor
-from django.core.exceptions import ObjectDoesNotExist
-from datetime import datetime
-from measurement.models import MinutelyMeasurement
-from measurement.models import QuarterlyMeasurement
-from measurement.models import MonthlyMeasurement
-from django.shortcuts import get_object_or_404
 
 
 class TransductorTestCase(TestCase):
