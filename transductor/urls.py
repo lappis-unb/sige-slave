@@ -7,8 +7,21 @@ from .views import BrokenTransductorsViewSet
 app_name = "transductors"
 
 router = routers.DefaultRouter()
-router.register(r'energy-transductors', EnergyTransductorViewSet)
-router.register(r'active-transductors', ActiveTransductorsViewSet)
-router.register(r'broken-transductors', BrokenTransductorsViewSet)
 
-urlpatterns = []
+router.register(
+    r'energy-transductors',
+    EnergyTransductorViewSet,
+    basename='energytransductor'
+)
+
+router.register(
+    r'active-transductors',
+    ActiveTransductorsViewSet,
+    basename='active_transductor',
+)
+
+router.register(
+    r'broken-transductors',
+    BrokenTransductorsViewSet,
+    basename='broken_transductor',
+)
