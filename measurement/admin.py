@@ -1,8 +1,7 @@
 from django.contrib import admin
-from .models import MinutelyMeasurement
-from .models import QuarterlyMeasurement
-from .models import MonthlyMeasurement
 
+from .models import (MinutelyMeasurement, MonthlyMeasurement,
+                     QuarterlyMeasurement)
 
 admin.site.register(MinutelyMeasurement)
 admin.site.register(QuarterlyMeasurement)

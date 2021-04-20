@@ -1,15 +1,12 @@
-from rest_framework import serializers, viewsets, mixins
 from django.utils import timezone
+from rest_framework import mixins, viewsets
 
-from .models import Measurement
-from .models import MinutelyMeasurement
-from .models import QuarterlyMeasurement
-from .models import MonthlyMeasurement
-from .models import EnergyTransductor
-from .serializers import MinutelyMeasurementSerializer
-from .serializers import QuarterlyMeasurementSerializer
-from .serializers import MonthlyMeasurementSerializer
-from .serializers import RealTimeMeasurementSerializer
+from .models import (EnergyTransductor, MinutelyMeasurement,
+                     MonthlyMeasurement, QuarterlyMeasurement)
+from .serializers import (MinutelyMeasurementSerializer,
+                          MonthlyMeasurementSerializer,
+                          QuarterlyMeasurementSerializer,
+                          RealTimeMeasurementSerializer)
 from .utils import MeasurementParamsValidator
 
 #  this viewset don't inherits from viewsets.ModelViewSet because it

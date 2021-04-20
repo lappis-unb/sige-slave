@@ -1,13 +1,6 @@
-import json
-
-from itertools import chain
-from datetime import datetime
-
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from django.core.validators import RegexValidator
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.postgres.fields import ArrayField
 
 from utils import is_datetime_similar
 
