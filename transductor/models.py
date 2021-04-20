@@ -1,13 +1,6 @@
-import json
-
-from itertools import chain
-from datetime import datetime
-
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
-from django.core.validators import RegexValidator
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.postgres.fields import ArrayField
 
 from utils import is_datetime_similar
 
@@ -119,7 +112,7 @@ class EnergyTransductor(Transductor):
         self.broken = new_status
         self.save(update_fields=['broken'])
 
-        # The transductor was working and is now "broken"
+        # The transductor was working and now is "broken"
         if old_status is False and new_status is True:
             FailedConnectionTransductorEvent.objects.create(transductor=self)
             TimeInterval.objects.create(
@@ -192,8 +185,6 @@ class TimeInterval(models.Model):
 
     begin = models.DateTimeField(null=False)
     end = models.DateTimeField(null=True)
-
-    # TODO Change related name
 
     transductor = models.ForeignKey(
         EnergyTransductor,

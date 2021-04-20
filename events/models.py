@@ -1,11 +1,10 @@
 from django.conf import settings
-from django.core.validators import RegexValidator
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
-from transductor.models import EnergyTransductor
 from polymorphic.models import PolymorphicModel
-from django.contrib.postgres.fields import JSONField
-from django.contrib.postgres.fields import ArrayField
+
+from transductor.models import EnergyTransductor
 
 
 class Event(PolymorphicModel):

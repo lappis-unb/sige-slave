@@ -4,5 +4,5 @@
 * * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob
 0,15,30,45 * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyCollectCronJob
 0 4 1 * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyCollectCronJob
-0 4 * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob
+# 0 4 * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob -> dont exists
 # Necessary line at end of file to make cron valid

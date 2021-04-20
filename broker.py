@@ -24,6 +24,25 @@ MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
 
 
 def send_udp_messages_list(messages, address, response=True):
+    """
+    Send multiple UDP messages using send_single_udp_message function.
+
+    Parameters
+    ----------
+    messages : list
+        List of messages to send using the socket object
+
+    address : tuple
+        Tuple consisting of ip address and port number
+
+    response : bool, optional
+        Set to True if you want to receive a response (default is True)
+
+    Returns
+    -------
+    received_message : list 
+        List containing responses from each UDP message sent.
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(1)
     received_message = []
@@ -34,6 +53,28 @@ def send_udp_messages_list(messages, address, response=True):
 
 
 def send_single_udp_message(message, address, s=None, response=True):
+    """
+    Send a single UDP message using a socket.
+
+    Parameters
+    ----------
+    message : bytes
+        Message for the open/new socket send
+
+    address : tuple
+        Tuple consisting of ip address and port number
+        
+    s : socket, optional
+        Socket object, if None, the function create a new socket object
+
+    response : bool, optional
+        Set to True if you want to receive a response (default is True)
+
+    Returns
+    -------
+    received_message : bytes 
+        UDP's message response.
+    """
     if s is None:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(1)
@@ -44,6 +85,22 @@ def send_single_udp_message(message, address, s=None, response=True):
 
 
 def send_tcp_messages_list(messages, address):
+    """
+    Send multiple TCP messages using a single connection.
+
+    Parameters
+    ----------
+    messages : list
+        List of messages to send using the socket object
+
+    address : tuple
+        Tuple consisting of ip address and port number
+
+    Returns
+    -------
+    responses : list 
+        List containing responses from TCP messages sent.
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.settimeout(3)
     s.connect(address)
@@ -57,6 +114,16 @@ def send_tcp_messages_list(messages, address):
 
 
 def worker(message_queue):
+    """
+    Function executed in threads that calls previous functions and uses a dict 
+    to send messages and receive responses.
+
+    Parameters
+    ----------
+    message_queue : 
+        Dict of messages to send using the socket object, 
+        mapping the given ip to a queue containing the messages.
+    """
     while(True):
         aux = message_queue.get()
         message = aux[0]
