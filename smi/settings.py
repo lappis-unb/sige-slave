@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+
 import environ
 
 env = environ.Env()
@@ -34,8 +35,7 @@ else:
 ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
 
 # Application definition
-
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,14 +43,22 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'django.contrib.sessions',
     'django.contrib.staticfiles',
+]
+
+EXTERNAL_APPS = [
     'django_cron',
     'polymorphic',
     'rest_framework',
+]
+
+LOCAL_APPS = [
     'events',
     'transductor',
     'measurement',
     'transductor_model',
 ]
+
+INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

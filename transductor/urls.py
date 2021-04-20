@@ -1,14 +1,26 @@
 from rest_framework import routers
 
-from .views import EnergyTransductorViewSet
-from .views import ActiveTransductorsViewSet
-from .views import BrokenTransductorsViewSet
+from .views import (ActiveTransductorsViewSet, BrokenTransductorsViewSet,
+                    EnergyTransductorViewSet)
 
 app_name = "transductors"
 
 router = routers.DefaultRouter()
-router.register(r'energy-transductors', EnergyTransductorViewSet)
-router.register(r'active-transductors', ActiveTransductorsViewSet)
-router.register(r'broken-transductors', BrokenTransductorsViewSet)
 
-urlpatterns = []
+router.register(
+    r'energy-transductors',
+    EnergyTransductorViewSet,
+    basename='energytransductor'
+)
+
+router.register(
+    r'active-transductors',
+    ActiveTransductorsViewSet,
+    basename='active_transductor',
+)
+
+router.register(
+    r'broken-transductors',
+    BrokenTransductorsViewSet,
+    basename='broken_transductor',
+)
