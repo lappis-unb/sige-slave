@@ -1,7 +1,7 @@
 FROM python:3.6
 
-RUN apt update && \
-    apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
                         libpq-dev \
                         cron \
                         tzdata \
