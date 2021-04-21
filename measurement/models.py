@@ -1,12 +1,9 @@
 import os
-import json
 
-from django.db import models
-from datetime import datetime
 from django.conf import settings
+from django.contrib.postgres.fields import ArrayField
+from django.db import models
 from django.utils import timezone
-from django.core import serializers
-from django.contrib.postgres.fields import ArrayField, HStoreField
 
 from transductor.models import EnergyTransductor
 
@@ -389,54 +386,54 @@ class MonthlyMeasurement(Measurement):
     )
 
     active_max_power_list_peak = ArrayField(
-        models.FloatField(), 
+        models.FloatField(),
         default=None,
         null=True,
         blank=True
     )
     active_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(), 
+        models.DateTimeField(),
         default=None,
         null=True,
         blank=True
     )
 
     active_max_power_list_off_peak = ArrayField(
-        models.FloatField(), 
+        models.FloatField(),
         default=None,
         null=True,
         blank=True
     )
 
     active_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(), 
+        models.DateTimeField(),
         default=None,
         null=True,
         blank=True
     )
 
     reactive_max_power_list_peak = ArrayField(
-        models.FloatField(), 
+        models.FloatField(),
         default=None,
         null=True,
         blank=True
     )
 
     reactive_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(), 
+        models.DateTimeField(),
         default=None,
         null=True,
         blank=True
     )
 
     reactive_max_power_list_off_peak = ArrayField(
-        models.FloatField(), 
+        models.FloatField(),
         default=None,
         null=True,
         blank=True
     )
     reactive_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(), 
+        models.DateTimeField(),
         default=None,
         null=True,
         blank=True

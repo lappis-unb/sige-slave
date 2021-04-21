@@ -1,9 +1,9 @@
-from rest_framework import serializers, viewsets, mixins
+from rest_framework import mixins, viewsets
 
 from .models import EnergyTransductor
-from .serializers import EnergyTransductorSerializer
-from .serializers import ActiveTransductorsSerializer
-from .serializers import BrokenTransductorsSerializer
+from .serializers import (ActiveTransductorsSerializer,
+                          BrokenTransductorsSerializer,
+                          EnergyTransductorSerializer)
 
 
 class EnergyTransductorViewSet(viewsets.ModelViewSet):

@@ -1,10 +1,7 @@
-from .views import MinutelyMeasurementViewSet
-from .views import QuarterlyMeasurementViewSet
-from .views import MonthlyMeasurementViewSet
-from .views import RealTimeMeasurementViewSet
-
 from rest_framework import routers
 
+from .views import (MinutelyMeasurementViewSet, MonthlyMeasurementViewSet,
+                    QuarterlyMeasurementViewSet, RealTimeMeasurementViewSet)
 
 app_name = "minutely_measurements"
 

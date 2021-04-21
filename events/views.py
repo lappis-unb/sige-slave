@@ -1,15 +1,13 @@
-from rest_framework import viewsets
-from rest_framework import mixins
+from rest_framework import mixins, viewsets
 from rest_framework.response import Response
-from .serializers import VoltageRelatedEventSerializer
-from .serializers import FailedConnectionTransductorEventSerializer
-from .models import VoltageRelatedEvent
-from .models import FailedConnectionTransductorEvent
-from .models import CriticalVoltageEvent
-from .models import PrecariousVoltageEvent
-from .models import PhaseDropEvent
+
 from transductor.models import EnergyTransductor
-from django.utils import timezone
+
+from .models import (CriticalVoltageEvent, FailedConnectionTransductorEvent,
+                     PhaseDropEvent, PrecariousVoltageEvent,
+                     VoltageRelatedEvent)
+from .serializers import (FailedConnectionTransductorEventSerializer,
+                          VoltageRelatedEventSerializer)
 
 
 class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
