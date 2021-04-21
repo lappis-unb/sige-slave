@@ -1,4 +1,7 @@
 import os
+
+from retrying import retry
+
 import pickle
 import socket
 from abc import ABCMeta, abstractmethod
@@ -30,57 +33,39 @@ class TransportProtocol(metaclass=ABCMeta):
         broker_port = os.environ['BROKER_PORT']
         self.broker_address = (broker_ip, int(broker_port))
 
-    def send_message(self, message):
-        self.open_socket()
-        max_receive_attempts = 3
-        receive_attemps = 0
-        received_message = None
-        crc_errors = 0
-        max_crc_erros = max_receive_attempts
-        while(
-            not received_message and (
-                receive_attemps < max_receive_attempts
-            ) and (
-                crc_errors < max_crc_erros
-            )
-        ):
-            message_to_send = self._create_message(message)
-            self.socket.sendto(
-                message_to_send,
-                self.broker_address
-            )
+    # stops if pass 30s (30000ms) since the first attempt
+    # wait 2.5s (2500ms) between retries
+    @retry(stop_max_delay=30000, wait_fixed=2500)
+    def socket_communication(self, message_to_send, MAX_MSG_SIZE):
+        from datetime import datetime
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as self.socket:
+            self.socket.settimeout(self.timeout)
+            self.socket.sendto(message_to_send, self.broker_address)
+            received_message = self.socket.recvfrom(MAX_MSG_SIZE)
+            unpacked_received_message = pickle.loads(received_message[0])
 
-            try:
-                MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
-                received_message = self.socket.recvfrom(MAX_MSG_SIZE)
-                unpacked_received_message = pickle.loads(received_message[0])
-                if unpacked_received_message['status'] == 0:
-                    raise Exception(unpacked_received_message['content'])
-                self._check_all_messages_crc(
-                    unpacked_received_message['content'])
-            except socket.timeout:
-                receive_attemps += 1
-                if receive_attemps == max_receive_attempts:
-                    self.socket.close()
-                    raise NumberOfAttempsReachedException(
-                        "Maximum attempts reached!")
-            except CRCInvalidException as e:
-                crc_errors += 1
-                if crc_errors == max_crc_erros:
-                    self.socket.close()
-                    raise e
+            if(unpacked_received_message['status'] == 0):
+                raise Exception(unpacked_received_message['content'])
 
-        self.socket.close()
+            self._check_all_messages_crc(unpacked_received_message['content'])
+
         return unpacked_received_message['content']
 
-    def open_socket(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.settimeout(self.timeout)
+    def send_message(self, message):
+        message_to_send = self._create_message(message)
+        MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
+
+        try:
+            content = self.socket_communication(message_to_send, MAX_MSG_SIZE)
+        except socket.timeout:
+            raise NumberOfAttempsReachedException
+
+        return content
 
     def _check_all_messages_crc(self, messages):
         for message in messages:
-            if self.serial_protocol._check_crc(message):
-                pass
+            if(self.serial_protocol._check_crc(message)):
+                continue
             else:
                 error_message = 'The received message contains an invalid CRC'
                 raise CRCInvalidException(error_message)

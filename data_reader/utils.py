@@ -1,5 +1,6 @@
 from typing import Tuple
 from threading import Thread
+from django.conf import settings
 from importlib import import_module
 
 from django.utils import timezone
@@ -87,7 +88,12 @@ def single_data_collection(transductor: EnergyTransductor,
             date
         )
 
-        with open("../home/successful_communication_logs.log", 'a') as file:
+        filename = os.path.join(
+            settings.LOG_PATH,
+            'successful_communication_logs.log'
+        )
+
+        with open(filename, 'a') as file:
             communication_log(
                 status='Success',
                 datetime=timezone.datetime.now(),
@@ -102,7 +108,18 @@ def single_data_collection(transductor: EnergyTransductor,
         return handled_response
 
     except Exception as e:
-        with open("../home/failed_communication_logs.log", 'a') as file:
+        filename = os.path.join(
+            settings.LOG_PATH,
+            'failed_communication_logs.log'
+        )
+
+        with open(filename, 'a') as file:
+            if (collection_type == "Minutely"):
+                transductor.set_broken(True)
+            else:
+                attribute = get_rescue_attribute(collection_type)
+                transductor.__dict__[attribute] = False
+                transductor.save(update_fields=[attribute])
             communication_log(
                 status='Failure at ' + communication_step,
                 datetime=timezone.datetime.now(),
@@ -131,12 +148,16 @@ def perform_minutely_data_rescue(transductor: EnergyTransductor):
     if (interval is None or interval.end is None):
         return
     while(True):
-        if single_data_collection(transductor, "DataRescuePost",
-                                  interval.begin) is None:
+        response = single_data_collection(
+            transductor,
+            "DataRescuePost",
+            interval.begin
+        )
+        if(response is None):
             return
 
         measurement = single_data_collection(transductor, "DataRescueGet")
-        if measurement is None:
+        if(measurement is None):
             return
 
         inside_interval = interval.change_interval(
@@ -179,7 +200,7 @@ def perform_all_data_rescue(rescue_type):
     transductors = get_active_transductors()
     rescue_function = get_rescue_function(rescue_type)
     for transductor in transductors:
-        if rescue_type is "Minutely":
+        if rescue_type == "Minutely":
             rescue_function(transductor)
         else:
             rescue_function(transductor, rescue_type)
@@ -280,14 +301,15 @@ def perform_all_data_collection(collection_type: str) -> None:
 
     transductors = get_active_transductors()
     for transductor in transductors:
-        collection_thread = Thread(
-            target=single_data_collection,
-            args=(transductor, collection_type)
-        )
+        single_data_collection(transductor, collection_type)
+    #     collection_thread = Thread(
+    #         target=single_data_collection,
+    #         args=(transductor, collection_type)
+    #     )
 
-        collection_thread.start()
+    #     collection_thread.start()
 
-        threads.append(collection_thread)
+    #     threads.append(collection_thread)
 
-    for thread in threads:
-        thread.join()
+    # for thread in threads:
+    #     thread.join()
