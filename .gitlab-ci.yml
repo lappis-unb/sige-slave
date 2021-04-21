@@ -37,12 +37,12 @@ docker:
 test:
   stage: test
   script:
-    - pytest
+    - python manage.py test --verbosity=3
 
 stylesheet:
   stage: test
   script:
-    - pycodestyle *
+    - pycodestyle .
 
 code_quality:
   stage: test

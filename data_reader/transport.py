@@ -1,14 +1,12 @@
-import importlib
-import socket
-import pickle
 import os
 
 from retrying import retry
 
+import pickle
+import socket
 from abc import ABCMeta, abstractmethod
 
-from .exceptions import NumberOfAttempsReachedException, \
-    CRCInvalidException
+from .exceptions import CRCInvalidException, NumberOfAttempsReachedException
 
 
 class TransportProtocol(metaclass=ABCMeta):
