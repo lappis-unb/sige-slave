@@ -301,15 +301,14 @@ def perform_all_data_collection(collection_type: str) -> None:
 
     transductors = get_active_transductors()
     for transductor in transductors:
-        single_data_collection(transductor, collection_type)
-    #     collection_thread = Thread(
-    #         target=single_data_collection,
-    #         args=(transductor, collection_type)
-    #     )
+        collection_thread = Thread(
+            target=single_data_collection,
+            args=(transductor, collection_type)
+        )
 
-    #     collection_thread.start()
+        collection_thread.start()
 
-    #     threads.append(collection_thread)
+        threads.append(collection_thread)
 
-    # for thread in threads:
-    #     thread.join()
+    for thread in threads:
+        thread.join()
