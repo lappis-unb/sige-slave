@@ -1,10 +1,10 @@
 import os
-
-from retrying import retry
-
 import pickle
 import socket
 from abc import ABCMeta, abstractmethod
+from typing import List
+
+from retrying import retry
 
 from .exceptions import CRCInvalidException, NumberOfAttempsReachedException
 
@@ -36,8 +36,11 @@ class TransportProtocol(metaclass=ABCMeta):
     # stops if pass 30s (30000ms) since the first attempt
     # wait 2.5s (2500ms) between retries
     @retry(stop_max_delay=30000, wait_fixed=2500)
-    def socket_communication(self, message_to_send, MAX_MSG_SIZE):
-        from datetime import datetime
+    def socket_communication(
+        self,
+        message_to_send: bytes,
+        MAX_MSG_SIZE: int
+    ):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as self.socket:
             self.socket.settimeout(self.timeout)
             self.socket.sendto(message_to_send, self.broker_address)
@@ -51,9 +54,9 @@ class TransportProtocol(metaclass=ABCMeta):
 
         return unpacked_received_message['content']
 
-    def send_message(self, message):
-        message_to_send = self._create_message(message)
-        MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
+    def send_message(self, message: List[bytes]):
+        message_to_send: bytes = self._create_message(message)
+        MAX_MSG_SIZE: int = int(os.environ['MAX_MSG_SIZE'])
 
         try:
             content = self.socket_communication(message_to_send, MAX_MSG_SIZE)
@@ -71,7 +74,7 @@ class TransportProtocol(metaclass=ABCMeta):
                 raise CRCInvalidException(error_message)
 
     @abstractmethod
-    def _create_message(self, message):
+    def _create_message(self, message: List[bytes]) -> bytes:
         pass
 
 
@@ -87,7 +90,7 @@ class UdpProtocol(TransportProtocol):
         receive message via socket UDP.
     """
 
-    def _create_message(self, message):
+    def _create_message(self, message: List[bytes]) -> bytes:
         real_message = {}
         real_message['content'] = message
         real_message['protocol'] = 'UDP'
@@ -100,7 +103,7 @@ class UdpProtocol(TransportProtocol):
 
 class TcpProtocol(TransportProtocol):
 
-    def _create_message(self, message):
+    def _create_message(self, message: List[bytes]) -> bytes:
         real_message = {}
         real_message['content'] = message
         real_message['protocol'] = 'TCP'
