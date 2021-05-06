@@ -2,10 +2,11 @@ import os
 import pickle
 import socket
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from retrying import retry
 
+from .communication import SerialProtocol
 from .exceptions import CRCInvalidException, NumberOfAttempsReachedException
 
 
@@ -23,7 +24,7 @@ class TransportProtocol(metaclass=ABCMeta):
         socket (socket._socketobject): The socket used in communication.
     """
 
-    def __init__(self, serial_protocol, timeout=10):
+    def __init__(self, serial_protocol: SerialProtocol, timeout: Optional[int] = 10):
         self.serial_protocol = serial_protocol
         self.transductor = serial_protocol.transductor
         self.timeout = timeout
@@ -97,7 +98,7 @@ class UdpProtocol(TransportProtocol):
         real_message['ip'] = self.transductor.ip_address
         real_message['port'] = self.transductor.port
 
-        real_message = pickle.dumps(real_message)
+        real_message: bytes = pickle.dumps(real_message)
         return real_message
 
 
@@ -110,5 +111,5 @@ class TcpProtocol(TransportProtocol):
         real_message['ip'] = self.transductor.ip_address
         real_message['port'] = self.transductor.port
 
-        real_message = pickle.dumps(real_message)
+        real_message: bytes = pickle.dumps(real_message)
         return real_message
