@@ -2,8 +2,13 @@ import math
 import struct
 import sys
 from abc import ABCMeta, abstractmethod
+from datetime import datetime
+from typing import List, Optional, Union
 
 from django.utils import timezone
+
+from transductor.models import EnergyTransductor
+from transductor_model.models import EnergyTransductorModel
 
 from .exceptions import NotANumberException
 
@@ -17,12 +22,20 @@ class SerialProtocol(metaclass=ABCMeta):
         hold communication.
     """
 
-    def __init__(self, transductor, transductor_model):
+    def __init__(
+        self,
+        transductor: EnergyTransductor,
+        transductor_model: EnergyTransductorModel
+    ) -> None:
         self.transductor = transductor
         self.transductor_model = transductor_model
 
     @abstractmethod
-    def create_messages(self):
+    def create_messages(
+        self,
+        collection_type: str,
+        date: Optional[datetime] = None
+    ) -> List[bytes]:
         """
         Abstract method responsible to create messages
         following the header patterns of the serial protocol used.
@@ -30,19 +43,16 @@ class SerialProtocol(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def get_content_from_message(self, message, message_type):
+    def get_content_from_message(self, message: bytes, message_type):
         """
         Abstract method responsible for read an value of
         a message sent by transductor.
-
-        Args:
-            message_received_data (str): The data from received message.
         """
         pass
 
     # TODO Change communication to use this methods
     @staticmethod
-    def bytes_to_int(x):
+    def bytes_to_int(x: bytes) -> Union[int, None]:
         number = int.from_bytes(x, byteorder='big')
         if math.isnan(number):
             return None
@@ -59,7 +69,7 @@ class SerialProtocol(metaclass=ABCMeta):
             return number[0]
 
     @staticmethod
-    def bytes_to_float(msg):
+    def bytes_to_float(msg) -> Union[float, None]:
         """
         Args:
             message_received_data (str): The data from received message.
@@ -79,24 +89,28 @@ class SerialProtocol(metaclass=ABCMeta):
             new_message.append(msb)
 
         value = struct.unpack("1f", new_message)[0]
+
         if math.isnan(value):
             return None
         else:
             return value
-        return value
 
     @staticmethod
-    def bytes_to_timestamp_to_datetime(x):
-        timestamp = ModbusRTU.bytes_to_int(x)
+    def bytes_to_timestamp_to_datetime(x: bytes) -> datetime:
+        timestamp: int = ModbusRTU.bytes_to_int(x)
         return timezone.datetime.fromtimestamp(timestamp)
 
     @staticmethod
-    def int_to_bytes(x, size=None, encryption='big'):
+    def int_to_bytes(
+        x: int,
+        size: Optional[int] = None,
+        encryption: str = 'big'
+        ) -> bytes:
         if size is None:
             return x.to_bytes((x.bit_length() + 7) // 8, encryption)
         return x.to_bytes(size, encryption)
 
-    def _check_crc(self, packaged_message):
+    def _check_crc(self, packaged_message) -> bool:
         return True
 
 
@@ -115,31 +129,49 @@ class Modbus(SerialProtocol):
     `Modbus reference guide <http://modbus.org/docs/PI_MBUS_300.pdf>`_
     """
 
-    def create_messages(self, collection_type, date=None):
+    def create_messages(
+        self,
+        collection_type: str,
+        date: Optional[datetime] = None
+    ) -> List[bytes]:
+
         request = self.transductor_model.data_collection(
-            collection_type, date)
-        messages = []
+            collection_type,
+            date
+        )
+
+        messages: List[bytes] = list()
+
         if request[0] == "ReadHoldingRegisters":
             for register in request[1]:
                 message = self.create_read_holding_registers_message(register)
-                full_message = self.add_complement(message)
+                full_message: bytes = self.add_complement(message)
                 messages.append(full_message)
+
         elif request[0] == "PresetMultipleRegisters":
             messages_bodies = zip(request[1], request[2])
+
             for message_body in messages_bodies:
                 message = self.create_preset_multiple_registers_message(
                     message_body)
-                full_message = self.add_complement(message)
+                full_message: bytes = self.add_complement(message)
                 messages.append(full_message)
+
         return messages
 
     @abstractmethod
-    def add_complement(self, message):
-        pass
+    def add_complement(self, message: bytes) -> bytes:
+        """
+        This method should implement how to add the complement to the message given a
+        given serial protocol
+        """
 
     @abstractmethod
-    def remove_complement(self, message):
-        pass
+    def remove_complement(self, message: bytes) -> bytes:
+        """
+        This method should implement how to remove the complement to the message given
+        a given serial protocol
+        """
 
     def create_read_holding_registers_message(self, register):
         # this line adds the slave id, in the TR4020 and MD30 is always 0x01
@@ -184,35 +216,73 @@ class Modbus(SerialProtocol):
 
         return message
 
-    def get_content_from_messages(self, collection_type, recived_messages,
-                                  date=None):
-        request = \
-            self.transductor_model.data_collection(
-                collection_type, date)
+    def get_content_from_messages(
+        self,
+        collection_type: str,
+        recived_messages,
+        date: Optional[datetime] = None
+    ) -> list:
+        """[summary]
+
+        Args:
+            collection_type (str): Desired measurement type. Every transductor,
+            regardless of hardware, must support at least the following 4 types of
+            measurement: (Minutely, Quarterly, Monthly, CorrectDate,  DataRescueGet).
+            Some transductor have other types of data collection, such as the case of
+            the `MD30` which expands the types of collection with the following
+            types: (DataRescuePost, DataRescueGet)
+
+            recived_messages ([type]): [description]
+
+            date (Optional[datetime]): Specifying a collection date. The
+            transductors store past measurements in their internal memory. In this way
+            it is possible to make requests for past dates. When this attribute is not
+            specified, the most recent measurement is retrieved. Defaults to None.
+
+        Returns:
+            list: [description]
+        """
+        request = self.transductor_model.data_collection(
+            collection_type,
+            date
+        )
         messages_registers = zip(recived_messages, request[1])
         messages_content = []
         for message_register in messages_registers:
-            messages_content.append(self.get_content_from_message(
-                message_register[0],
-                message_register[1][1]
-            ))
+            messages_content.append(
+                self.get_content_from_message(
+                    message_register[0],
+                    message_register[1][1]
+                )
+            )
         return messages_content
 
-    def get_content_from_message(self, message, message_type):
-        message = self.remove_complement(message)
+    # TODO: This method returns a strange data structure
+    # Abstract the return of this function to a class
+    def get_content_from_message(
+        self,
+        message: bytes,
+        message_type
+    ) -> Union[int, float, list]:
+        message: bytes = self.remove_complement(message)
         if message_type == 1:
-            message_content = self.bytes_to_int(message)
+            message_content: int = self.bytes_to_int(message)
+
         elif message_type == 2:
-            message_content = self.bytes_to_float(message)
+            message_content: float = self.bytes_to_float(message)
+
         elif message_type == 4:
-            message_content = self.bytes_to_int(message)
+            message_content: int = self.bytes_to_int(message)
+
         elif message_type == 22:
             message_content = []
-            message_content.append(
-                self.bytes_to_timestamp_to_datetime(message[0:8]))
+            date: datetime = self.bytes_to_timestamp_to_datetime(message[0:8])
+            message_content.append(date)
+
             for i in range(8, 44, 4):
                 message_content.append(
-                    self._unpack_float_response(message[i:i + 4]))
+                    self._unpack_float_response(message[i:i + 4])
+                )
 
         return message_content
 
@@ -232,18 +302,15 @@ class ModbusRTU(Modbus):
     `Modbus reference guide <http://modbus.org/docs/PI_MBUS_300.pdf>`_
     """
 
-    def __init__(self, transductor, transductor_model):
-        super(ModbusRTU, self).__init__(transductor, transductor_model)
-
-    def add_complement(self, message):
-        aux = self._computate_crc(message)
-        message += self.int_to_bytes(aux, 2, 'little')
+    def add_complement(self, message: bytes) -> bytes:
+        aux: int = self._computate_crc(message)
+        message: bytes = message + self.int_to_bytes(aux, 2, 'little')
         return message
 
-    def remove_complement(self, message):
+    def remove_complement(self, message: bytes) -> bytes:
         return message[3:-2]
 
-    def _check_crc(self, packaged_message):
+    def _check_crc(self, packaged_message) -> bool:
         """
         Method responsible to verify if a CRC is valid.
 
@@ -259,7 +326,7 @@ class ModbusRTU(Modbus):
         return (crc == packaged_message[-2:])
 
     @staticmethod
-    def _computate_crc(packaged_message):
+    def _computate_crc(packaged_message: str) -> int:
         """
         Method responsible to computate the crc from a packaged message.
 
@@ -291,10 +358,7 @@ class ModbusRTU(Modbus):
 
 
 class ModbusTCP(Modbus):
-    def __init__(self, transductor, transductor_model):
-        super(ModbusTCP, self).__init__(transductor, transductor_model)
-
-    def add_complement(self, message):
+    def add_complement(self, message: bytes) -> bytes:
         timestamp = timezone.datetime.now().timestamp()
         timestamp = str(timestamp).split('.')
         trasaction_id = int(timestamp[1]) % 65535
@@ -306,5 +370,5 @@ class ModbusTCP(Modbus):
         full_message += message
         return full_message
 
-    def remove_complement(self, message):
+    def remove_complement(self, message: bytes) -> bytes:
         return message[9:]
