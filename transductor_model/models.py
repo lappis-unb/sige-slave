@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Callable, Dict, List, Optional, Tuple, Union
 from datetime import datetime
 from transductor.models import EnergyTransductor
 
@@ -49,8 +49,10 @@ class EnergyTransductorModel():
 
     DATA_RESCUE_GET_REGISTERS = [[200, 22]]
 
+    # TODO: As can be seen, this function returns a strange data structure.
+    # Abstract this data structure into a class
     @property
-    def registers(self) -> dict:
+    def registers(self) -> Dict[str, List[List[int]]]:
         """Alias dictionary with register mapping"""
         return {
             "Minutely": self.MINUTELY_REGISTERS,
@@ -61,7 +63,20 @@ class EnergyTransductorModel():
             "DataRescueGet": self.DATA_RESCUE_GET_REGISTERS
         }
 
-    def collection_functions(self) -> dict:
+    # TODO: As can be seen, this function returns a REALLY strange data structure.
+    # Abstract this data structure into a class
+    # This strange return is the result of a chain of strange returns
+    def collection_functions(
+        self
+    ) -> Dict[str,                                           # method identifier
+              Callable[                                      # method
+                  [Optional[datetime]],                      # method parameters
+                  Union[                                     # method return
+                      Tuple[str, List[List[int]]],           # the return can be this
+                      Tuple[str, List[List[int]], List[int]] # or this
+                   ]
+                ]
+            ]:
         """
         Alias dictionary for collection functions.
 
@@ -75,7 +90,11 @@ class EnergyTransductorModel():
             "CorrectDate": self.correct_date,
         }
 
-    def handle_response_functions(self) -> dict:
+    # TODO: As can be seen, this function returns a REALLY strange data structure.
+    # Abstract this data structure into a class
+    def handle_response_functions(
+        self
+    ) -> Dict[str, Callable[[list, EnergyTransductor, Optional[datetime]], datetime]]:
         """
         Alias dictionary for handle functions
 
@@ -89,7 +108,13 @@ class EnergyTransductorModel():
             "CorrectDate": self.verify_rescue_collection_date,
         }
 
-    def data_collection(self, type: str, date: datetime = None) -> Tuple:
+    # TODO: As can be seen, this function returns a really strange data structure.
+    # Abstract this data structure into a class
+    def data_collection(
+        self,
+        type: str,
+        date: Optional[datetime] = None
+    ) -> Union[Tuple[str, List[List[int]]], Tuple[str, List[List[int]], List[int]]]:
         """
         Factory function that will return the data-structure necessary to
         collect certain information from a transducer
@@ -100,39 +125,89 @@ class EnergyTransductorModel():
         else:
             return collection_dict[type](date)
 
-    def minutely_collection(self) -> Tuple:
+    # TODO: As can be seen, this function returns a strange data structure.
+    # Abstract this data structure into a class
+    def minutely_collection(self) -> Tuple[str, List[List[int]]]:
         return ("ReadHoldingRegisters", self.registers['Minutely'])
 
-    def quarterly_collection(self) -> Tuple:
+    # TODO: As can be seen, this function returns a strange data structure.
+    # Abstract this data structure into a class
+    def quarterly_collection(self) -> Tuple[str, List[List[int]]]:
         return ("ReadHoldingRegisters", self.registers['Quarterly'])
 
-    def monthly_collection(self) -> Tuple:
+    # TODO: As can be seen, this function returns a strange data structure.
+    # Abstract this data structure into a class
+    def monthly_collection(self) -> Tuple[str, List[List[int]]]:
         return ("ReadHoldingRegisters", self.registers['Monthly'])
 
-    def correct_date(self, date: datetime) -> Tuple:
+    # TODO: As can be seen, this function returns a strange data structure.
+    # Abstract this data structure into a class
+    def correct_date(
+        self,
+        date: Optional[datetime] = None
+    ) -> Tuple[str, List[List[int]], List[int]]:
         if not date:
             date = timezone.datetime.now()
-        payload = [date.year, date.month, date.day, date.hour, date.minute,
-                   date.second]
-        return ("PresetMultipleRegisters", self.registers['CorrectDate'],
-                payload)
 
-    def handle_response(self,
-                        collection_type: str,
-                        response: list,
-                        transductor: EnergyTransductor,
-                        date: datetime = None):
+        payload = [
+            date.year,
+            date.month,
+            date.day,
+            date.hour,
+            date.minute,
+            date.second
+        ]
+
+        return ("PresetMultipleRegisters", self.registers['CorrectDate'], payload)
+
+    def handle_response(
+        self,
+        collection_type: str,
+        response: list,
+        transductor: EnergyTransductor,
+        date: Optional[datetime] = None
+    ) -> datetime:
         """
         Helper function to handle transductor response according to the type
         of collection.
+
+        Args:
+            collection_type (str): Desired measurement type. Every transductor,
+            regardless of hardware, must support at least the following 4 types of
+            measurement: (Minutely, Quarterly, Monthly, CorrectDate,  DataRescueGet).
+            Some transductor have other types of data collection, such as the case of
+            the `MD30` which expands the types of collection with the following
+            types: (DataRescuePost, DataRescueGet)
+
+            response (list): [description]
+
+            transductor (EnergyTransductor): Transductor that has the desired
+            measurements
+
+            date (Optional[datetime]): Specifying a collection date. The
+            transductors store past measurements in their internal memory. In this way
+            it is possible to make requests for past dates. When this attribute is not
+            specified, the most recent measurement is retrieved. Defaults to None.
+
+        Returns:
+            datetime: Every measurement has a date associated with it.
+            This function returns this date.
         """
+
         response_dict = self.handle_response_functions()
         return response_dict[collection_type](response, transductor, date)
 
-    def save_minutely_measurement(self,
-                                  response: list,
-                                  transductor: EnergyTransductor,
-                                  date: datetime = None):
+    def save_minutely_measurement(
+        self,
+        response: List[Union[int, float, None]],
+        transductor: EnergyTransductor,
+        date: Optional[datetime] = None
+    ) -> datetime:
+        # TODO: Esse comportamento é esperado?
+        # After every measurement, a check is made if the transductor time is more than
+        # 30s apart, and if the transductor time is wrong, the current measurement is
+        # "paused" to make a new request to the meter requesting that the time be
+        # updated
         self.verify_collection_date(response, transductor)
 
         minutely_measurement = MinutelyMeasurement()
@@ -140,13 +215,14 @@ class EnergyTransductorModel():
 
         # saving the datetime from transductor
         date = timezone.datetime(
-            response[0],
-            response[1],
-            response[2],
-            response[3],
-            response[4],
-            response[5]
+            year=response[0],
+            month=response[1],
+            day=response[2],
+            hour=response[3],
+            minute=response[4],
+            second=response[5]
         )
+
         minutely_measurement.transctor_collection_date = date
         minutely_measurement.slave_collection_date = timezone.now()
 
@@ -217,6 +293,8 @@ class EnergyTransductorModel():
         quarterly_measurement.check_measurements()
         quarterly_measurement.save()
 
+        return quarterly_measurement.transductor_collection_date
+
     def data_rescue_post(self, date):
         timestamp = int(timezone.datetime.timestamp(date))
         payload = [timestamp]
@@ -226,7 +304,12 @@ class EnergyTransductorModel():
     def data_rescue_get(self):
         return ("ReadHoldingRegisters", self.registers['DataRescueGet'])
 
-    def save_monthly_measurement(self, response, transductor, date=None):
+    def save_monthly_measurement(
+        self,
+        response: list,
+        transductor: EnergyTransductor,
+        date: Optional[datetime] = None
+    ) -> datetime:
         measurement = MonthlyMeasurement()
         measurement.transductor = transductor
 
@@ -330,11 +413,24 @@ class EnergyTransductorModel():
             pass
 
         measurement.save()
+        return measurement.transductor_collection_date
 
-    def verify_rescue_collection_date(self, response, transductor, date=None):
-        return True
+    def verify_rescue_collection_date(
+        self,
+        response: list,
+        transductor: EnergyTransductor,
+        date: Optional[datetime] = None
+    ):
+        # functions that process responses must return datetime to maintain the
+        # interface
+        return datetime.now()
 
-    def save_rescued_data(self, response, transductor, date=None):
+    def save_rescued_data(
+        self,
+        response: list,
+        transductor: EnergyTransductor,
+        date: Optional[datetime] = None
+    ):
         measurement = MinutelyMeasurement()
 
         measurement.transductor_collection_date = response[0][0]
@@ -354,8 +450,10 @@ class EnergyTransductorModel():
         return measurement
 
     @staticmethod
-    def verify_collection_date(measurements: list,
-                               transductor: EnergyTransductor):
+    def verify_collection_date(
+        measurements: List[Union[int, float, None]],
+        transductor: EnergyTransductor
+    ) -> None:
         from data_reader.utils import single_data_collection
         collected_date = timezone.datetime(
             year=measurements[0],
@@ -367,6 +465,8 @@ class EnergyTransductorModel():
         )
         current_date = timezone.datetime.now()
 
+        # If the date the transductor returns is more than acceptable (30s), a new
+        # request is sent to reset the meter time
         if not is_datetime_similar(collected_date, current_date):
             single_data_collection(transductor, "CorrectDate")
             measurements[0] = current_date.year
@@ -381,7 +481,7 @@ class MD30(EnergyTransductorModel):
     transport_protocol = "TcpProtocol"
     serial_protocol = "ModbusTCP"
 
-    def collection_functions(self):
+    def collection_functions(self) -> Dict[str, Callable[[Optional[datetime]], int]]:
 
         base_collection_functions = super(
             EnergyTransductorModel, self
