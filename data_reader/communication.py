@@ -25,7 +25,7 @@ class SerialProtocol(metaclass=ABCMeta):
     def __init__(
         self,
         transductor: EnergyTransductor,
-        transductor_model: EnergyTransductorModel
+        transductor_model: EnergyTransductorModel,
     ) -> None:
         self.transductor = transductor
         self.transductor_model = transductor_model
@@ -34,7 +34,7 @@ class SerialProtocol(metaclass=ABCMeta):
     def create_messages(
         self,
         collection_type: str,
-        date: Optional[datetime] = None
+        date: Optional[datetime] = None,
     ) -> List[bytes]:
         """
         Abstract method responsible to create messages
@@ -53,7 +53,7 @@ class SerialProtocol(metaclass=ABCMeta):
     # TODO Change communication to use this methods
     @staticmethod
     def bytes_to_int(x: bytes) -> Union[int, None]:
-        number = int.from_bytes(x, byteorder='big')
+        number = int.from_bytes(x, byteorder="big")
         if math.isnan(number):
             return None
         else:
@@ -61,10 +61,9 @@ class SerialProtocol(metaclass=ABCMeta):
 
     @staticmethod
     def _unpack_float_response(msg):
-        number = struct.unpack('>f', msg)
+        number = struct.unpack(">f", msg)
         if math.isnan(number[0]):
-            raise NotANumberException(
-                "The bytestring can't be conveted to a float")
+            raise NotANumberException("The bytestring can't be conveted to a float")
         else:
             return number[0]
 
@@ -104,8 +103,8 @@ class SerialProtocol(metaclass=ABCMeta):
     def int_to_bytes(
         x: int,
         size: Optional[int] = None,
-        encryption: str = 'big'
-        ) -> bytes:
+        encryption: str = "big",
+    ) -> bytes:
         if size is None:
             return x.to_bytes((x.bit_length() + 7) // 8, encryption)
         return x.to_bytes(size, encryption)
@@ -132,13 +131,10 @@ class Modbus(SerialProtocol):
     def create_messages(
         self,
         collection_type: str,
-        date: Optional[datetime] = None
+        date: Optional[datetime] = None,
     ) -> List[bytes]:
 
-        request = self.transductor_model.data_collection(
-            collection_type,
-            date
-        )
+        request = self.transductor_model.data_collection(collection_type, date)
 
         messages: List[bytes] = list()
 
@@ -152,8 +148,7 @@ class Modbus(SerialProtocol):
             messages_bodies = zip(request[1], request[2])
 
             for message_body in messages_bodies:
-                message = self.create_preset_multiple_registers_message(
-                    message_body)
+                message = self.create_preset_multiple_registers_message(message_body)
                 full_message: bytes = self.add_complement(message)
                 messages.append(full_message)
 
@@ -220,7 +215,7 @@ class Modbus(SerialProtocol):
         self,
         collection_type: str,
         recived_messages,
-        date: Optional[datetime] = None
+        date: Optional[datetime] = None,
     ) -> list:
         """[summary]
 
@@ -242,17 +237,13 @@ class Modbus(SerialProtocol):
         Returns:
             list: [description]
         """
-        request = self.transductor_model.data_collection(
-            collection_type,
-            date
-        )
+        request = self.transductor_model.data_collection(collection_type, date)
         messages_registers = zip(recived_messages, request[1])
         messages_content = []
         for message_register in messages_registers:
             messages_content.append(
                 self.get_content_from_message(
-                    message_register[0],
-                    message_register[1][1]
+                    message_register[0], message_register[1][1]
                 )
             )
         return messages_content
@@ -262,7 +253,7 @@ class Modbus(SerialProtocol):
     def get_content_from_message(
         self,
         message: bytes,
-        message_type
+        message_type,
     ) -> Union[int, float, list]:
         message: bytes = self.remove_complement(message)
         if message_type == 1:
@@ -280,9 +271,7 @@ class Modbus(SerialProtocol):
             message_content.append(date)
 
             for i in range(8, 44, 4):
-                message_content.append(
-                    self._unpack_float_response(message[i:i + 4])
-                )
+                message_content.append(self._unpack_float_response(message[i : i + 4]))
 
         return message_content
 
@@ -304,7 +293,7 @@ class ModbusRTU(Modbus):
 
     def add_complement(self, message: bytes) -> bytes:
         aux: int = self._computate_crc(message)
-        message: bytes = message + self.int_to_bytes(aux, 2, 'little')
+        message: bytes = message + self.int_to_bytes(aux, 2, "little")
         return message
 
     def remove_complement(self, message: bytes) -> bytes:
@@ -323,7 +312,7 @@ class ModbusRTU(Modbus):
         """
         crc = struct.pack("<H", self._computate_crc(packaged_message[:-2]))
 
-        return (crc == packaged_message[-2:])
+        return crc == packaged_message[-2:]
 
     @staticmethod
     def _computate_crc(packaged_message: str) -> int:
@@ -360,7 +349,7 @@ class ModbusRTU(Modbus):
 class ModbusTCP(Modbus):
     def add_complement(self, message: bytes) -> bytes:
         timestamp = timezone.datetime.now().timestamp()
-        timestamp = str(timestamp).split('.')
+        timestamp = str(timestamp).split(".")
         trasaction_id = int(timestamp[1]) % 65535
         full_message = self.int_to_bytes(trasaction_id, 2)
         protocol_identifier = 0

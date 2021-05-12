@@ -15,6 +15,6 @@ router.registry.extend(transductors_routes.router.registry)
 router.registry.extend(events_routes.router.registry)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("", include(router.urls)),
 ]

@@ -14,43 +14,35 @@ from .communication import SerialProtocol
 from .transport import TransportProtocol
 
 
-def communication_log(status, datetime, type, transductor, file, errors=[]):
-    print('DateTime:\t', datetime, file=file)
+def communication_log(
+    status,
+    datetime,
+    type,
+    transductor,
+    file,
+    errors=[],
+):
+    print("DateTime:\t", datetime, file=file)
     print(
-        'Transductor:\t',
-        transductor.serial_number + '@' + transductor.physical_location,
-        '(' + transductor.ip_address + ')',
-        file=file
+        "Transductor:\t",
+        transductor.serial_number + "@" + transductor.physical_location,
+        "(" + transductor.ip_address + ")",
+        file=file,
     )
-    print('Type:\t\t', type, file=file)
-    print('Status:\t\t', status, file=file)
+    print("Type:\t\t", type, file=file)
+    print("Status:\t\t", status, file=file)
     if errors:
-        print('Errors:', file=file)
+        print("Errors:", file=file)
         for error in errors:
-            print('\t\t', error, file=file)
-    print('\n', file=file)
+            print("\t\t", error, file=file)
+    print("\n", file=file)
 
 
-    """
-    Thread method responsible to handle all the communication used
-    by a transductor and save the measurements collected.
-
-    Parameters
-    ----------
-    transductor : EnergyTransductor
-        The transductor used.
-
-    collection_type : str
-        The type of collection to be made
-
-    Returns:
-        None
-    """
 def single_data_collection(
     transductor: EnergyTransductor,
     collection_type: str,
-    date: Optional[datetime]=None
-    ):
+    date: Optional[datetime] = None,
+):
     """
     Function responsible for performing a certain type of data collection for a given
     transductor.
@@ -85,64 +77,58 @@ def single_data_collection(
         (which makes no sense at all...)
     """
     # Variable to log the step where the failure occurred.
-    communication_step = ''
+    communication_step = ""
 
     try:
-        communication_step = 'capturing transductor model'
+        communication_step = "capturing transductor model"
         transductor_model: EnergyTransductorModel = get_transductor_model_instance(
             transductor
         )
 
         communication_step = "capturing serial protocol"
         serial_protocol_instance: SerialProtocol = get_serial_protocol(
-            transductor,
-            transductor_model
+            transductor, transductor_model
         )
 
         communication_step = "capturing transport protocol"
         transport_protocol_instance: TransportProtocol = get_transport_protocol(
             serial_protocol_instance,
-            transductor_model
+            transductor_model,
         )
 
-        communication_step = 'assembling messages'
+        communication_step = "assembling messages"
         messages_to_send: List[bytes] = serial_protocol_instance.create_messages(
             collection_type,
-            date
+            date,
         )
 
-        communication_step = 'sending messages'
-        received_messages = transport_protocol_instance.send_message(
-            messages_to_send
-        )
+        communication_step = "sending messages"
+        received_messages = transport_protocol_instance.send_message(messages_to_send)
 
-        communication_step = 'parsing response'
+        communication_step = "parsing response"
         received_messages_content = serial_protocol_instance.get_content_from_messages(
             collection_type,
             received_messages,
-            date
+            date,
         )
 
-        communication_step = 'handling response'
+        communication_step = "handling response"
         handled_response = transductor_model.handle_response(
             collection_type,
             received_messages_content,
             transductor,
-            date
+            date,
         )
 
-        filename = os.path.join(
-            settings.LOG_PATH,
-            'successful_communication_logs.log'
-        )
+        filename = os.path.join(settings.LOG_PATH, "successful_communication_logs.log")
 
-        with open(filename, 'a') as file:
+        with open(filename, "a") as file:
             communication_log(
-                status='Success',
+                status="Success",
                 datetime=timezone.datetime.now(),
                 type=collection_type,
                 transductor=transductor,
-                file=file
+                file=file,
             )
 
         if not handled_response:
@@ -151,13 +137,10 @@ def single_data_collection(
         return handled_response
 
     except Exception as e:
-        filename = os.path.join(
-            settings.LOG_PATH,
-            'failed_communication_logs.log'
-        )
+        filename = os.path.join(settings.LOG_PATH, "failed_communication_logs.log")
 
-        with open(filename, 'a') as file:
-            if (collection_type == "Minutely"):
+        with open(filename, "a") as file:
+            if collection_type == "Minutely":
                 transductor.set_broken(True)
 
             else:
@@ -166,18 +149,18 @@ def single_data_collection(
                 transductor.save(update_fields=[attribute])
 
             communication_log(
-                status='Failure at ' + communication_step,
+                status="Failure at " + communication_step,
                 datetime=timezone.datetime.now(),
                 type=collection_type,
                 transductor=transductor,
                 errors=[e],
-                file=file
+                file=file,
             )
 
-        if (collection_type == "Minutely"):
+        if collection_type == "Minutely":
             transductor.set_broken(True)
 
-        elif collection_type in ['Quarterly', 'Monthly']:
+        elif collection_type in ["Quarterly", "Monthly"]:
             attribute = get_rescue_attribute(collection_type)
             transductor.__dict__[attribute] = False
             transductor.save(update_fields=[attribute])
@@ -191,22 +174,23 @@ def single_data_collection(
 def perform_minutely_data_rescue(transductor: EnergyTransductor):
     interval: TimeInterval = transductor.timeintervals.first()
 
-    if (interval is None or interval.end is None):
+    if interval is None or interval.end is None:
         return
 
-    while(True):
+    while True:
         response = single_data_collection(transductor, "DataRescuePost", interval.begin)
 
-        if(response is None):
+        if response is None:
             return
 
         measurement = single_data_collection(transductor, "DataRescueGet")
 
-        if(measurement is None):
+        if measurement is None:
             return
 
         inside_interval = interval.change_interval(
-            measurement.transductor_collection_date)
+            measurement.transductor_collection_date
+        )
 
         if inside_interval:
             measurement.check_measurements()
@@ -215,7 +199,11 @@ def perform_minutely_data_rescue(transductor: EnergyTransductor):
         else:
             return
 
-def perform_periodic_data_rescue(transductor: EnergyTransductor, rescue_type: str):
+
+def perform_periodic_data_rescue(
+    transductor: EnergyTransductor,
+    rescue_type: str,
+):
     attribute = get_rescue_attribute(rescue_type)
     if transductor.__dict__[attribute] is True:
         return
@@ -227,17 +215,17 @@ def perform_periodic_data_rescue(transductor: EnergyTransductor, rescue_type: st
 
 
 def get_rescue_function(rescue_type: str):
-    if rescue_type == 'Minutely':
+    if rescue_type == "Minutely":
         return perform_minutely_data_rescue
     else:
         return perform_periodic_data_rescue
 
 
 def get_rescue_attribute(rescue_type: str) -> Union[str, None]:
-    if rescue_type == 'Quarterly':
-        return 'quarterly_data_rescued'
-    if rescue_type == 'Monthly':
-        return 'monthly_data_rescued'
+    if rescue_type == "Quarterly":
+        return "quarterly_data_rescued"
+    if rescue_type == "Monthly":
+        return "monthly_data_rescued"
     return None
 
 
@@ -251,8 +239,8 @@ def perform_all_data_rescue(rescue_type: str):
 
 
 def get_transductor_model_instance(
-    transductor: EnergyTransductor
-    ) -> EnergyTransductorModel:
+    transductor: EnergyTransductor,
+) -> EnergyTransductorModel:
     """
     Method responsible for dynamically instantiating the class that comprises the
     binary data sent by the measuring equipment.
@@ -275,16 +263,15 @@ def get_transductor_model_instance(
         Returns the instance of a transductor_model
     """
     transductor_model_class = getattr(
-        import_module('transductor_model.models'),
-        transductor.model
+        import_module("transductor_model.models"), transductor.model
     )
     return transductor_model_class()
 
 
 def get_serial_protocol(
     transductor: EnergyTransductor,
-    transductor_model: EnergyTransductorModel
-    ) -> SerialProtocol:
+    transductor_model: EnergyTransductorModel,
+) -> SerialProtocol:
     """
     Dynamic import the serial protocol model class,
     according to the transductor model passed as parameter
@@ -296,16 +283,15 @@ def get_serial_protocol(
         any class that inherits from SerialProtocol
     """
     serial_protocol_class = getattr(
-        import_module('data_reader.communication'),
-        transductor_model.serial_protocol
+        import_module("data_reader.communication"), transductor_model.serial_protocol
     )
     return serial_protocol_class(transductor, transductor_model)
 
 
 def get_transport_protocol(
     serial_protocol_instance: SerialProtocol,
-    transductor_model: EnergyTransductorModel
-    ) -> TransportProtocol:
+    transductor_model: EnergyTransductorModel,
+) -> TransportProtocol:
     """
     Dynamic import the transport protocol model class,
     according to the transductor model passed as parameter
@@ -317,8 +303,7 @@ def get_transport_protocol(
         any class that inherits from TransportProtocol
     """
     transport_protocol_class = getattr(
-        import_module('data_reader.transport'),
-        transductor_model.transport_protocol
+        import_module("data_reader.transport"), transductor_model.transport_protocol
     )
     return transport_protocol_class(serial_protocol_instance)
 
@@ -346,7 +331,7 @@ def perform_all_data_collection(collection_type: str) -> None:
     for transductor in EnergyTransductor.objects.all():
         collection_thread = Thread(
             target=single_data_collection,
-            args=(transductor, collection_type)
+            args=(transductor, collection_type),
         )
 
         collection_thread.start()

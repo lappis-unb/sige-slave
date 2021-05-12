@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 
 class VoltageState(Enum):
-    CRITICAL_UPPER = 'CriticalHigh'
-    PRECARIOUS_UPPER = 'PrecariousHigh'
-    NORMAL = 'Normal'
-    PRECARIOUS_LOWER = 'PrecariousLow'
-    CRITICAL_LOWER = 'CriticalLow'
-    PHASE_DOWN = 'PhaseDown'
+    CRITICAL_UPPER = "CriticalHigh"
+    PRECARIOUS_UPPER = "PrecariousHigh"
+    NORMAL = "Normal"
+    PRECARIOUS_LOWER = "PrecariousLow"
+    CRITICAL_LOWER = "CriticalLow"
+    PHASE_DOWN = "PhaseDown"
 
     def get_target_event_class(voltage_state: str):
         """
@@ -32,16 +32,14 @@ class VoltageState(Enum):
         from events.models import (
             CriticalVoltageEvent,
             PrecariousVoltageEvent,
-            PhaseDropEvent
+            PhaseDropEvent,
         )
 
         m = {
             VoltageState.CRITICAL_UPPER.value: CriticalVoltageEvent,
             VoltageState.CRITICAL_LOWER.value: CriticalVoltageEvent,
-
             VoltageState.PRECARIOUS_UPPER.value: PrecariousVoltageEvent,
             VoltageState.PRECARIOUS_LOWER.value: PrecariousVoltageEvent,
-
             VoltageState.PHASE_DOWN.value: PhaseDropEvent,
         }
 

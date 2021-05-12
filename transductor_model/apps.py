@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class TransductorModelConfig(AppConfig):
-    name = 'transductor_model'
+    name = "transductor_model"

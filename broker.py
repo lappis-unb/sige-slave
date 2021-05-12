@@ -20,7 +20,7 @@ import os
 # }
 
 
-MAX_MSG_SIZE = int(os.environ['MAX_MSG_SIZE'])
+MAX_MSG_SIZE = int(os.environ["MAX_MSG_SIZE"])
 
 
 def send_udp_messages_list(messages, address, response=True):
@@ -40,15 +40,14 @@ def send_udp_messages_list(messages, address, response=True):
 
     Returns
     -------
-    received_message : list 
+    received_message : list
         List containing responses from each UDP message sent.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(1)
     received_message = []
     for message in messages:
-        received_message.append(send_single_udp_message(message, address,
-                                                        s, response))
+        received_message.append(send_single_udp_message(message, address, s, response))
     return received_message
 
 
@@ -63,7 +62,7 @@ def send_single_udp_message(message, address, s=None, response=True):
 
     address : tuple
         Tuple consisting of ip address and port number
-        
+
     s : socket, optional
         Socket object, if None, the function create a new socket object
 
@@ -72,7 +71,7 @@ def send_single_udp_message(message, address, s=None, response=True):
 
     Returns
     -------
-    received_message : bytes 
+    received_message : bytes
         UDP's message response.
     """
     if s is None:
@@ -98,7 +97,7 @@ def send_tcp_messages_list(messages, address):
 
     Returns
     -------
-    responses : list 
+    responses : list
         List containing responses from TCP messages sent.
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,69 +114,70 @@ def send_tcp_messages_list(messages, address):
 
 def worker(message_queue):
     """
-    Function executed in threads that calls previous functions and uses a dict 
+    Function executed in threads that calls previous functions and uses a dict
     to send messages and receive responses.
 
     Parameters
     ----------
-    message_queue : 
-        Dict of messages to send using the socket object, 
+    message_queue :
+        Dict of messages to send using the socket object,
         mapping the given ip to a queue containing the messages.
     """
-    while(True):
+    while True:
         aux = message_queue.get()
         message = aux[0]
         sender = aux[1]
-        transductor = (message['ip'], message['port'])
+        transductor = (message["ip"], message["port"])
         try:
-            if message['protocol'] == 'UDP':
+            if message["protocol"] == "UDP":
                 transductor_response = send_udp_messages_list(
-                    message['content'], transductor)
+                    message["content"], transductor
+                )
                 response = {}
-                response['status'] = 1
-                response['content'] = transductor_response
-            elif message['protocol'] == 'TCP':
+                response["status"] = 1
+                response["content"] = transductor_response
+            elif message["protocol"] == "TCP":
                 transductor_response = send_tcp_messages_list(
-                    message['content'], transductor)
+                    message["content"], transductor
+                )
                 response = {}
-                response['status'] = 1
-                response['content'] = transductor_response
+                response["status"] = 1
+                response["content"] = transductor_response
             else:
-                response['status'] = 0
-                response['content'] = 'Unknown protocol'
+                response["status"] = 0
+                response["content"] = "Unknown protocol"
         except Exception as e:
             response = {}
-            response['status'] = 0
-            response['content'] = e
+            response["status"] = 0
+            response["content"] = e
         response = pickle.dumps(response)
         try:
-            send_single_udp_message(response, sender, response=False) 
+            send_single_udp_message(response, sender, response=False)
         except Exception:
             pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.bind(('0.0.0.0', int(os.environ['BROKER_PORT'])))
+    s.bind(("0.0.0.0", int(os.environ["BROKER_PORT"])))
 
-    # This is a dict with all the message queues that uses the ip of 
+    # This is a dict with all the message queues that uses the ip of
     # the receiver as key and the queue of messages to that receiver as value
     message_queues = {}
 
-    while(True):
+    while True:
         message, sender = s.recvfrom(MAX_MSG_SIZE)
         message = pickle.loads(message)
-        queue_identifier = message['ip']
+        queue_identifier = message["ip"]
 
-        if message_queues.__contains__(message['ip']):
+        if message_queues.__contains__(message["ip"]):
             ip = message_queues[queue_identifier]
             ip.put([message, sender])
 
         else:
-            message_queues[message['ip']] = queue.Queue()
+            message_queues[message["ip"]] = queue.Queue()
 
-            message_queues[message['ip']].put([message, sender])
+            message_queues[message["ip"]].put([message, sender])
 
-            t = threading.Thread(target=worker, args=(
-                message_queues[message['ip']],))
+            t = threading.Thread(target=worker, args=(message_queues[message["ip"]],))
             t.start()

@@ -6,7 +6,7 @@ from typing import Dict, Optional, Tuple
 from .data_classes import VoltageBounds, VoltageState
 
 
-class VoltageEventDebouncer():
+class VoltageEventDebouncer:
     """
     Defines a debouncer for voltage related events.
     It works as FSM that changes its states due to a combination of an average
@@ -19,8 +19,11 @@ class VoltageEventDebouncer():
     # TODO: Conversar com o prof. sobre esse número mágico
     HYSTERESIS_RATE = 0.005
 
-
-    def __init__(self, measurement_phase: str, history_size: Optional[int] = 15):
+    def __init__(
+        self,
+        measurement_phase: str,
+        history_size: Optional[int] = 15,
+    ):
 
         contracted_voltage = settings.CONTRACTED_VOLTAGE
         PHASE_DOWN_THRESHOLD_RATE = VoltageEventDebouncer.PHASE_DOWN_THRESHOLD_RATE
@@ -47,21 +50,23 @@ class VoltageEventDebouncer():
         # Holds last event status transition
         self.last_event_state_transition = (
             VoltageState.NORMAL.value,
-            VoltageState.NORMAL.value
+            VoltageState.NORMAL.value,
         )
-        """
-        Adds data from a new measurement to the event debouncer and updates
-        the debouncer state
-        Args:
-            measurement_phase: The signal phase type. For example, if the data
-            comes from phase A then type='voltage_a'
-            measurement_value: The last measurement value.
-        """
 
     def add_new_measurement(
         self,
-        measurement_value: float
+        measurement_value: float,
     ) -> Tuple[VoltageState, VoltageState]:
+        """
+        Adds data from a new measurement to the event debouncer and updates
+        the debouncer state
+
+        Args:
+            measurement_value (float): The last measurement value.
+
+        Returns:
+            Tuple[VoltageState, VoltageState]: Last state transition of a voltage phase
+        """
         self.data_history.append(measurement_value)
         self.last_measurement = measurement_value
 
@@ -92,28 +97,40 @@ class VoltageEventDebouncer():
         CRITICAL_LOWER = VoltageState.CRITICAL_LOWER.value
         PHASE_DOWN = VoltageState.PHASE_DOWN.value
 
-        if (state_ranges[CRITICAL_UPPER].lower_bound <= last_measurement and
-            state_ranges[CRITICAL_UPPER].upper_bound >= last_measurement):
+        if (
+            state_ranges[CRITICAL_UPPER].lower_bound <= last_measurement
+            and state_ranges[CRITICAL_UPPER].upper_bound >= last_measurement
+        ):
             current_state = CRITICAL_UPPER
 
-        elif (state_ranges[PRECARIOUS_UPPER].lower_bound <= last_measurement and
-            state_ranges[PRECARIOUS_UPPER].upper_bound >= last_measurement):
+        elif (
+            state_ranges[PRECARIOUS_UPPER].lower_bound <= last_measurement
+            and state_ranges[PRECARIOUS_UPPER].upper_bound >= last_measurement
+        ):
             current_state = PRECARIOUS_UPPER
 
-        elif (state_ranges[NORMAL].lower_bound <= last_measurement and
-            state_ranges[NORMAL].upper_bound >= last_measurement):
+        elif (
+            state_ranges[NORMAL].lower_bound <= last_measurement
+            and state_ranges[NORMAL].upper_bound >= last_measurement
+        ):
             current_state = NORMAL
 
-        elif (state_ranges[PRECARIOUS_LOWER].lower_bound <= last_measurement and
-            state_ranges[PRECARIOUS_LOWER].upper_bound >= last_measurement):
+        elif (
+            state_ranges[PRECARIOUS_LOWER].lower_bound <= last_measurement
+            and state_ranges[PRECARIOUS_LOWER].upper_bound >= last_measurement
+        ):
             current_state = PRECARIOUS_LOWER
 
-        elif (state_ranges[CRITICAL_LOWER].lower_bound <= last_measurement and
-            state_ranges[CRITICAL_LOWER].upper_bound >= last_measurement):
+        elif (
+            state_ranges[CRITICAL_LOWER].lower_bound <= last_measurement
+            and state_ranges[CRITICAL_LOWER].upper_bound >= last_measurement
+        ):
             current_state = CRITICAL_LOWER
 
-        elif (state_ranges[PHASE_DOWN].lower_bound <= last_measurement and
-            state_ranges[PHASE_DOWN].upper_bound >= last_measurement):
+        elif (
+            state_ranges[PHASE_DOWN].lower_bound <= last_measurement
+            and state_ranges[PHASE_DOWN].upper_bound >= last_measurement
+        ):
             current_state = PHASE_DOWN
 
         self.last_voltage_state_transition = (previous_state, current_state)
@@ -147,44 +164,43 @@ class VoltageEventDebouncer():
         state_ranges: Dict[str, VoltageBounds] = dict()
 
         state_ranges[VoltageState.CRITICAL_UPPER.value] = VoltageBounds(
-            upper_bound=float('inf'),
-            lower_bound=self.critical_upper_voltage
+            upper_bound=float("inf"),
+            lower_bound=self.critical_upper_voltage,
         )
 
         state_ranges[VoltageState.PRECARIOUS_UPPER.value] = VoltageBounds(
             upper_bound=self.critical_upper_voltage,
-            lower_bound=self.precarious_upper_voltage
+            lower_bound=self.precarious_upper_voltage,
         )
 
         state_ranges[VoltageState.NORMAL.value] = VoltageBounds(
             upper_bound=self.precarious_upper_voltage,
-            lower_bound=self.precarious_lower_voltage
+            lower_bound=self.precarious_lower_voltage,
         )
 
         state_ranges[VoltageState.PRECARIOUS_LOWER.value] = VoltageBounds(
             upper_bound=self.precarious_lower_voltage,
-            lower_bound=self.critical_lower_voltage
+            lower_bound=self.critical_lower_voltage,
         )
 
         state_ranges[VoltageState.CRITICAL_LOWER.value] = VoltageBounds(
             upper_bound=self.critical_lower_voltage,
-            lower_bound=self.phase_down_voltage
+            lower_bound=self.phase_down_voltage,
         )
 
         state_ranges[VoltageState.PHASE_DOWN.value] = VoltageBounds(
             upper_bound=self.phase_down_voltage,
-            lower_bound=float('-inf')
+            lower_bound=float("-inf"),
         )
 
         # hysteresis applied to the current phase bounds
         hysteresis_rate = VoltageEventDebouncer.HYSTERESIS_RATE
         current_voltage_state = self.current_voltage_state
 
-        state_ranges[current_voltage_state].upper_bound *= (1 + hysteresis_rate)
-        state_ranges[current_voltage_state].lower_bound *= (1 - hysteresis_rate)
+        state_ranges[current_voltage_state].upper_bound *= 1 + hysteresis_rate
+        state_ranges[current_voltage_state].lower_bound *= 1 - hysteresis_rate
 
         return state_ranges
-
 
     @staticmethod
     def get_target_event_class(event_state):
@@ -204,17 +220,20 @@ class VoltageEventDebouncer():
             so this function return None
 
         """
-        from events.models import (CriticalVoltageEvent, PrecariousVoltageEvent,
-                                   PhaseDropEvent)
+        from events.models import (
+            CriticalVoltageEvent,
+            PrecariousVoltageEvent,
+            PhaseDropEvent,
+        )
 
         critical_event_states = [
             VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER,
-            VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER
+            VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER,
         ]
 
         precarious_event_states = [
             VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER,
-            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER
+            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER,
         ]
 
         if event_state in critical_event_states:
@@ -225,7 +244,6 @@ class VoltageEventDebouncer():
             return PhaseDropEvent
         else:  # Does nothing when its normal state
             return None
-
 
     def finish_transductor_event(self, transductor, event_type_class):
         """
@@ -269,7 +287,11 @@ class VoltageEventDebouncer():
             return
 
         if not last_event.data:
-            last_event.data = {'voltage_a': None, 'voltage_b': None, 'voltage_c': None}
+            last_event.data = {
+                "voltage_a": None,
+                "voltage_b": None,
+                "voltage_c": None,
+            }
 
         # when set to None, it is because the event is no longer happening at this phase
         last_event.data[self.measurement_phase] = None
@@ -294,7 +316,7 @@ class VoltageEventDebouncer():
 
         transductor_voltage_state = TransductorVoltageState.objects.get(
             transductor=transductor,
-            phase=self.measurement_phase
+            phase=self.measurement_phase,
         )
 
         transductor_voltage_state.current_voltage_state = self.current_voltage_state
@@ -308,11 +330,15 @@ class VoltageEventDebouncer():
         # Create the event first
         if previous_state != current_state:
             event = event_type_class.objects.create(transductor=transductor)
-        else: # get a existing event
+        else:  # get a existing event
             event = event_type_class.objects.filter(transductor=transductor).last()
 
         if event:
-            data = {'voltage_a': None, 'voltage_b': None, 'voltage_c': None}
+            data = {
+                "voltage_a": None,
+                "voltage_b": None,
+                "voltage_c": None,
+            }
             data[self.measurement_phase] = self.last_measurement
             event.data = data
             event.save()

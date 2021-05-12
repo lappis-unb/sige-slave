@@ -6,52 +6,52 @@ from .utils import perform_all_data_collection, perform_all_data_rescue
 class MinutelyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.MinutelyCollectCronJob'
+    code = "data_reader.cronjob.MinutelyCollectCronJob"
 
     def do(self):
-        perform_all_data_collection('Minutely')
+        perform_all_data_collection("Minutely")
 
 
 class QuarterlyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.QuarterlyCollectCronJob'
+    code = "data_reader.cronjob.QuarterlyCollectCronJob"
 
     def do(self):
-        perform_all_data_collection('Quarterly')
+        perform_all_data_collection("Quarterly")
 
 
 class MonthlyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.MonthlyCollectCronJob'
+    code = "data_reader.cronjob.MonthlyCollectCronJob"
 
     def do(self):
-        perform_all_data_collection('Monthly')
+        perform_all_data_collection("Monthly")
 
 
 class MinutelyDataRescueCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.MinutelyDataRescueCronJob'
+    code = "data_reader.cronjob.MinutelyDataRescueCronJob"
 
     def do(self):
-        perform_all_data_rescue('Minutely')
+        perform_all_data_rescue("Minutely")
 
 
 class QuarterlyDataRescueCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.QuarterlyDataRescueCronJob'
+    code = "data_reader.cronjob.QuarterlyDataRescueCronJob"
 
     def do(self):
-        perform_all_data_rescue('Quarterly')
+        perform_all_data_rescue("Quarterly")
 
 
 class MonthlyDataRescueCronJob(CronJobBase):
     RUN_EVERY_MINS = 0
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-    code = 'data_reader.cronjob.MonthlyDataRescueCronJob'
+    code = "data_reader.cronjob.MonthlyDataRescueCronJob"
 
     def do(self):
-        perform_all_data_rescue('Monthly')
+        perform_all_data_rescue("Monthly")

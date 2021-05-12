@@ -3,23 +3,31 @@ from rest_framework.response import Response
 
 from transductor.models import EnergyTransductor
 
-from .models import (CriticalVoltageEvent, FailedConnectionTransductorEvent,
-                     PhaseDropEvent, PrecariousVoltageEvent,
-                     VoltageRelatedEvent)
-from .serializers import (FailedConnectionTransductorEventSerializer,
-                          VoltageRelatedEventSerializer)
+from .models import (
+    CriticalVoltageEvent,
+    FailedConnectionTransductorEvent,
+    PhaseDropEvent,
+    PrecariousVoltageEvent,
+    VoltageRelatedEvent,
+)
+from .serializers import (
+    FailedConnectionTransductorEventSerializer,
+    VoltageRelatedEventSerializer,
+)
 
 
-class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
-                                 mixins.DestroyModelMixin,
-                                 mixins.ListModelMixin,
-                                 viewsets.GenericViewSet):
+class VoltageRelatedEventViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = VoltageRelatedEventSerializer
     queryset = VoltageRelatedEvent.objects.none()
     models = {
-        'CriticalVoltageEvent': CriticalVoltageEvent,
-        'PrecariousVoltageEvent': PrecariousVoltageEvent,
-        'PhaseDropEvent': PhaseDropEvent
+        "CriticalVoltageEvent": CriticalVoltageEvent,
+        "PrecariousVoltageEvent": PrecariousVoltageEvent,
+        "PhaseDropEvent": PhaseDropEvent,
     }
 
     def list(self, request):
@@ -36,23 +44,25 @@ class VoltageRelatedEventViewSet(mixins.RetrieveModelMixin,
 
                 if last_event:
                     data = {}
-                    data['data'] = {}
+                    data["data"] = {}
                     for measure in last_event.data.keys():
-                        data['data'][measure] = last_event.data[measure]
+                        data["data"][measure] = last_event.data[measure]
 
-                    data['ip_address'] = last_event.transductor.ip_address
-                    data['created_at'] = last_event.created_at
-                    data['ended_at'] = last_event.ended_at
-                    data['type'] = last_event.__class__.__name__
+                    data["ip_address"] = last_event.transductor.ip_address
+                    data["created_at"] = last_event.created_at
+                    data["ended_at"] = last_event.ended_at
+                    data["type"] = last_event.__class__.__name__
                     events.append(data)
 
         return Response(events, status=200)
 
 
-class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
-                                              mixins.DestroyModelMixin,
-                                              mixins.ListModelMixin,
-                                              viewsets.GenericViewSet):
+class FailedConnectionTransductorEventViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = FailedConnectionTransductorEventSerializer
     queryset = FailedConnectionTransductorEvent.objects.none()
 
@@ -68,11 +78,11 @@ class FailedConnectionTransductorEventViewSet(mixins.RetrieveModelMixin,
 
             if last_event:
                 data = {}
-                data['data'] = last_event.data
-                data['ip_address'] = last_event.transductor.ip_address
-                data['created_at'] = last_event.created_at
-                data['ended_at'] = last_event.ended_at
-                data['type'] = last_event.__class__.__name__
+                data["data"] = last_event.data
+                data["ip_address"] = last_event.transductor.ip_address
+                data["created_at"] = last_event.created_at
+                data["ended_at"] = last_event.ended_at
+                data["type"] = last_event.__class__.__name__
                 events.append(data)
 
         return Response(events, status=200)

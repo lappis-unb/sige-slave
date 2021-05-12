@@ -1,4 +1,3 @@
-
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
@@ -11,6 +10,7 @@ class Event(PolymorphicModel):
     """
     Defines a new event object
     """
+
     created_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(null=True, blank=True)
     transductor = models.ForeignKey(
@@ -18,12 +18,12 @@ class Event(PolymorphicModel):
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
-        null=False
+        null=False,
     )
     data = JSONField(default=dict)
 
     def __str__(self):
-        return '%s@%s' % (self.__class__.__name__, self.created_at)
+        return "%s@%s" % (self.__class__.__name__, self.created_at)
 
     def save_event(self):
         """
@@ -40,7 +40,7 @@ class VoltageRelatedEvent(Event):
     non_polymorphic = models.Manager()
 
     class Meta:
-        base_manager_name = 'non_polymorphic'
+        base_manager_name = "non_polymorphic"
 
     def save_event(self, transductor, list_data=[]):
         self.transductor = transductor

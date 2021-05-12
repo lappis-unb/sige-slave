@@ -15,6 +15,7 @@ class Measurement(models.Model):
         collection_date (datetime): The exactly collection time.
 
     """
+
     slave_collection_date = models.DateTimeField(default=timezone.now)
     transductor_collection_date = models.DateTimeField(default=timezone.now)
 
@@ -23,7 +24,7 @@ class Measurement(models.Model):
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
         blank=False,
-        null=False
+        null=False,
     )
 
     class Meta:
@@ -57,170 +58,54 @@ class Measurement(models.Model):
 
 class MinutelyMeasurement(Measurement):
     class Meta:
-        default_related_name = 'minutely_measurements'
+        default_related_name = "minutely_measurements"
 
     def __str__(self):
-        return '%s' % self.transductor_collection_date
+        return "%s" % self.transductor_collection_date
 
-    frequency_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    frequency_a = models.FloatField(default=None, null=True, blank=True)
 
-    voltage_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    voltage_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    voltage_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    voltage_a = models.FloatField(default=None, null=True, blank=True)
+    voltage_b = models.FloatField(default=None, null=True, blank=True)
+    voltage_c = models.FloatField(default=None, null=True, blank=True)
 
-    current_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    current_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    current_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    current_a = models.FloatField(default=None, null=True, blank=True)
+    current_b = models.FloatField(default=None, null=True, blank=True)
+    current_c = models.FloatField(default=None, null=True, blank=True)
 
-    active_power_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    active_power_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    active_power_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    total_active_power = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    active_power_a = models.FloatField(default=None, null=True, blank=True)
+    active_power_b = models.FloatField(default=None, null=True, blank=True)
+    active_power_c = models.FloatField(default=None, null=True, blank=True)
+    total_active_power = models.FloatField(default=None, null=True, blank=True)
 
-    reactive_power_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    reactive_power_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    reactive_power_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    total_reactive_power = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    reactive_power_a = models.FloatField(default=None, null=True, blank=True)
+    reactive_power_b = models.FloatField(default=None, null=True, blank=True)
+    reactive_power_c = models.FloatField(default=None, null=True, blank=True)
+    total_reactive_power = models.FloatField(default=None, null=True, blank=True)
 
-    apparent_power_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    apparent_power_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    apparent_power_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    total_apparent_power = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    apparent_power_a = models.FloatField(default=None, null=True, blank=True)
+    apparent_power_b = models.FloatField(default=None, null=True, blank=True)
+    apparent_power_c = models.FloatField(default=None, null=True, blank=True)
+    total_apparent_power = models.FloatField(default=None, null=True, blank=True)
 
-    power_factor_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    power_factor_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    power_factor_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    total_power_factor = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    power_factor_a = models.FloatField(default=None, null=True, blank=True)
+    power_factor_b = models.FloatField(default=None, null=True, blank=True)
+    power_factor_c = models.FloatField(default=None, null=True, blank=True)
+    total_power_factor = models.FloatField(default=None, null=True, blank=True)
 
-    dht_voltage_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    dht_voltage_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    dht_voltage_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    dht_voltage_a = models.FloatField(default=None, null=True, blank=True)
+    dht_voltage_b = models.FloatField(default=None, null=True, blank=True)
+    dht_voltage_c = models.FloatField(default=None, null=True, blank=True)
 
-    dht_current_a = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    dht_current_b = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    dht_current_c = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    dht_current_a = models.FloatField(default=None, null=True, blank=True)
+    dht_current_b = models.FloatField(default=None, null=True, blank=True)
+    dht_current_c = models.FloatField(default=None, null=True, blank=True)
 
     def check_measurements(self):
         measurements = [
-            ['voltage_a', self.voltage_a],
-            ['voltage_b', self.voltage_b],
-            ['voltage_c', self.voltage_c]
+            ["voltage_a", self.voltage_a],
+            ["voltage_b", self.voltage_b],
+            ["voltage_c", self.voltage_c],
         ]
 
         for measurement_phase, measurements_value in measurements:
@@ -240,43 +125,25 @@ class MinutelyMeasurement(Measurement):
 
 class QuarterlyMeasurement(Measurement):
     def __str__(self):
-        return '%s' % self.transductor_collection_date
+        return "%s" % self.transductor_collection_date
 
-    generated_energy_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+    generated_energy_peak_time = models.FloatField(default=None, null=True, blank=True)
     generated_energy_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+        default=None, null=True, blank=True
+    )
 
-    consumption_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
-    consumption_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+    consumption_peak_time = models.FloatField(default=None, null=True, blank=True)
+    consumption_off_peak_time = models.FloatField(default=None, null=True, blank=True)
 
-    inductive_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+    inductive_power_peak_time = models.FloatField(default=None, null=True, blank=True)
     inductive_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+        default=None, null=True, blank=True
+    )
 
-    capacitive_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+    capacitive_power_peak_time = models.FloatField(default=None, null=True, blank=True)
     capacitive_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True)
+        default=None, null=True, blank=True
+    )
 
     # TODO
     def check_measurements(self):
@@ -287,128 +154,67 @@ class QuarterlyMeasurement(Measurement):
 
 
 class MonthlyMeasurement(Measurement):
-
     def __str__(self):
-        return '%s' % self.transductor_collection_date
+        return "%s" % self.transductor_collection_date
 
-    generated_energy_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    generated_energy_peak_time = models.FloatField(default=None, null=True, blank=True)
     generated_energy_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
 
-    consumption_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
-    consumption_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    consumption_peak_time = models.FloatField(default=None, null=True, blank=True)
+    consumption_off_peak_time = models.FloatField(default=None, null=True, blank=True)
 
-    inductive_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    inductive_power_peak_time = models.FloatField(default=None, null=True, blank=True)
     inductive_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
 
-    capacitive_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    capacitive_power_peak_time = models.FloatField(default=None, null=True, blank=True)
     capacitive_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
 
-    active_max_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
-    )
+    active_max_power_peak_time = models.FloatField(default=None, null=True, blank=True)
     active_max_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
 
     reactive_max_power_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
     reactive_max_power_off_peak_time = models.FloatField(
-        default=None,
-        null=True,
-        blank=True
+        default=None, null=True, blank=True
     )
 
     active_max_power_list_peak = ArrayField(
-        models.FloatField(),
-        default=None,
-        null=True,
-        blank=True
+        models.FloatField(), default=None, null=True, blank=True
     )
     active_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(),
-        default=None,
-        null=True,
-        blank=True
+        models.DateTimeField(), default=None, null=True, blank=True
     )
 
     active_max_power_list_off_peak = ArrayField(
-        models.FloatField(),
-        default=None,
-        null=True,
-        blank=True
+        models.FloatField(), default=None, null=True, blank=True
     )
 
     active_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(),
-        default=None,
-        null=True,
-        blank=True
+        models.DateTimeField(), default=None, null=True, blank=True
     )
 
     reactive_max_power_list_peak = ArrayField(
-        models.FloatField(),
-        default=None,
-        null=True,
-        blank=True
+        models.FloatField(), default=None, null=True, blank=True
     )
 
     reactive_max_power_list_peak_time = ArrayField(
-        models.DateTimeField(),
-        default=None,
-        null=True,
-        blank=True
+        models.DateTimeField(), default=None, null=True, blank=True
     )
 
     reactive_max_power_list_off_peak = ArrayField(
-        models.FloatField(),
-        default=None,
-        null=True,
-        blank=True
+        models.FloatField(), default=None, null=True, blank=True
     )
     reactive_max_power_list_off_peak_time = ArrayField(
-        models.DateTimeField(),
-        default=None,
-        null=True,
-        blank=True
+        models.DateTimeField(), default=None, null=True, blank=True
     )
 
     # TODO
@@ -434,16 +240,13 @@ class MonthlyMeasurement(Measurement):
                     values_list[initial_date_position][0 + i],
                     values_list[initial_date_position][1 + i],
                     values_list[initial_date_position + 1][0 + i],
-                    values_list[initial_date_position + 1][1 + i]
+                    values_list[initial_date_position + 1][1 + i],
                 )
             else:
                 value_result = values_list[value + count]
                 timestamp = timezone.datetime(1900, 1, 1, 1, 1)
 
-            dict = {
-                'value': value_result,
-                'timestamp': timestamp
-            }
+            dict = {"value": value_result, "timestamp": timestamp}
             count += 1
             max_power_list.append(dict)
         return max_power_list

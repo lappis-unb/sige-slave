@@ -15,8 +15,8 @@ import os
 import environ
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-LOG_PATH = os.path.join(BASE_DIR, 'logs')
-ENVFILE_PATH = os.path.join(BASE_DIR, 'dev-env')
+LOG_PATH = os.path.join(BASE_DIR, "logs")
+ENVFILE_PATH = os.path.join(BASE_DIR, "dev-env")
 
 env = environ.Env()
 env.read_env(ENVFILE_PATH)
@@ -25,66 +25,66 @@ env.read_env(ENVFILE_PATH)
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SLAVE_SECRET_KEY')
+SECRET_KEY = env("SLAVE_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if env('ENVIRONMENT') == 'production':
+if env("ENVIRONMENT") == "production":
     DEBUG = False
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = [env('ALLOWED_HOSTS')]
+ALLOWED_HOSTS = [env("ALLOWED_HOSTS")]
 
 # Application definition
 DJANGO_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.messages',
-    'django.contrib.postgres',
-    'django.contrib.sessions',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.messages",
+    "django.contrib.postgres",
+    "django.contrib.sessions",
+    "django.contrib.staticfiles",
 ]
 
 EXTERNAL_APPS = [
-    'django_cron',
-    'polymorphic',
-    'rest_framework',
+    "django_cron",
+    "polymorphic",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
-    'events',
-    'transductor',
-    'measurement',
-    'transductor_model',
-    'debouncers',
+    "events",
+    "transductor",
+    "measurement",
+    "transductor_model",
+    "debouncers",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'smi.urls'
+ROOT_URLCONF = "smi.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -97,18 +97,16 @@ CRON_CLASSES = [
     "data_reader.cronjob.MinutelyCollectCronJob",
     "data_reader.cronjob.QuarterlyCollectCronJob",
     "data_reader.cronjob.MonthlyCollectCronJob",
-
     ## RescueCronJobs
     "data_reader.cronjob.MinutelyDataRescueCronJob",
     "data_reader.cronjob.QuarterlyDataRescueCronJob",
     "data_reader.cronjob.MonthlyDataRescueCronJob",
-
     # Others CronJobs
     # "data_reader.cronjob.CorrectDateCronJob", dont exists
 ]
 
 # delete django-cron logs older than 90 days
-DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90 #days
+DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90  # days
 # ALLOW_PARALLEL_RUNS = False
 
 ### end django-cron configuration
@@ -121,20 +119,20 @@ DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90 #days
 # }
 
 
-WSGI_APPLICATION = 'smi.wsgi.application'
+WSGI_APPLICATION = "smi.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('POSTGRES_DB'),
-        'USER': env('POSTGRES_USER'),
-        'PASSWORD': env('POSTGRES_PASSWORD'),
-        'HOST': env('POSTGRES_HOST'),
-        'PORT': env('POSTGRES_PORT')
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": env("POSTGRES_DB"),
+        "USER": env("POSTGRES_USER"),
+        "PASSWORD": env("POSTGRES_PASSWORD"),
+        "HOST": env("POSTGRES_HOST"),
+        "PORT": env("POSTGRES_PORT"),
     }
 }
 
@@ -142,21 +140,23 @@ DATABASES = {
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': ('django.contrib.auth.password_validation'
-              '.UserAttributeSimilarityValidator')},  # noqa
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': ('django.contrib.auth.password_validation'
-              '.CommonPasswordValidator')},
-    {'NAME': ('django.contrib.auth.password_validation'
-              '.NumericPasswordValidator')}
+    {
+        "NAME": (
+            "django.contrib.auth.password_validation"
+            ".UserAttributeSimilarityValidator"
+        )
+    },  # noqa
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": ("django.contrib.auth.password_validation" ".CommonPasswordValidator")},
+    {"NAME": ("django.contrib.auth.password_validation" ".NumericPasswordValidator")},
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = "pt-br"
 
-TIME_ZONE = 'America/Sao_Paulo'
+TIME_ZONE = "America/Sao_Paulo"
 
 USE_I18N = True
 
@@ -165,8 +165,8 @@ USE_L10N = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 
 ## BUSINESS LOGIC VARIABLES
-CONTRACTED_VOLTAGE = float(os.getenv('CONTRACTED_VOLTAGE', 220))
+CONTRACTED_VOLTAGE = float(os.getenv("CONTRACTED_VOLTAGE", 220))
