@@ -14,12 +14,12 @@ import os
 
 import environ
 
-env = environ.Env()
-env.read_env('dev-env')
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_PATH = os.path.join(BASE_DIR, 'logs')
+ENVFILE_PATH = os.path.join(BASE_DIR, 'dev-env')
+
+env = environ.Env()
+env.read_env(ENVFILE_PATH)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -57,6 +57,7 @@ LOCAL_APPS = [
     'transductor',
     'measurement',
     'transductor_model',
+    'debouncers',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + LOCAL_APPS
@@ -89,15 +90,35 @@ TEMPLATES = [
     },
 ]
 
+### django-cron configuration
+
 CRON_CLASSES = [
-    "data_reader.cronjob.MinutelyDataRescueCronJob",
-    "data_reader.cronjob.QuarterlyDataRescueCronJob",
-    "data_reader.cronjob.MonthlyDataRescueCronJob",
+    ## CollectCronJobs
     "data_reader.cronjob.MinutelyCollectCronJob",
     "data_reader.cronjob.QuarterlyCollectCronJob",
     "data_reader.cronjob.MonthlyCollectCronJob",
+
+    ## RescueCronJobs
+    "data_reader.cronjob.MinutelyDataRescueCronJob",
+    "data_reader.cronjob.QuarterlyDataRescueCronJob",
+    "data_reader.cronjob.MonthlyDataRescueCronJob",
+
+    # Others CronJobs
     # "data_reader.cronjob.CorrectDateCronJob", dont exists
 ]
+
+# delete django-cron logs older than 90 days
+DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90 #days
+# ALLOW_PARALLEL_RUNS = False
+
+### end django-cron configuration
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+#         'LOCATION': '/var/tmp/django_cache',
+#     }
+# }
 
 
 WSGI_APPLICATION = 'smi.wsgi.application'
@@ -145,3 +166,7 @@ USE_L10N = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+## BUSINESS LOGIC VARIABLES
+CONTRACTED_VOLTAGE = float(os.getenv('CONTRACTED_VOLTAGE', 220))
