@@ -1,6 +1,4 @@
-import os
-
-from django.conf import settings
+from debouncers.debouncers import VoltageEventDebouncer
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
@@ -17,7 +15,6 @@ class Measurement(models.Model):
         collection_date (datetime): The exactly collection time.
 
     """
-    settings.USE_TZ = False
     slave_collection_date = models.DateTimeField(default=timezone.now)
     transductor_collection_date = models.DateTimeField(default=timezone.now)
 
@@ -59,6 +56,8 @@ class Measurement(models.Model):
 
 
 class MinutelyMeasurement(Measurement):
+    class Meta:
+        default_related_name = 'minutely_measurements'
 
     def __str__(self):
         return '%s' % self.transductor_collection_date
@@ -218,52 +217,25 @@ class MinutelyMeasurement(Measurement):
     )
 
     def check_measurements(self):
-        # Voltage Parameters
-        used_voltage = float(os.getenv('CONTRACTED_VOLTAGE'))
-        precary_lower_boundary = used_voltage * 0.91
-        precary_upper_boundary = used_voltage * 1.04
-        critical_lower_boundary = used_voltage * 0.86
-        critical_upper_boundary = used_voltage * 1.06
-
-        # shortened validations for the if statement
         measurements = [
             ['voltage_a', self.voltage_a],
             ['voltage_b', self.voltage_b],
             ['voltage_c', self.voltage_c]
         ]
 
-        # List of Debouncers for each Phase
-        from events.models import VoltageEventDebouncer
-        debouncers = [
-            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
-                                                        'voltage_a'),
-            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
-                                                        'voltage_b'),
-            VoltageEventDebouncer.get_voltage_debouncer(self.transductor,
-                                                        'voltage_c'),
-        ]
+        for measurement_phase, measurements_value in measurements:
+            transductor: EnergyTransductor = self.transductor
 
-        # Add new measurements in each debouncer (debouncer per phase)
-        for i in range(len(debouncers)):
-            debouncers[i].add_new_measurement(measurements[i][0],
-                                              measurements[i][1])
-            debouncers[i].raise_event(self.transductor)
+            debouncer: VoltageEventDebouncer
+            debouncer = transductor.get_voltage_debouncer(measurement_phase)
 
-    def reset_debouncers(self):
-        from events.models import VoltageEventDebouncer
-        debouncer_a = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_a')
-        debouncer_a.reset()
-        debouncer_b = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_b')
-        debouncer_b.reset()
-        debouncer_c = VoltageEventDebouncer.get_voltage_debouncer(
-            self.transductor, 'voltage_c')
-        debouncer_c.reset()
+            voltage_state_transition = debouncer.add_new_measurement(measurements_value)
 
-    def reset_events(self):
-        from events.models import RaisedVoltageEventData
-        RaisedVoltageEventData.reset_transductor_events(self.transductor)
+            transductor.check_voltage_events(
+                voltage_state_transition,
+                measurement_phase,
+                measurements_value,
+            )
 
 
 class QuarterlyMeasurement(Measurement):
