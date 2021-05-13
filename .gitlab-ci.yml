@@ -42,7 +42,8 @@ test:
 stylesheet:
   stage: test
   script:
-    - pycodestyle .
+    - black --check .
+    - isort --check-only --skip migrations  --profile black .
 
 code_quality:
   stage: test
