@@ -1,6 +1,5 @@
-from typing import Callable, Dict, List, Optional, Tuple, Union
 from datetime import datetime
-from transductor.models import EnergyTransductor
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from django.utils import timezone
 
@@ -9,6 +8,7 @@ from measurement.models import (
     MonthlyMeasurement,
     QuarterlyMeasurement,
 )
+from transductor.models import EnergyTransductor
 from utils import is_datetime_similar
 
 

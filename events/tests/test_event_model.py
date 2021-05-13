@@ -9,7 +9,6 @@ from events.models import (
     PrecariousVoltageEvent,
     VoltageRelatedEvent,
 )
-
 from measurement.models import MinutelyMeasurement
 from transductor.models import EnergyTransductor
 

@@ -1,11 +1,12 @@
 import datetime
-
-from debouncers.data_classes import VoltageState
-from debouncers.debouncers import VoltageEventDebouncer
 from typing import List, Tuple
+
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+
+from debouncers.data_classes import VoltageState
+from debouncers.debouncers import VoltageEventDebouncer
 from utils import is_datetime_similar
 
 

@@ -1,8 +1,8 @@
-from debouncers.debouncers import VoltageEventDebouncer
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.utils import timezone
 
+from debouncers.debouncers import VoltageEventDebouncer
 from transductor.models import EnergyTransductor
 
 

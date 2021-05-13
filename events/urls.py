@@ -1,8 +1,6 @@
 from rest_framework import routers
 
-from .views import VoltageRelatedEventViewSet
-from .views import FailedConnectionTransductorEventViewSet
-
+from .views import FailedConnectionTransductorEventViewSet, VoltageRelatedEventViewSet
 
 app_name = "events"
 

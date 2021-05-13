@@ -1,7 +1,8 @@
-from django.utils import timezone
 import statistics
-from django.conf import settings
 from typing import Dict, Optional, Tuple
+
+from django.conf import settings
+from django.utils import timezone
 
 from .data_classes import VoltageBounds, VoltageState
 
@@ -222,8 +223,8 @@ class VoltageEventDebouncer:
         """
         from events.models import (
             CriticalVoltageEvent,
-            PrecariousVoltageEvent,
             PhaseDropEvent,
+            PrecariousVoltageEvent,
         )
 
         critical_event_states = [

@@ -1,9 +1,8 @@
+import os
+import pickle
+import queue
 import socket
 import threading
-import queue
-import pickle
-import time
-import os
 
 # message from slave format
 # {

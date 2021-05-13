@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Event, CriticalVoltageEvent, PrecariousVoltageEvent, PhaseDropEvent
+from .models import CriticalVoltageEvent, Event, PhaseDropEvent, PrecariousVoltageEvent
 
 
 @admin.register(Event)

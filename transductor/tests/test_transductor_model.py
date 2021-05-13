@@ -4,13 +4,13 @@ from django.db import IntegrityError
 from django.db.utils import DataError
 from django.test import TestCase
 
+from events.models import FailedConnectionTransductorEvent
 from measurement.models import (
     MinutelyMeasurement,
     MonthlyMeasurement,
     QuarterlyMeasurement,
 )
 from transductor.models import EnergyTransductor
-from events.models import FailedConnectionTransductorEvent
 
 
 class TransductorTestCase(TestCase):

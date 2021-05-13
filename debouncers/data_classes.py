@@ -1,5 +1,5 @@
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 
 
 class VoltageState(Enum):
@@ -31,8 +31,8 @@ class VoltageState(Enum):
         """
         from events.models import (
             CriticalVoltageEvent,
-            PrecariousVoltageEvent,
             PhaseDropEvent,
+            PrecariousVoltageEvent,
         )
 
         m = {

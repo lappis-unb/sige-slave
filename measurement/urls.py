@@ -7,7 +7,6 @@ from .views import (
     RealTimeMeasurementViewSet,
 )
 
-
 app_name = "minutely_measurements"
 
 router = routers.DefaultRouter()
