@@ -16,7 +16,7 @@ from transductor.models import EnergyTransductor
 
 class EventTestCase(TestCase):
     def setUp(self):
-        self.transductor1 = EnergyTransductor.objects.create(
+        self.transductor = EnergyTransductor.objects.create(
             serial_number="8764321",
             ip_address="111.101.111.11",
             broken=False,
@@ -41,10 +41,26 @@ class EventTestCase(TestCase):
             installation_date=datetime.now(),
         )
 
+    def test_event_behavior(self):
+        event = Event.objects.create(transductor=self.transductor)
+
+        self.assertIsNotNone(
+            event.created_at,
+            msg="An event was created with a start date set to None.",
+        )
+
+        self.assertIsNone(
+            event.ended_at,
+            msg=(
+                "A connection failure event has been created with an end date other "
+                "than None."
+            )
+        )
+
     def test_connection_event_behavior(self):
         size_before = len(FailedConnectionTransductorEvent.objects.all())
 
-        self.transductor1.set_broken(True)
+        self.transductor.set_broken(True)
 
         size_after = len(FailedConnectionTransductorEvent.objects.all())
 
@@ -60,7 +76,7 @@ class EventTestCase(TestCase):
         event: Event = FailedConnectionTransductorEvent.objects.last()
 
         self.assertEqual(
-            first=self.transductor1.ip_address,
+            first=self.transductor.ip_address,
             second=event.transductor.ip_address,
             msg=(
                 "The communication failure event created has an IP address different "
@@ -76,11 +92,11 @@ class EventTestCase(TestCase):
             )
         )
 
-        self.transductor1.set_broken(False)
+        self.transductor.set_broken(False)
 
         event = FailedConnectionTransductorEvent.objects.last()
 
-        self.assertIsNone(
+        self.assertIsNotNone(
             event.ended_at,
             msg=(
                 "The broken attribute has been toggled to False and the associated "
