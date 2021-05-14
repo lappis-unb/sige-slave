@@ -25,12 +25,6 @@ class Event(PolymorphicModel):
     def __str__(self):
         return "%s@%s" % (self.__class__.__name__, self.created_at)
 
-    def save_event(self):
-        """
-        Saves the event.
-        """
-        raise NotImplementedError
-
 
 class VoltageRelatedEvent(Event):
     """
@@ -41,16 +35,6 @@ class VoltageRelatedEvent(Event):
 
     class Meta:
         base_manager_name = "non_polymorphic"
-
-    def save_event(self, transductor, list_data=[]):
-        self.transductor = transductor
-        self.data = dict()
-
-        for phase in list_data:
-            self.data[phase[0]] = phase[1]
-
-        self.save()
-        return self
 
     def all_phases_are_none(self):
         for phase_name, phase_value in self.data.items():
@@ -63,12 +47,6 @@ class FailedConnectionTransductorEvent(Event):
     """
     Defines a new event related to a failed connection with a transductor
     """
-
-    def save_event(self, transductor, list_data=[]):
-        self.transductor = transductor
-        self.data = dict()
-        self.save()
-        return self
 
 
 class CriticalVoltageEvent(VoltageRelatedEvent):
