@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from events.models import (
     CriticalVoltageEvent,
+    Event,
     FailedConnectionTransductorEvent,
     PhaseDropEvent,
     PrecariousVoltageEvent,
@@ -40,18 +41,51 @@ class EventTestCase(TestCase):
             installation_date=datetime.now(),
         )
 
-    def test_create_failed_connection_event(self):
-        before = len(FailedConnectionTransductorEvent.objects.all())
+    def test_connection_event_behavior(self):
+        size_before = len(FailedConnectionTransductorEvent.objects.all())
 
         self.transductor1.set_broken(True)
-        event = FailedConnectionTransductorEvent.objects.last()
+
+        size_after = len(FailedConnectionTransductorEvent.objects.all())
 
         self.assertEqual(
-            before + 1, len(FailedConnectionTransductorEvent.objects.all())
+            first=size_before + 1,
+            second=size_after,
+            msg=(
+                "The broken attribute has been toggled to True and a communication "
+                "failure event has not been created."
+            ),
         )
+
+        event: Event = FailedConnectionTransductorEvent.objects.last()
+
         self.assertEqual(
-            self.transductor1.ip_address,
-            event.transductor.ip_address,
+            first=self.transductor1.ip_address,
+            second=event.transductor.ip_address,
+            msg=(
+                "The communication failure event created has an IP address different "
+                "from the transducer that had the broken attribute modified."
+            )
+        )
+
+        self.assertIsNone(
+            event.ended_at,
+            msg=(
+                "A connection failure event has been created with an end date other "
+                "than None."
+            )
+        )
+
+        self.transductor1.set_broken(False)
+
+        event = FailedConnectionTransductorEvent.objects.last()
+
+        self.assertIsNone(
+            event.ended_at,
+            msg=(
+                "The broken attribute has been toggled to False and the associated "
+                "communication failure event has not been closed."
+            )
         )
 
     # def test_voltage_debouncer(self):
