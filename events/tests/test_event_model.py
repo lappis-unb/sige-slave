@@ -3,14 +3,9 @@ from datetime import datetime
 from django.test import TestCase
 
 from events.models import (
-    CriticalVoltageEvent,
     Event,
     FailedConnectionTransductorEvent,
-    PhaseDropEvent,
-    PrecariousVoltageEvent,
-    VoltageRelatedEvent,
 )
-from measurement.models import MinutelyMeasurement
 from transductor.models import EnergyTransductor
 
 
