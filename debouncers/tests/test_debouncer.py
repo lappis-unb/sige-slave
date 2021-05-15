@@ -35,10 +35,10 @@ class VoltageEventDebouncerTestCase(TestCase):
         )
 
         self.assertTrue(
-            hasattr(self.debouncer, 'last_event_state_transition'),
+            hasattr(self.debouncer, 'last_voltage_state_transition'),
             msg=(
                 "The debouncer was instantiated without the "
-                "last_event_state_transition attribute"
+                "last_voltage_state_transition attribute"
             )
         )
 
@@ -95,6 +95,55 @@ class VoltageEventDebouncerTestCase(TestCase):
                 "and a non-normal state has been defined"
             )
         )
+
+    def test_all_possible_states(self):
+        self.debouncer.add_new_measurement(measurement_value=220)
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.NORMAL.value
+        )
+
+        while self.debouncer.avg_filter >= self.debouncer.precarious_lower_voltage:
+            self.debouncer.add_new_measurement(measurement_value=190)
+
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.PRECARIOUS_LOWER.value
+        )
+
+        while self.debouncer.avg_filter >= self.debouncer.critical_lower_voltage:
+            self.debouncer.add_new_measurement(measurement_value=150)
+
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.CRITICAL_LOWER.value
+        )
+
+        while self.debouncer.avg_filter >= self.debouncer.phase_down_voltage:
+            self.debouncer.add_new_measurement(measurement_value=50)
+
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.PHASE_DOWN.value
+        )
+
+        while self.debouncer.avg_filter <= self.debouncer.precarious_upper_voltage:
+            self.debouncer.add_new_measurement(measurement_value=230)
+
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.PRECARIOUS_UPPER.value
+        )
+
+        for i in range(10):
+            self.debouncer.add_new_measurement(measurement_value=260)
+
+        self.assertEqual(
+            self.debouncer.current_voltage_state,
+            VoltageState.CRITICAL_UPPER.value
+        )
+
+
 
     def test_update_current_state(self):
         last_voltage_state_transition = self.debouncer.add_new_measurement(
