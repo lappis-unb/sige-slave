@@ -1,4 +1,10 @@
 from datetime import datetime
+from events.models import (
+    Event,
+    PrecariousVoltageEvent,
+    CriticalVoltageEvent,
+    PhaseDropEvent,
+)
 
 from django.db import IntegrityError
 from django.test import TestCase
@@ -216,6 +222,182 @@ class EnergyMeasurementTestCase(TestCase):
 
         with self.assertRaises(MinutelyMeasurement.DoesNotExist):
             MinutelyMeasurement.objects.get(total_power_factor=value).delete()
+
+    def test_check_measurements(self):
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=220,
+            voltage_b=220,
+            voltage_c=220,
+        )
+
+        # b_ -> before
+        b_event_qty = Event.objects.count()
+
+        measurement.check_measurements()
+
+        # a_ -> after
+        a_event_qty = Event.objects.count()
+
+        self.assertEqual(
+            b_event_qty,
+            a_event_qty,
+            msg="The voltage measurements created should not have created an event"
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=195,
+            voltage_b=195,
+            voltage_c=195,
+        )
+        measurement.check_measurements()
+
+        # a_ -> after
+        a_event_qty = Event.objects.count()
+
+        self.assertEqual(
+            b_event_qty+1,
+            a_event_qty,
+            msg="The voltage measurements created should have created an event"
+        )
+
+        last_event = Event.objects.last()
+
+        self.assertIsInstance(
+            last_event,
+            PrecariousVoltageEvent,
+            msg=(
+                "The event created should have been of the type "
+                "`PrecariousVoltageEvent`"
+            )
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=180,
+            voltage_b=180,
+            voltage_c=180,
+        )
+
+        measurement.check_measurements()
+
+        last_precarious_event = PrecariousVoltageEvent.objects.last()
+
+        self.assertIsNotNone(
+            last_precarious_event.ended_at,
+            msg="The last open event should have been closed after the change of state"
+        )
+
+        last_event = Event.objects.last()
+
+        self.assertIsInstance(
+            last_event,
+            CriticalVoltageEvent,
+            msg=(
+                "The event created should have been of the type "
+                "`CriticalVoltageEvent`"
+            )
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=100,
+            voltage_b=100,
+            voltage_c=100,
+        )
+
+        measurement.check_measurements()
+
+        last_critical_event = CriticalVoltageEvent.objects.last()
+
+        self.assertIsNotNone(
+            last_critical_event.ended_at,
+            msg="The last open event should have been closed after the change of state"
+        )
+
+        last_event = Event.objects.last()
+
+        self.assertIsInstance(
+            last_event,
+            PhaseDropEvent,
+            msg=(
+                "The event created should have been of the type "
+                "`PhaseDropEvent`"
+            )
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=230,
+            voltage_b=230,
+            voltage_c=230,
+        )
+
+        measurement.check_measurements()
+
+        last_phase_drop_event = PhaseDropEvent.objects.last()
+
+        self.assertIsNotNone(
+            last_phase_drop_event.ended_at,
+            msg="The last open event should have been closed after the change of state"
+        )
+
+        last_event = Event.objects.last()
+
+        self.assertIsInstance(
+            last_event,
+            PrecariousVoltageEvent,
+            msg=(
+                "The event created should have been of the type "
+                "`PrecariousVoltageEvent`"
+            )
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=250,
+            voltage_b=250,
+            voltage_c=250,
+        )
+
+        measurement.check_measurements()
+
+        last_precarious_event = PrecariousVoltageEvent.objects.last()
+
+        self.assertIsNotNone(
+            last_precarious_event.ended_at,
+            msg="The last open event should have been closed after the change of state"
+        )
+
+        last_event = Event.objects.last()
+
+        self.assertIsInstance(
+            last_event,
+            CriticalVoltageEvent,
+            msg=(
+                "The event created should have been of the type "
+                "`CriticalVoltageEvent`"
+            )
+        )
+
+        measurement = MinutelyMeasurement.objects.create(
+            transductor=self.transductor,
+            voltage_a=220,
+            voltage_b=220,
+            voltage_c=220,
+        )
+        measurement.check_measurements()
+
+        all_open_events = Event.objects.filter(ended_at=None)
+
+        self.assertTrue(
+            len(all_open_events) == 0,
+            msg=(
+                "After the last measurement, with normal values, there should be no "
+                "open events"
+            )
+        )
 
     """
     QuarterlyMeasurementTests
