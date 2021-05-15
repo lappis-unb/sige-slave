@@ -2,10 +2,7 @@ from datetime import datetime
 
 from django.test import TestCase
 
-from events.models import (
-    Event,
-    FailedConnectionTransductorEvent,
-)
+from events.models import Event, FailedConnectionTransductorEvent
 from transductor.models import EnergyTransductor
 
 

@@ -1,7 +1,7 @@
 from django.test import TestCase
 
-from debouncers.debouncers import VoltageEventDebouncer
 from debouncers.data_classes import VoltageState
+from debouncers.debouncers import VoltageEventDebouncer
 
 
 class VoltageEventDebouncerTestCase(TestCase):

@@ -1,15 +1,15 @@
 from datetime import datetime
-from events.models import (
-    Event,
-    PrecariousVoltageEvent,
-    CriticalVoltageEvent,
-    PhaseDropEvent,
-)
 
 from django.db import IntegrityError
 from django.test import TestCase
 from django.utils import timezone
 
+from events.models import (
+    CriticalVoltageEvent,
+    Event,
+    PhaseDropEvent,
+    PrecariousVoltageEvent,
+)
 from measurement.models import (
     MinutelyMeasurement,
     MonthlyMeasurement,
