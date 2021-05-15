@@ -211,65 +211,58 @@ class EnergyTransductor(Transductor):
         previous_state, current_state = voltage_state_transition
         self.update_measurement_phase_state(measurement_phase, current_state)
 
-        # if the state has not changed, no change is necessary
-        if previous_state != current_state:
-            pass
+        # If the previous state was not VoltageState.NORMAL, it means that there is
+        # an open event that needs to be closed
+        if (previous_state != VoltageState.NORMAL.value and
+            previous_state != current_state
+        ):
+            event_class = VoltageState.get_target_event_class(previous_state)
 
-        if True:
+            related_unfinished_events = event_class.objects.filter(
+                transductor=self, ended_at=None
+            )
 
-            # If the previous state was not VoltageState.NORMAL, it means that there is
-            # an open event that needs to be closed
-            if (
-                previous_state != VoltageState.NORMAL.value
-                and previous_state != current_state
-            ):
-                event_class = VoltageState.get_target_event_class(previous_state)
+            last_event = related_unfinished_events.last()
 
-                related_unfinished_events = event_class.objects.filter(
-                    transductor=self, ended_at=None
-                )
-
-                last_event = related_unfinished_events.last()
-
-                if last_event:
-                    if not last_event.data:
-                        data = {
-                            "voltage_a": None,
-                            "voltage_b": None,
-                            "voltage_c": None,
-                        }
-                        last_event.data = data
-
-                    last_event.data[measurement_phase] = None
-
-                    if last_event.all_phases_are_none():
-                        last_event.ended_at = timezone.datetime.now()
-
-                    last_event.save()
-
-                # BUG => the previous state was not normal and there is no event opened
-                else:
-                    pass
-
-            # If the current state is not VoltageState.NORMAL, it means that you need
-            # to open a new event for the current state.
-            if current_state != VoltageState.NORMAL.value:
-                event_class = VoltageState.get_target_event_class(current_state)
-
-                event, created = event_class.objects.get_or_create(
-                    transductor=self, ended_at=None
-                )
-
-                if not event.data:
+            if last_event:
+                if not last_event.data:
                     data = {
                         "voltage_a": None,
                         "voltage_b": None,
                         "voltage_c": None,
                     }
-                    event.data = data
+                    last_event.data = data
 
-                event.data[measurement_phase] = measurements_value
-                event.save()
+                last_event.data[measurement_phase] = None
+
+                if last_event.all_phases_are_none():
+                    last_event.ended_at = timezone.datetime.now()
+
+                last_event.save()
+
+            # BUG => the previous state was not normal and there is no event opened
+            else:
+                pass
+
+        # If the current state is not VoltageState.NORMAL, it means that you need
+        # to open a new event for the current state.
+        if current_state != VoltageState.NORMAL.value:
+            event_class = VoltageState.get_target_event_class(current_state)
+
+            event, created = event_class.objects.get_or_create(
+                transductor=self, ended_at=None
+            )
+
+            if not event.data:
+                data = {
+                    "voltage_a": None,
+                    "voltage_b": None,
+                    "voltage_c": None,
+                }
+                event.data = data
+
+            event.data[measurement_phase] = measurements_value
+            event.save()
 
 
 class TransductorVoltageState(models.Model):
