@@ -213,8 +213,9 @@ class EnergyTransductor(Transductor):
 
         # If the previous state was not VoltageState.NORMAL, it means that there is
         # an open event that needs to be closed
-        if (previous_state != VoltageState.NORMAL.value and
-            previous_state != current_state
+        if (
+            previous_state != VoltageState.NORMAL.value
+            and previous_state != current_state
         ):
             event_class = VoltageState.get_target_event_class(previous_state)
 

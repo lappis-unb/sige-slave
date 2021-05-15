@@ -242,7 +242,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertEqual(
             b_event_qty,
             a_event_qty,
-            msg="The voltage measurements created should not have created an event"
+            msg="The voltage measurements created should not have created an event",
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -257,9 +257,9 @@ class EnergyMeasurementTestCase(TestCase):
         a_event_qty = Event.objects.count()
 
         self.assertEqual(
-            b_event_qty+1,
+            b_event_qty + 1,
             a_event_qty,
-            msg="The voltage measurements created should have created an event"
+            msg="The voltage measurements created should have created an event",
         )
 
         last_event = Event.objects.last()
@@ -270,7 +270,7 @@ class EnergyMeasurementTestCase(TestCase):
             msg=(
                 "The event created should have been of the type "
                 "`PrecariousVoltageEvent`"
-            )
+            ),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -286,7 +286,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertIsNotNone(
             last_precarious_event.ended_at,
-            msg="The last open event should have been closed after the change of state"
+            msg="The last open event should have been closed after the change of state",
         )
 
         last_event = Event.objects.last()
@@ -297,7 +297,7 @@ class EnergyMeasurementTestCase(TestCase):
             msg=(
                 "The event created should have been of the type "
                 "`CriticalVoltageEvent`"
-            )
+            ),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -313,7 +313,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertIsNotNone(
             last_critical_event.ended_at,
-            msg="The last open event should have been closed after the change of state"
+            msg="The last open event should have been closed after the change of state",
         )
 
         last_event = Event.objects.last()
@@ -321,10 +321,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertIsInstance(
             last_event,
             PhaseDropEvent,
-            msg=(
-                "The event created should have been of the type "
-                "`PhaseDropEvent`"
-            )
+            msg=("The event created should have been of the type " "`PhaseDropEvent`"),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -340,7 +337,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertIsNotNone(
             last_phase_drop_event.ended_at,
-            msg="The last open event should have been closed after the change of state"
+            msg="The last open event should have been closed after the change of state",
         )
 
         last_event = Event.objects.last()
@@ -351,7 +348,7 @@ class EnergyMeasurementTestCase(TestCase):
             msg=(
                 "The event created should have been of the type "
                 "`PrecariousVoltageEvent`"
-            )
+            ),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -367,7 +364,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertIsNotNone(
             last_precarious_event.ended_at,
-            msg="The last open event should have been closed after the change of state"
+            msg="The last open event should have been closed after the change of state",
         )
 
         last_event = Event.objects.last()
@@ -378,7 +375,7 @@ class EnergyMeasurementTestCase(TestCase):
             msg=(
                 "The event created should have been of the type "
                 "`CriticalVoltageEvent`"
-            )
+            ),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -396,7 +393,7 @@ class EnergyMeasurementTestCase(TestCase):
             msg=(
                 "After the last measurement, with normal values, there should be no "
                 "open events"
-            )
+            ),
         )
 
     """

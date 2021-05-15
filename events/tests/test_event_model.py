@@ -49,7 +49,7 @@ class EventTestCase(TestCase):
             msg=(
                 "A connection failure event has been created with an end date other "
                 "than None."
-            )
+            ),
         )
 
     def test_connection_event_behavior(self):
@@ -76,7 +76,7 @@ class EventTestCase(TestCase):
             msg=(
                 "The communication failure event created has an IP address different "
                 "from the transducer that had the broken attribute modified."
-            )
+            ),
         )
 
         self.assertIsNone(
@@ -84,7 +84,7 @@ class EventTestCase(TestCase):
             msg=(
                 "A connection failure event has been created with an end date other "
                 "than None."
-            )
+            ),
         )
 
         self.transductor.set_broken(False)
@@ -96,5 +96,5 @@ class EventTestCase(TestCase):
             msg=(
                 "The broken attribute has been toggled to False and the associated "
                 "communication failure event has not been closed."
-            )
+            ),
         )
