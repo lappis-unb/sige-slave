@@ -24,9 +24,11 @@ class VoltageEventDebouncer:
         self,
         measurement_phase: str,
         history_size: Optional[int] = 15,
+        contracted_voltage: Optional[float] = 220,
     ):
+        if not contracted_voltage:
+            contracted_voltage = settings.CONTRACTED_VOLTAGE
 
-        contracted_voltage = settings.CONTRACTED_VOLTAGE
         PHASE_DOWN_THRESHOLD_RATE = VoltageEventDebouncer.PHASE_DOWN_THRESHOLD_RATE
 
         self.critical_upper_voltage = contracted_voltage * 1.06
@@ -49,7 +51,7 @@ class VoltageEventDebouncer:
         self.current_voltage_state = VoltageState.NORMAL.value
 
         # Holds last event status transition
-        self.last_event_state_transition = (
+        self.last_voltage_state_transition = (
             VoltageState.NORMAL.value,
             VoltageState.NORMAL.value,
         )
@@ -202,171 +204,3 @@ class VoltageEventDebouncer:
         state_ranges[current_voltage_state].lower_bound *= 1 - hysteresis_rate
 
         return state_ranges
-
-    @staticmethod
-    def get_target_event_class(event_state):
-        """
-        Obtains the event name generated in a specific state in the list of
-        available ones.
-        For example, if the event state is CriticalLower the target event name
-        should be critical.
-        The same applies if the event would be CriticalUpper.
-
-        Args:
-            event_state:  The spectif event state in the list of available ones.
-
-        Returns:
-            The target event name.
-            Note that if the event state is Normal, there are not target event
-            so this function return None
-
-        """
-        from events.models import (
-            CriticalVoltageEvent,
-            PhaseDropEvent,
-            PrecariousVoltageEvent,
-        )
-
-        critical_event_states = [
-            VoltageEventDebouncer.EVENT_STATE_CRITICAL_UPPER,
-            VoltageEventDebouncer.EVENT_STATE_CRITICAL_LOWER,
-        ]
-
-        precarious_event_states = [
-            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_UPPER,
-            VoltageEventDebouncer.EVENT_STATE_PRECARIOUS_LOWER,
-        ]
-
-        if event_state in critical_event_states:
-            return CriticalVoltageEvent
-        elif event_state in precarious_event_states:
-            return PrecariousVoltageEvent
-        elif event_state == VoltageEventDebouncer.EVENT_STATE_PHASE_DOWN:
-            return PhaseDropEvent
-        else:  # Does nothing when its normal state
-            return None
-
-    def finish_transductor_event(self, transductor, event_type_class):
-        """
-        Finishes an event related to a transductor and phase.
-        It may either finishes the event if there are no data related to it
-        (i.e. no phase currently in the event), or
-        update the active event by removing the phase that no longer active in
-        that event.
-        Args:
-            transductor: The used transductor.
-            ## TODO: FIX event_type_name: The event type it may vary from Critical,
-            Precarious or Phase Drop events.
-            measurement_phase: The phase of the finished event.
-
-        Returns:
-        """
-        from transductor.models import TransductorVoltageState
-
-        # TODO: POPULAR O BANCO ->
-        transductor_voltage_state = TransductorVoltageState.objects.get(
-            transductor=transductor,
-            phase=self.measurement_phase,
-        )
-        transductor_voltage_state.current_voltage_state = self.current_voltage_state
-        transductor_voltage_state.save()
-
-        # if the is no event to close, just return
-        if event_type_class is None:
-            return
-
-        # TODO: SEMPRE SÓ 1 -> CRITICAL -> DROP
-        transductor_unfinished_events = event_type_class.objects.filter(
-            transductor=transductor,
-            ended_at=None,
-        )
-        last_event = transductor_unfinished_events.last()
-
-        # if there is no event opened, just return
-        # TODO: BUG
-        if not last_event:
-            return
-
-        if not last_event.data:
-            last_event.data = {
-                "voltage_a": None,
-                "voltage_b": None,
-                "voltage_c": None,
-            }
-
-        # when set to None, it is because the event is no longer happening at this phase
-        last_event.data[self.measurement_phase] = None
-
-        all_phases_is_none = True
-        for measurement_value in last_event.data.values():
-            if measurement_value != None:
-                all_phases_is_none = False
-
-        # If the event does not occur at any phase, it is because the event is over
-        if all_phases_is_none:
-            last_event.ended_at = timezone.datetime.now()
-
-        else:
-            # ATUALIZANDO A FASE QUE PERMANECE COM O EVENTO ABERTO
-            last_event.data[self.measurement_phase] = self.last_measurement
-
-        last_event.save()
-
-    def update_transductor_event_data(self, transductor, event_type_class):
-        from transductor.models import TransductorVoltageState
-
-        transductor_voltage_state = TransductorVoltageState.objects.get(
-            transductor=transductor,
-            phase=self.measurement_phase,
-        )
-
-        transductor_voltage_state.current_voltage_state = self.current_voltage_state
-        transductor_voltage_state.save()
-
-        if event_type_class is None:
-            return
-
-        previous_state, current_state = self.last_event_state_transition
-
-        # Create the event first
-        if previous_state != current_state:
-            event = event_type_class.objects.create(transductor=transductor)
-        else:  # get a existing event
-            event = event_type_class.objects.filter(transductor=transductor).last()
-
-        if event:
-            data = {
-                "voltage_a": None,
-                "voltage_b": None,
-                "voltage_c": None,
-            }
-            data[self.measurement_phase] = self.last_measurement
-            event.data = data
-            event.save()
-
-        return event
-
-    def raise_event(self, transductor):
-        previous_state, current_state = self.last_event_state_transition
-
-        # The event is no longer happing at this phase
-        # A new event may be occurring or it may have been normalized on all phases
-        # The finish_transductor_event will update the phase status and related events
-        if previous_state != current_state:
-            target_event_class = self.get_target_event_class(previous_state)
-            self.finish_transductor_event(transductor, target_event_class)
-
-        """
-        In this `if` two different cases are treated
-
-        The first case is when an EVENT_STATE_NORMAL to X transition occurs
-        In this case an event is created for the new X state
-
-        The second case is when an X -> Y transition occurs
-
-        If state X is equal to state Y, the event is retrieved and updated
-        If state X is different from state Y, an event is created for state Y
-        """
-        if self.current_voltage_state != VoltageEventDebouncer.EVENT_STATE_NORMAL:
-            target_event_class = self.get_target_event_class(current_state)
-            self.update_transductor_event_data(transductor, target_event_class)
