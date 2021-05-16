@@ -24,7 +24,7 @@ class VoltageEventDebouncer:
         self,
         measurement_phase: str,
         history_size: Optional[int] = 15,
-        contracted_voltage: Optional[float] = 220,
+        contracted_voltage: Optional[float] = None,
     ):
         if not contracted_voltage:
             contracted_voltage = settings.CONTRACTED_VOLTAGE
@@ -153,7 +153,7 @@ class VoltageEventDebouncer:
         >   upper_bound = 228.80
         >   lower_bound = 200.20
 
-        And using the threshold constant equal to 0.05, the interval associated with
+        And using the threshold constant equal to 0.005, the interval associated with
         the NORMAL status will be updated as follows:
 
         >   upper_bound = 228.80 + (228.80 * (1 + threshold))
