@@ -230,7 +230,7 @@ class VoltageEventDebouncerTestCase(TestCase):
 
         self.assertEqual(
             first=current_state,
-            second=VoltageState.NORMAL.value
+            second=VoltageState.NORMAL.value,
         )
 
         previous_state, current_state = self.debouncer.add_new_measurement(
@@ -239,7 +239,7 @@ class VoltageEventDebouncerTestCase(TestCase):
 
         self.assertEqual(
             first=current_state,
-            second=VoltageState.PRECARIOUS_UPPER.value
+            second=VoltageState.PRECARIOUS_UPPER.value,
         )
 
         previous_state, current_state = self.debouncer.add_new_measurement(
@@ -253,5 +253,5 @@ class VoltageEventDebouncerTestCase(TestCase):
                 "The lower_bound of the current phase should have changed, thus "
                 "preventing a small variation in the measure from changing the "
                 "current state"
-            )
+            ),
         )

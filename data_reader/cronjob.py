@@ -4,7 +4,7 @@ from .utils import perform_all_data_collection, perform_all_data_rescue
 
 
 class MinutelyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0 # 1 in 1 minute
+    RUN_EVERY_MINS = 0  # 1 in 1 minute
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "data_reader.cronjob.MinutelyCollectCronJob"
 
@@ -22,7 +22,7 @@ class QuarterlyCollectCronJob(CronJobBase):
 
 
 class MonthlyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS = 720 # 30 in 30 days
+    RUN_EVERY_MINS = 720  # 30 in 30 days
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "data_reader.cronjob.MonthlyCollectCronJob"
 
@@ -31,7 +31,7 @@ class MonthlyCollectCronJob(CronJobBase):
 
 
 class MinutelyDataRescueCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0 # 1 in 1 minute
+    RUN_EVERY_MINS = 0  # 1 in 1 minute
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "data_reader.cronjob.MinutelyDataRescueCronJob"
 
@@ -40,7 +40,7 @@ class MinutelyDataRescueCronJob(CronJobBase):
 
 
 class QuarterlyDataRescueCronJob(CronJobBase):
-    RUN_EVERY_MINS = 0 # 15
+    RUN_EVERY_MINS = 0  # 15
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "data_reader.cronjob.QuarterlyDataRescueCronJob"
 
@@ -49,7 +49,7 @@ class QuarterlyDataRescueCronJob(CronJobBase):
 
 
 class MonthlyDataRescueCronJob(CronJobBase):
-    RUN_EVERY_MINS = 720 # 30 in 30 days
+    RUN_EVERY_MINS = 720  # 30 in 30 days
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "data_reader.cronjob.MonthlyDataRescueCronJob"
 
