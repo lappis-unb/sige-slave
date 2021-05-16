@@ -10,25 +10,26 @@ class VoltageRelatedEventSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = VoltageRelatedEvent
         fields = (
-            'data',
-            'type',
-            'ip_address',
-            'created_at',
-            'ended_at'
+            "data",
+            "type",
+            "ip_address",
+            "created_at",
+            "ended_at",
         )
 
 
 class FailedConnectionTransductorEventSerializer(
-        serializers.HyperlinkedModelSerializer):
+    serializers.HyperlinkedModelSerializer
+):
     type = serializers.CharField()
     ip_address = serializers.CharField()
 
     class Meta:
         model = FailedConnectionTransductorEvent
         fields = (
-            'data',
-            'type',
-            'ip_address',
-            'created_at',
-            'ended_at'
+            "data",
+            "type",
+            "ip_address",
+            "created_at",
+            "ended_at",
         )
