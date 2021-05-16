@@ -222,3 +222,36 @@ class VoltageEventDebouncerTestCase(TestCase):
                 "negative infinite"
             ),
         )
+
+    def test_threshold_application_in_the_current_phase(self):
+        previous_state, current_state = self.debouncer.add_new_measurement(
+            measurement_value=220
+        )
+
+        self.assertEqual(
+            first=current_state,
+            second=VoltageState.NORMAL.value
+        )
+
+        previous_state, current_state = self.debouncer.add_new_measurement(
+            measurement_value=228.8
+        )
+
+        self.assertEqual(
+            first=current_state,
+            second=VoltageState.PRECARIOUS_UPPER.value
+        )
+
+        previous_state, current_state = self.debouncer.add_new_measurement(
+            measurement_value=228.7
+        )
+
+        self.assertEqual(
+            first=current_state,
+            second=VoltageState.PRECARIOUS_UPPER.value,
+            msg=(
+                "The lower_bound of the current phase should have changed, thus "
+                "preventing a small variation in the measure from changing the "
+                "current state"
+            )
+        )
