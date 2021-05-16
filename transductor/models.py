@@ -283,7 +283,7 @@ class TransductorVoltageState(models.Model):
     current_voltage_state = models.CharField(
         max_length=14,
         choices=VOLTAGE_STATES,
-        default=VOLTAGE_STATES[0][0],  # Normal
+        default=VOLTAGE_STATES[2][0],  # Normal
     )
 
     transductor = models.ForeignKey(
