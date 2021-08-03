@@ -37,7 +37,9 @@ python3 manage.py migrate
 # python3 seed_db.py
 
 echo '======= STARTING CRON'
+/bin/cp /smi-slave/crons/cronjob /etc/cron.d/smi-cron
+crontab /etc/cron.d/smi-cron
 cron
 
 echo '======= RUNNING SERVER'
-python3 manage.py runserver 0.0.0.0:8000
+exec python3 manage.py runserver 0.0.0.0:8000
