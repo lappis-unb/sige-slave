@@ -1,8 +1,15 @@
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyCollectCronJob
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyDataRescueCronJob
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyDataRescueCronJob
-* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob
-0,15,30,45 * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyCollectCronJob
-0 4 1 * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyCollectCronJob
-# 0 4 * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob -> dont exists
-# Necessary line at end of file to make cron valid
+# According to the django-cron documentation, you only need to call the `manage.py runcrons` command to run cronjobs
+* * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons >> /smi-slave/logs/cronjobs_execution.log 2>&1
+
+
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+
+# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# An empty line is required at the end of this file for a valid cron file.

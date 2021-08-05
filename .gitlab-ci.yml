@@ -1,4 +1,4 @@
-image: python:3.6
+image: python:3.8
 
 services:
   - postgres:9.6
@@ -37,12 +37,14 @@ docker:
 test:
   stage: test
   script:
-    - python manage.py test --verbosity=3
+    - python manage.py test --verbosity=2
 
 stylesheet:
   stage: test
   script:
-    - pycodestyle .
+    - black --check .
+    - isort --check-only --skip migrations  --profile black .
+    - pylint --load-plugins pylint_django --django-settings-module=smi.settings --fail-under=7 **/*.py *.py
 
 code_quality:
   stage: test
