@@ -12,6 +12,7 @@ from transductor_model.models import EnergyTransductorModel
 from transductor.models import EnergyTransductor
 from transductor.models import TimeInterval
 
+import os
 
 def communication_log(status, datetime, type, transductor, file, errors=[]):
     print('DateTime:\t', datetime, file=file)
