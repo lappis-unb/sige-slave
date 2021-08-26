@@ -6,6 +6,8 @@ from events import urls as events_routes
 from measurement import urls as measurements_routes
 from transductor import urls as transductors_routes
 
+from rest_framework.documentation import include_docs_urls
+
 router = DefaultRouter()
 
 router.registry.extend(measurements_routes.router.registry)
@@ -13,6 +15,7 @@ router.registry.extend(transductors_routes.router.registry)
 router.registry.extend(events_routes.router.registry)
 
 urlpatterns = [
+    path('docs/', include_docs_urls(title='Slave')),
     path("admin/", admin.site.urls),
     path("", include(router.urls)),
 ]
