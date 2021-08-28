@@ -139,6 +139,7 @@ class Modbus(SerialProtocol):
         messages: List[bytes] = list()
 
         if request[0] == "ReadHoldingRegisters":
+            compacted_request = self.compress_request(request)
             for register in request[1]:
                 message = self.create_read_holding_registers_message(register)
                 full_message: bytes = self.add_complement(message)
@@ -153,6 +154,89 @@ class Modbus(SerialProtocol):
                 messages.append(full_message)
 
         return messages
+
+    def memory_limits(self, registers):
+
+        # registers is a list of registers [reg1, reg2 ...]
+        # each register is in the format: [memory_position, bytes_to_read]
+
+        # find initial memory location
+        memory_start = min(registers, key=lambda x: x[0])[0]
+
+        # and the last memory position added with the bytes read:
+        memory_end = max(registers, key=lambda x: x[0] + x[1])
+        memory_end = memory_end[0] + memory_end[1]
+
+        bytes_to_read = memory_end - memory_start
+
+        return (memory_start, bytes_to_read)
+
+    def compress_request(self, request):
+
+        request_registers = request[1]
+
+        # we do not need to compact a single register request
+        if len(request_registers) < 2:
+            return request
+
+        memory_limits = self.memory_limits(request_registers)
+
+        # the maximum query size is of 100 registers
+        # if memory_limits[1] (bytes_to_read) is greater than that
+        # we need to split the request
+        memory_blocks_amount = math.ceil(memory_limits[1] / 100)
+        bytes_left = memory_limits[1]
+        starting_position = memory_limits[0]
+
+        memory_blocks_requests_created = []
+        while len(memory_blocks_requests_created) < memory_blocks_amount:      
+
+            bytes_to_read = min(bytes_left, 100)
+
+            memory_block_request = [starting_position, bytes_to_read]
+            memory_blocks_requests_created.append(memory_block_request)
+
+            bytes_left -= bytes_to_read
+            starting_position += bytes_to_read
+
+        return (request[0], memory_blocks_requests_created)
+
+    def decompress_response(self, original_request, messages):
+
+        # a PresetMultipleRegisters is not compressed, then we
+        # just clean the messages
+        if original_request[0] == 'PresetMultipleRegisters':
+            return [self.remove_complement(msg) for msg in messages]
+
+        memory_block = None
+
+        for msg in messages:
+            msg_data = self.remove_complement(msg)
+            if memory_block is None:
+                memory_block = msg_data
+            else:
+                memory_block += msg_data
+
+        expected_registers = original_request[1]
+        memory_limits = self.memory_limits(expected_registers)
+        
+        responses = []      
+        for register in expected_registers:
+    
+            # lower boundary is multiplied by 2 because each byte 
+            # is composed of 2 position  on the memory_block 
+            # python list.
+            lower_boundary = (register[0] - memory_limits[0]) * 2
+            
+            # the lenght to read is also multiplied by 2
+            #  because a byte would be positions on the list
+            higher_boundary = lower_boundary + (register[1] * 2)
+            
+            data = memory_block[lower_boundary:higher_boundary]
+
+            responses.append(data)
+
+        return responses
 
     @abstractmethod
     def add_complement(self, message: bytes) -> bytes:
@@ -238,8 +322,15 @@ class Modbus(SerialProtocol):
             list: [description]
         """
         request = self.transductor_model.data_collection(collection_type, date)
-        messages_registers = zip(recived_messages, request[1])
+
+        uncompressed_responses = self.decompress_response(
+            request,
+            recived_messages
+        )
+
+        messages_registers = zip(uncompressed_responses, request[1])
         messages_content = []
+        
         for message_register in messages_registers:
             messages_content.append(
                 self.get_content_from_message(
@@ -255,7 +346,7 @@ class Modbus(SerialProtocol):
         message: bytes,
         message_type,
     ) -> Union[int, float, list]:
-        message: bytes = self.remove_complement(message)
+        # message: bytes = self.remove_complement(message)
         if message_type == 1:
             message_content: int = self.bytes_to_int(message)
 
