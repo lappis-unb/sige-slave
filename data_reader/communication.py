@@ -189,7 +189,7 @@ class Modbus(SerialProtocol):
         starting_position = memory_limits[0]
 
         memory_blocks_requests_created = []
-        while len(memory_blocks_requests_created) < memory_blocks_amount:      
+        while len(memory_blocks_requests_created) < memory_blocks_amount:
 
             bytes_to_read = min(bytes_left, 100)
 
@@ -219,19 +219,19 @@ class Modbus(SerialProtocol):
 
         expected_registers = original_request[1]
         memory_limits = self.memory_limits(expected_registers)
-        
-        responses = []      
+
+        responses = []
         for register in expected_registers:
-    
-            # lower boundary is multiplied by 2 because each byte 
-            # is composed of 2 position  on the memory_block 
+
+            # lower boundary is multiplied by 2 because each byte
+            # is composed of 2 position  on the memory_block
             # python list.
             lower_boundary = (register[0] - memory_limits[0]) * 2
-            
+
             # the lenght to read is also multiplied by 2
             #  because a byte would be positions on the list
             higher_boundary = lower_boundary + (register[1] * 2)
-            
+
             data = memory_block[lower_boundary:higher_boundary]
 
             responses.append(data)
@@ -330,7 +330,7 @@ class Modbus(SerialProtocol):
 
         messages_registers = zip(uncompressed_responses, request[1])
         messages_content = []
-        
+
         for message_register in messages_registers:
             messages_content.append(
                 self.get_content_from_message(
