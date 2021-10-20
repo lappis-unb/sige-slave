@@ -1,8 +1,7 @@
 from django.contrib import admin
 from django.urls import include, path
-
-from rest_framework.routers import DefaultRouter
 from rest_framework.documentation import include_docs_urls
+from rest_framework.routers import DefaultRouter
 
 from events import urls as events_routes
 from measurement import urls as measurements_routes
