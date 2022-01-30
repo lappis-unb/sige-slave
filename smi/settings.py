@@ -170,3 +170,5 @@ STATIC_URL = "/static/"
 
 ## BUSINESS LOGIC VARIABLES
 CONTRACTED_VOLTAGE = float(os.getenv("CONTRACTED_VOLTAGE", 220))
+
+REST_FRAMEWORK = {"DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema"}
