@@ -499,7 +499,7 @@ class MD30(EnergyTransductorModel):
     def collection_functions(self) -> Dict[str, Callable[[Optional[datetime]], int]]:
 
         base_collection_functions = super(
-            MD30, self
+            EnergyTransductorModel, self
         ).collection_functions()
 
         return dict(
@@ -513,7 +513,7 @@ class MD30(EnergyTransductorModel):
     def handle_response_functions(self):
 
         base_handle_response_functions = super(
-            MD30, self
+            EnergyTransductorModel, self
         ).handle_response_functions()
 
         return dict(
