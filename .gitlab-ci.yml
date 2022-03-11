@@ -38,6 +38,7 @@ test:
   stage: test
   script:
     - python manage.py test --verbosity=2
+    - coverage run manage.py test && coverage report && coverage erase
 
 stylesheet:
   stage: test
