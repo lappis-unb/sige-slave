@@ -13,7 +13,6 @@ from transductor_model.models import EnergyTransductorModel
 from .communication import SerialProtocol
 from .transport import TransportProtocol
 
-
 def communication_log(
     status,
     datetime,
