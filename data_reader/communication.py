@@ -205,7 +205,7 @@ class Modbus(SerialProtocol):
 
         # a PresetMultipleRegisters is not compressed, then we
         # just clean the messages
-        if original_request[0] == 'PresetMultipleRegisters':
+        if original_request[0] == "PresetMultipleRegisters":
             return [self.remove_complement(msg) for msg in messages]
 
         memory_block = None
@@ -323,10 +323,7 @@ class Modbus(SerialProtocol):
         """
         request = self.transductor_model.data_collection(collection_type, date)
 
-        uncompressed_responses = self.decompress_response(
-            request,
-            recived_messages
-        )
+        uncompressed_responses = self.decompress_response(request, recived_messages)
 
         messages_registers = zip(uncompressed_responses, request[1])
         messages_content = []
