@@ -1,0 +1,16 @@
+register,address,size,type,group,active,byteorder,datamodel
+dia,14,1,u16,minutely,True,B3_B2_B1_B0,DEFALT
+hora,15,1,u16,quartely,True,B0_B1_B2_B3,COIL
+minuto,16,1,u16,monthly,false,B0_B1_B2_B3,COIL
+frequency_a,66,2,f32,minutely,True,B1_B0_B3_B2,DISCRET
+frequency_b,68,2,f32,quartely,f,B2_B3_B0_B1,HOLDING_REGISTER
+frequency_c,70,2,f32,mouthly,true,B1_B0,INPUT_REGISTER
+voltage_a,72,2,f32,minutely,0,B0_B1,
+voltage_b,74,2,f32,quartely,True,,HOLDING_REGISTER
+voltage_c,76,2,f32,monthly,t,,HOLDING_REGISTER
+current_a,78,2,f32,minutely,True,,
+current_b,80,2,f32,quartely,True,,HOLDING_REGISTER
+current_c,82,2,f32,monthly,1,,
+active_power_a,84,2,f32,minutely,True,,
+active_power_b,86,2,f32,quartely,True,,
+active_power_c,88,2,f32,monthly,1,,
