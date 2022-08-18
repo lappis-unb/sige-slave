@@ -1,6 +1,8 @@
 from django_cron import CronJobBase, Schedule
 
-from .utils import perform_all_data_collection, perform_all_data_rescue
+# from .utils import perform_all_data_collection, perform_all_data_rescue
+from .utils import perform_all_data_rescue
+from modbus_reader.main import perform_all_data_collection
 
 
 class MinutelyCollectCronJob(CronJobBase):
