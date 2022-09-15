@@ -44,7 +44,11 @@ def perform_all_data_collection(collection_type: str) -> None:
         thread.join()
 
 
-def single_data_collection(transductor: EnergyTransductor, collection_type: str, date: Optional[datetime] = None) -> None:
+def single_data_collection(
+    transductor: EnergyTransductor,
+    collection_type: str,
+    date: Optional[datetime] = None,
+) -> None:
     """
     Function responsible for performing a certain type of data collection for a given
     transductor.
@@ -72,9 +76,15 @@ def single_data_collection(transductor: EnergyTransductor, collection_type: str,
 
     max_reg_request = config_file["max_reg_request"]
 
-    file_reader = load_handler(PATH_REGISTER_CSV, config_file["path_file_csv"], REGISTER_MAP_COLUMNS)
-    transductor_device = load_handler(PATH_TRANSDUCTOR_DEVICE, transductor, max_reg_request, file_reader)
-    transductor_reader = load_handler(PATH_TRANSDUCTOR_READER, collection_type, transductor_device)
+    file_reader = load_handler(
+        PATH_REGISTER_CSV, config_file["path_file_csv"], REGISTER_MAP_COLUMNS
+    )
+    transductor_device = load_handler(
+        PATH_TRANSDUCTOR_DEVICE, transductor, max_reg_request, file_reader
+    )
+    transductor_reader = load_handler(
+        PATH_TRANSDUCTOR_READER, collection_type, transductor_device
+    )
 
     measurements_data = transductor_reader.single_data_collection_type()
 
