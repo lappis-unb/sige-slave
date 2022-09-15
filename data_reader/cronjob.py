@@ -3,12 +3,17 @@ from django_cron import CronJobBase, Schedule
 from .utils import perform_all_data_rescue
 from modbus_reader.main import perform_all_data_collection
 
+TRANSDUCTOR_COLLECTION_TYPE_MINUTELY: str = "Minutely"
+TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY: str = "Quarterly"
+TRANSDUCTOR_COLLECTION_TYPE_MONTHLY: str = "Monthly"
+MONTH_TO_MINUTES: int = 30 * 24 * 60
+
 
 class MinutelyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS: int = 1
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.MinutelyCollectCronJob"
-    collection_type: str = "Minutely"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_MINUTELY
 
     def do(self) -> None:
         perform_all_data_collection(self.collection_type)
@@ -18,17 +23,17 @@ class QuarterlyCollectCronJob(CronJobBase):
     RUN_EVERY_MINS: int = 15
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.QuarterlyCollectCronJob"
-    collection_type: str = "Quarterly"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY
 
     def do(self) -> None:
         perform_all_data_collection(self.collection_type)
 
 
 class MonthlyCollectCronJob(CronJobBase):
-    RUN_EVERY_MINS: int = 30 * 24 * 60
+    RUN_EVERY_MINS: int = MONTH_TO_MINUTES
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.MonthlyCollectCronJob"
-    collection_type: str = "Monthly"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_MONTHLY
 
     def do(self) -> None:
         perform_all_data_collection(self.collection_type)
@@ -38,7 +43,7 @@ class MinutelyDataRescueCronJob(CronJobBase):
     RUN_EVERY_MINS: int = 1
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.MinutelyDataRescueCronJob"
-    collection_type: str = "Minutely"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_MINUTELY
 
     def do(self) -> None:
         perform_all_data_rescue(self.collection_type)
@@ -48,17 +53,17 @@ class QuarterlyDataRescueCronJob(CronJobBase):
     RUN_EVERY_MINS: int = 15
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.QuarterlyDataRescueCronJob"
-    collection_type: str = "Quarterly"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY
 
     def do(self) -> None:
         perform_all_data_rescue(self.collection_type)
 
 
 class MonthlyDataRescueCronJob(CronJobBase):
-    RUN_EVERY_MINS: int = 30 * 24 * 60
+    RUN_EVERY_MINS: int = MONTH_TO_MINUTES
     schedule: Schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code: str = "data_reader.cronjob.MonthlyDataRescueCronJob"
-    collection_type: str = "Monthly"
+    collection_type: str = TRANSDUCTOR_COLLECTION_TYPE_MONTHLY
 
     def do(self) -> None:
         perform_all_data_rescue(self.collection_type)
