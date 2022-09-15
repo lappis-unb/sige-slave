@@ -1,7 +1,6 @@
-import time
+from datetime import datetime
 from threading import Thread
-from time import time
-from typing import List, Optional, Union
+from typing import Optional
 
 from modbus_reader.utils.config import devices_config
 from modbus_reader.utils.constants import (
@@ -13,7 +12,7 @@ from modbus_reader.utils.constants import (
 from modbus_reader.utils.utils import load_handler
 from transductor.models import EnergyTransductor
 
-from .save_data import save_data
+from modbus_reader.save_data import save_data
 
 
 def perform_all_data_collection(collection_type: str) -> None:
@@ -21,9 +20,8 @@ def perform_all_data_collection(collection_type: str) -> None:
     Method responsible to start all transductors data collection
     simultaneously.
 
-    Parameters
-    ----------
-    collection_type : str
+    Args:
+        collection_type : str
         Time interval in which data collection should
         be performed (Minutely, Quarterly, Monthly)
 
@@ -34,7 +32,7 @@ def perform_all_data_collection(collection_type: str) -> None:
 
     transductor: EnergyTransductor
     for transductor in EnergyTransductor.objects.all():
-        collection_thread = Thread(
+        collection_thread: Thread = Thread(
             target=single_data_collection,
             args=(transductor, collection_type),
         )
@@ -46,7 +44,7 @@ def perform_all_data_collection(collection_type: str) -> None:
         thread.join()
 
 
-def single_data_collection(transductor: EnergyTransductor, collection_type: str):
+def single_data_collection(transductor: EnergyTransductor, collection_type: str, date: Optional[datetime] = None) -> None:
     """
     Function responsible for performing a certain type of data collection for a given
     transductor.
@@ -66,15 +64,18 @@ def single_data_collection(transductor: EnergyTransductor, collection_type: str)
         is possible to make requests for past dates. When this attribute is not
         specified, the most recent measurement is retrieved. Defaults to None.
 
+    TODO: Implement collection by date using PyModbus
+    Returns:
+        None
     """
     config_file = devices_config[transductor.model]
-    
+
     max_reg_request = config_file["max_reg_request"]
-    
+
     file_reader = load_handler(PATH_REGISTER_CSV, config_file["path_file_csv"], REGISTER_MAP_COLUMNS)
     transductor_device = load_handler(PATH_TRANSDUCTOR_DEVICE, transductor, max_reg_request, file_reader)
     transductor_reader = load_handler(PATH_TRANSDUCTOR_READER, collection_type, transductor_device)
-    
+
     measurements_data = transductor_reader.single_data_collection_type()
 
     save_data(measurements_data, transductor, collection_type)
