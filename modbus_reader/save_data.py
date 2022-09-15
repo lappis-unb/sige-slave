@@ -13,7 +13,7 @@ from modbus_reader.utils.constants import (
 from transductor.models import EnergyTransductor
 
 
-def save_data(data, transductor, collection_type):
+def save_data(data, transductor: EnergyTransductor, collection_type: str) -> None:
 
     if collection_type == COLLECTION_TYPE_MINUTELY:
         MinutelyMeasurement.objects.create(
