@@ -1,49 +1,51 @@
 # flake8: noqa
-# --------------------------------------------------------------------------- #
-# Define some constants
-# --------------------------------------------------------------------------- #
 
-# Esse padão de nomenclatura deve ser utilizada no arquivo do mapa csv (coluna group)
-COLLECTION_TYPE_DATETIME = "datetime"
-COLLECTION_TYPE_MINUTELY = "minutely"
-COLLECTION_TYPE_QUARTERLY = "quarterly"
-COLLECTION_TYPE_MONTHLY = "monthly"
+# These names must be used in the CSV map file in the `group` column
+COLLECTION_TYPE_DATETIME: str = "datetime"
+COLLECTION_TYPE_MINUTELY: str = "minutely"
+COLLECTION_TYPE_QUARTERLY: str = "quarterly"
+COLLECTION_TYPE_MONTHLY: str = "monthly"
 
-# Atenção se o nome do arquivo, nome da classe ou diretório for alterado
-# você deve alterar o nome da constante abaixo
-PATH_REGISTER_CSV = "modbus_reader.register_csv.RegisterCSV"
-PATH_TRANSDUCTOR_DEVICE = "modbus_reader.device.TransductorDevice"
-PATH_TRANSDUCTOR_READER = "modbus_reader.device.DeviceReader"
+# Cronjob definitions
+TRANSDUCTOR_COLLECTION_TYPE_MINUTELY: str = "Minutely"
+TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY: str = "Quarterly"
+TRANSDUCTOR_COLLECTION_TYPE_MONTHLY: str = "Monthly"
+MONTH_TO_MINUTES: int = 30 * 24 * 60
 
-REGISTER_MAP_COLUMNS = ["register", "address", "size", "type", "group"]
+# WARNING: these must change if the files, classes or directories are changed
+PATH_REGISTER_CSV: str = "modbus_reader.register_csv.RegisterCSV"
+PATH_TRANSDUCTOR_DEVICE: str = "modbus_reader.device.TransductorDevice"
+PATH_TRANSDUCTOR_READER: str = "modbus_reader.device.DeviceReader"
 
-# Modbus data is read and written as "registers" which are 16 bits (1 byte) chunks of data.
-# SIZE = size in bytes for type
-# lenght = number of registers for size()
+REGISTER_MAP_COLUMNS: list[str] = ["register", "address", "size", "type", "group"]
 
-MODBUS_REGISTER_SIZE = 2   # 2 bytes(16 bits) 
-MODBUS_READ_MAX = 100
+# Modbus reads and writes in "registers". Our registers have 16 bytes
+MODBUS_REGISTER_SIZE: int = 2
+MODBUS_READ_MAX: int = 100
 
+# Variables with size (bytes) and length (register size)
+LENGTH: int
+SIZE: int
 SIZE, LENGTH = 0, 1
-UINT8   = (1, 1) 
-UINT16  = (2, 1)  # UINT16.SIZE = 2, UINT16.LENGTH = 1
-UINT32  = (4, 2)
-UINT64  = (8, 4)
-INT8    = (1, 1)
-INT16   = (2, 1)
-INT32   = (4, 2)
-INT64   = (8, 4)
-FLOAT16 = (2, 1)
-FLOAT32 = (4, 2)
-FLOAT64 = (8, 4)  
+UINT8: tuple[int, int] = (1, 1)
+UINT16: tuple[int, int] = (2, 1)
+UINT32: tuple[int, int] = (4, 2)
+UINT64: tuple[int, int] = (8, 4)
+INT8: tuple[int, int] = UINT8
+INT16: tuple[int, int] = UINT16
+INT32: tuple[int, int] = UINT32
+INT64: tuple[int, int] = UINT64
+FLOAT16: tuple[int, int] = (2, 1)
+FLOAT32: tuple[int, int] = (4, 2)
+FLOAT64: tuple[int, int] = (8, 4)
 
 
-# BYTE Ordering
-BIG = "big"
-BIG_ENDIAN = ">"
-LITTLE_ENDIAN = "<"
+# Endianness definitions
+BIG: str = "big"
+BIG_ENDIAN: str = ">"
+LITTLE_ENDIAN: str = "<"
 
-TABLE_EXCEPTION_CODE = {
+TABLE_EXCEPTION_CODE: dict[str, str] = {
     "1": "ILLEGAL FUNCTION",
     "2": "ILLEGAL DATA ADDRESS",
     "3": "ILLEGAL DATA VALUE",
@@ -53,8 +55,7 @@ TABLE_EXCEPTION_CODE = {
     "8": "MEMORY PARITY ERROR",
 }
 
-dir_type_map = {
+dir_type_map: dict[str, str] = {
     "csv_dir": "CSV Config Directory",
     "config_dir": "Diver Config Directory",
 }
-
