@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from csv import DictReader
-from typing import List, Union
+from typing import List, Tuple, Union
 
 try:
     from modbus_reader.utils.constants import (
@@ -23,10 +23,10 @@ class RegisterCSV(object):
         filter the registers by collection_type and build contiguous blocks with
         fields: initial_address, num_reg, type to be requested
         """
-        
+
         registers_collection_type = self.get_registers_collection_type(collection_type)
         registers_data_size = [(line["address"], line["size"], line["type"], line["register"]) for line in registers_collection_type]
-        collection_type_request = self._build_request_blocks(registers_data_size, max_reg_request)
+        collection_type_request = self._build_contiguous_blocks_requests_to_device(registers_data_size, max_reg_request)
         return self._build_registers_data(collection_type_request)
 
     def get_registers_collection_type(self, collection_type):
@@ -84,25 +84,8 @@ class RegisterCSV(object):
                 valid_map_block.append(valid_line)
         return valid_map_block
 
-#   def _build_request_chunks
-#   def _build_sequential_packs
-    def _build_request_blocks(self, registers, max_reg_request=100):
-        """
-        build contiguous block of the same type to better reduce the
-        number of requests to the device.
-        
-        params:
-            registers: list of tuples (address, size, type) - each tuple one register
-            max_reg_request: maximum number of registers in contiguous block
-                to be requested.
-        
-        return: list of tuples (initial_address, num_reg, type)
-            initial_address: initial address of block
-            num_reg: the number of registers to read
-            type: type of registers in the block
-        """
+    def _build_contiguous_blocks_requests_to_device(self, registers: List[Tuple[int, int, str]], max_reg_request: int=100) -> List[OrderedDict]:
         sequential_blocks = []
-        # request_blocks: List[Tuple[int, int, str]] = []
 
         current_addr, current_size, current_type, current_name = registers[0]
         start_address: int = current_addr
@@ -129,7 +112,7 @@ class RegisterCSV(object):
                         name_registers=name_registers
                     )
                 )
-    
+
                 start_address = next_addr
                 size_request = next_size
                 register_counter = 0
@@ -149,7 +132,7 @@ class RegisterCSV(object):
             )
         )
         return sequential_blocks
-    
+
     def _filter_registers_collection_type(self, registers_block, collection_type: str):
         # sourcery skip: for-append-to-extend, identity-comprehension, inline-immediately-returned-variable, list-comprehension, remove-redundant-if
         """
