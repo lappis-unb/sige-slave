@@ -32,25 +32,35 @@ def test_without_django(configuration, collection_to_perform: str) -> None:
 
     start: float = time()
 
-    Device: Type[tuple] = namedtuple('Device', ["ip_address", "port", "model"])
-    transductor = Device(configuration['ip_address'], configuration['port'], configuration['model'])
+    Device: Type[tuple] = namedtuple("Device", ["ip_address", "port", "model"])
+    transductor = Device(
+        configuration["ip_address"], configuration["port"], configuration["model"]
+    )
     max_request = config_file["max_reg_request"]
 
-    file_reader: RegisterCSV = RegisterCSV(configuration["path_file_csv"], REGISTER_MAP_COLUMNS)
-    transductor_device: TransductorDevice = TransductorDevice(transductor, max_request, file_reader)
-    transductor_reader: DeviceReader = DeviceReader(collection_to_perform, transductor_device)
+    file_reader: RegisterCSV = RegisterCSV(
+        configuration["path_file_csv"], REGISTER_MAP_COLUMNS
+    )
+    transductor_device: TransductorDevice = TransductorDevice(
+        transductor, max_request, file_reader
+    )
+    transductor_reader: DeviceReader = DeviceReader(
+        collection_to_perform, transductor_device
+    )
 
-    measurements_data: dict[str, datetime] = transductor_reader.single_data_collection_type()
+    measurements_data: dict[
+        str, datetime
+    ] = transductor_reader.single_data_collection_type()
     stop: float = time()
 
     print("Transductor information")
     transductor_info = [
         ["Transductor:", f"{transductor.model}"],
-        ["Serial:", configuration['serial_number']],
+        ["Serial:", configuration["serial_number"]],
         ["IP:", f"{transductor.ip_address}"],
         ["Port:", f"{transductor.port}"],
-        ["Max_reg_request:", configuration['max_reg_request']],
-        ["Path_file_csv:", configuration['path_file_csv']],
+        ["Max_reg_request:", configuration["max_reg_request"]],
+        ["Path_file_csv:", configuration["path_file_csv"]],
     ]
 
     print(tabulate(transductor_info, headers=["Attribute", "value"]))
