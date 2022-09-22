@@ -15,6 +15,7 @@ class TransductorDevice(object):
     """
     Transductor device class for reading registers from modbus device
     """
+
     def __init__(self, transductor, max_reg_request, file_reader) -> None:
         self.file_reader = file_reader
         self.model = transductor.model
@@ -34,14 +35,17 @@ class TransductorDevice(object):
 
 
 class DeviceReader(object):
-
     def __init__(self, collection_type: str, device: TransductorDevice):
         self.device = device
         self.collection_type = collection_type
         self.modbus_decoder = ModbusTypeDecoder()
 
-        self.registers_collection_type = device.get_registers_collection_type(collection_type)
-        self.registers_data = device.get_registers_data(collection_type, device.max_reg_request)
+        self.registers_collection_type = device.get_registers_collection_type(
+            collection_type
+        )
+        self.registers_data = device.get_registers_data(
+            collection_type, device.max_reg_request
+        )
 
         # self.registers["Minutely"] = []
         # self.registers["Quartely"] = []
@@ -54,11 +58,11 @@ class DeviceReader(object):
 
         measurements_data = {}
         for data in self.registers_data:
-            payload = self._read_registers(self.device.ip_address, self.device.port, data)
+            payload = self._read_registers(
+                self.device.ip_address, self.device.port, data
+            )
             payload_decoder = BinaryPayloadDecoder.fromRegisters(
-                registers=payload,
-                byteorder=Endian.Big,
-                wordorder=Endian.Little
+                registers=payload, byteorder=Endian.Big, wordorder=Endian.Little
             )
             decoded_data = self._modbus_decoder(payload_decoder, data)
             measurements_data.update(decoded_data)
@@ -91,7 +95,9 @@ class DeviceReader(object):
         """
         decoded_payload = {}
         for name_register in registers_data["name_registers"]:
-            decoded_payload[name_register] = round(registers_data.func_decode(payload_decoder), 2)
+            decoded_payload[name_register] = round(
+                registers_data.func_decode(payload_decoder), 2
+            )
             # valor arredondado para 2 casas decimais (validar professor)
 
         return decoded_payload
