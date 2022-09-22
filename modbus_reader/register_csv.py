@@ -48,7 +48,7 @@ class RegisterCSV(object):
     def _filter_valid_block_by_column_active(
         self, raw_block: list
     ) -> List[OrderedDict[str, Union[str, int]]]:
-        valid_map_block = []
+        valid_map_block: List[OrderedDict[str, Union[str, int]]] = []
 
         for line in raw_block:
             line["address"] = int(line["address"])
@@ -57,22 +57,13 @@ class RegisterCSV(object):
             line["type"] = type_modbus(line["type"])
 
             if line["active"]:
-                valid_map_block = self.get_valid_map_blocks_per_line(line)
-
+                valid_line = OrderedDict()
+                for column in line:
+                    if column in self.csv_map_columns:
+                        valid_line[column] = line[column]
+                valid_map_block.append(valid_line)
         return valid_map_block
 
-    def get_valid_map_blocks_per_line(
-        self, line: list
-    ) -> List[OrderedDict[str, Union[str, int]]]:
-        valid_map_block = []
-        valid_line = OrderedDict()
-
-        for column in line:
-            if column in self.csv_map_columns:
-                valid_line[column] = line[column]
-        valid_map_block.append(valid_line)
-
-        return valid_map_block
 
     def _parser_csv_file(self, path_file: str) -> List[OrderedDict[str, str]]:
         raw_map_block = []

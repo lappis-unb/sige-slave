@@ -28,10 +28,10 @@ class TransductorDevice(object):
         self.registers_data = None
 
     def get_registers_collection_type(self, collection_type):
-        return self.file_reader.get_registers_collection_type(collection_type)
+        return self.file_reader.get_registers_by_collection_type(collection_type)
 
     def get_registers_data(self, collection_type, max_reg_request):
-        return self.file_reader.get_request_blocks(collection_type, max_reg_request)
+        return self.file_reader.filter_registers_by_collection_type_and_get_requests_blocks(collection_type, max_reg_request)
 
 
 class DeviceReader(object):
