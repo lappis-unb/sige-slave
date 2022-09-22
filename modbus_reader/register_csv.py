@@ -18,21 +18,36 @@ class RegisterCSV(object):
         self.path_file = path_file
         self.csv_map_columns = REGISTER_MAP_COLUMNS
 
-    def filter_registers_by_collection_type_and_get_requests_blocks(self, collection_type, max_reg_request):
-        registers_collection_type = self.get_registers_by_collection_type(collection_type)
-        registers_data_size = [(line["address"], line["size"], line["type"], line["register"]) for line in registers_collection_type]
-        collection_type_request = self._build_contiguous_blocks_requests_to_device(registers_data_size, max_reg_request)
-        return self._build_registers_data_according_modbus_decoder(collection_type_request)
+    def filter_registers_by_collection_type_and_get_requests_blocks(
+        self, collection_type, max_reg_request
+    ):
+        registers_collection_type = self.get_registers_by_collection_type(
+            collection_type
+        )
+        registers_data_size = [
+            (line["address"], line["size"], line["type"], line["register"])
+            for line in registers_collection_type
+        ]
+        collection_type_request = self._build_contiguous_blocks_requests_to_device(
+            registers_data_size, max_reg_request
+        )
+        return self._build_registers_data_according_modbus_decoder(
+            collection_type_request
+        )
 
     def get_registers_by_collection_type(self, collection_type):
         valid_block = self.get_full_registers_according_defined_columns()
         return self._filter_registers_by_collection_type(valid_block, collection_type)
 
-    def get_full_registers_according_defined_columns(self) ->  List[OrderedDict[str, Union[str, int]]]:
+    def get_full_registers_according_defined_columns(
+        self,
+    ) -> List[OrderedDict[str, Union[str, int]]]:
         raw_block = self._parser_csv_file(self.path_file)
         return self._filter_valid_block_by_column_active(raw_block)
 
-    def _filter_valid_block_by_column_active(self, raw_block: list) -> List[OrderedDict[str, Union[str, int]]]:
+    def _filter_valid_block_by_column_active(
+        self, raw_block: list
+    ) -> List[OrderedDict[str, Union[str, int]]]:
         valid_map_block = []
 
         for line in raw_block:
@@ -46,7 +61,9 @@ class RegisterCSV(object):
 
         return valid_map_block
 
-    def get_valid_map_blocks_per_line(self, line: list) ->  List[OrderedDict[str, Union[str, int]]]:
+    def get_valid_map_blocks_per_line(
+        self, line: list
+    ) -> List[OrderedDict[str, Union[str, int]]]:
         valid_map_block = []
         valid_line = OrderedDict()
 
@@ -70,7 +87,9 @@ class RegisterCSV(object):
                 raw_map_block.append(raw_line)
         return raw_map_block
 
-    def _build_contiguous_blocks_requests_to_device(self, registers: List[Tuple[int, int, str]], max_reg_request: int=100) -> List[OrderedDict]:
+    def _build_contiguous_blocks_requests_to_device(
+        self, registers: List[Tuple[int, int, str]], max_reg_request: int = 100
+    ) -> List[OrderedDict]:
         sequential_blocks = []
 
         current_addr, current_size, current_type, current_name = registers[0]
@@ -95,7 +114,7 @@ class RegisterCSV(object):
                         start_address=start_address,
                         size=size_request,
                         type=current_type,
-                        name_registers=name_registers
+                        name_registers=name_registers,
                     )
                 )
 
@@ -114,21 +133,27 @@ class RegisterCSV(object):
                 start_address=start_address,
                 size=size_request,
                 type=current_type,
-                name_registers=name_registers
+                name_registers=name_registers,
             )
         )
         return sequential_blocks
 
-    def _filter_registers_by_collection_type(self, registers_block, collection_type: str) -> List[OrderedDict[str, Union[str, int]]]:
+    def _filter_registers_by_collection_type(
+        self, registers_block, collection_type: str
+    ) -> List[OrderedDict[str, Union[str, int]]]:
         registers_collection_type = []
 
         for line in registers_block:
-            if line["group"].lower() in [collection_type, COLLECTION_TYPE_DATETIME, COLLECTION_TYPE_MINUTELY]:
+            if line["group"].lower() in [
+                collection_type,
+                COLLECTION_TYPE_DATETIME,
+                COLLECTION_TYPE_MINUTELY,
+            ]:
                 registers_collection_type.append(line)
         return registers_collection_type
 
     def _build_registers_data_according_modbus_decoder(self, request_blocks):
         for block in request_blocks:
-            block.func_decode = ModbusTypeDecoder().parsers[block['type']]
+            block.func_decode = ModbusTypeDecoder().parsers[block["type"]]
 
         return request_blocks
