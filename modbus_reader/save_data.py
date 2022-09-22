@@ -13,7 +13,7 @@ from modbus_reader.utils.constants import (
 from transductor.models import EnergyTransductor
 
 
-def save_data(data, transductor, collection_type):
+def save_data(data, transductor: EnergyTransductor, collection_type: str) -> None:
 
     if collection_type == COLLECTION_TYPE_MINUTELY:
         MinutelyMeasurement.objects.create(
@@ -61,7 +61,7 @@ def save_data(data, transductor, collection_type):
             inductive_power_peak_time=data.get("inductive_power_peak_time"),
             inductive_power_off_peak_time=data.get("inductive_power_off_peak_time"),
             capacitive_power_peak_time=data.get("capacitive_power_peak_time"),
-            capacitive_power_off_peak_time=data.get("capacitive_power_off_peak_time")
+            capacitive_power_off_peak_time=data.get("capacitive_power_off_peak_time"),
         )
 
     elif collection_type == COLLECTION_TYPE_MONTHLY:
@@ -69,16 +69,20 @@ def save_data(data, transductor, collection_type):
         MonthlyMeasurement.objects.create(
             transductor_collection_date=timezone.now(),
             generated_energy_peak_time=data.get("generated_energy_peak_monthly"),
-            generated_energy_off_peak_time=data.get("generated_energy_off_peak_monthly"),
+            generated_energy_off_peak_time=data.get(
+                "generated_energy_off_peak_monthly"
+            ),
             consumption_peak_time=data.get("consumption_peak_monthly"),
             consumption_off_peak_time=data.get("consumption_off_peak_monthly"),
             inductive_power_peak_time=data.get("inductive_power_peak_monthly"),
             inductive_power_off_peak_time=data.get("inductive_power_off_peak_monthly"),
             capacitive_power_peak_time=data.get("capacitive_power_peak_monthly"),
-            capacitive_power_off_peak_time=data.get("capacitive_power_off_peak_monthly"),
+            capacitive_power_off_peak_time=data.get(
+                "capacitive_power_off_peak_monthly"
+            ),
             active_max_power_peak_time=data.get("active_max_power_peak_monthly"),
             active_max_power_off_peaktime=data.get("active_max_power_off_peak_monthly"),
             reactive_max_power_peak_time=data.get("reactive_max_power_peak_monthly"),
             reactive_max_power_off_peaktime=data.get(""),
-            active_max_power_list_peak=data.get("")
+            active_max_power_list_peak=data.get(""),
         )
