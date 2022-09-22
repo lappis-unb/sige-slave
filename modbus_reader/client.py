@@ -19,8 +19,7 @@ class ModbusClient:
         self.client = self.create_modbus_client()
 
     def create_modbus_client(self):
-        """Initialize a client instance
-        """
+        """Initialize a client instance"""
         if self.protocol == 0:
             logger.info(f"cliente tcp, host: {self.ip_address}, port: {self.port}")
             client = ModbusTcpClient(self.ip_address, self.port)
@@ -38,8 +37,7 @@ class ModbusClient:
         return client
 
     def disconnect(self) -> None:
-        """ Closes the underlying socket connection
-        """
+        """Closes the underlying socket connection"""
         self.client.close()
 
     def read_holding_registers(self, address, count: int, unit: int = 1):
