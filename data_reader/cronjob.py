@@ -1,13 +1,14 @@
 from django_cron import CronJobBase, Schedule
 
-from .utils import perform_all_data_rescue
 from modbus_reader.main import perform_all_data_collection
 from modbus_reader.utils.constants import (
     MONTH_TO_MINUTES,
     TRANSDUCTOR_COLLECTION_TYPE_MINUTELY,
-    TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY,
     TRANSDUCTOR_COLLECTION_TYPE_MONTHLY,
+    TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY,
 )
+
+from .utils import perform_all_data_rescue
 
 
 class MinutelyCollectCronJob(CronJobBase):

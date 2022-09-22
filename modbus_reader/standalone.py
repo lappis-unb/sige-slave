@@ -3,7 +3,7 @@ from datetime import datetime
 from time import time
 from typing import Type
 
-from device import TransductorDevice, DeviceReader
+from device import DeviceReader, TransductorDevice
 from register_csv import RegisterCSV
 from tabulate import tabulate
 
@@ -11,8 +11,8 @@ from utils.config import devices_config
 from utils.constants import (
     REGISTER_MAP_COLUMNS,
     TRANSDUCTOR_COLLECTION_TYPE_MINUTELY,
-    TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY,
     TRANSDUCTOR_COLLECTION_TYPE_MONTHLY,
+    TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY,
 )
 
 

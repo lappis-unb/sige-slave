@@ -2,6 +2,7 @@ from datetime import datetime
 from threading import Thread
 from typing import Optional
 
+from modbus_reader.save_data import save_data
 from modbus_reader.utils.config import devices_config
 from modbus_reader.utils.constants import (
     PATH_REGISTER_CSV,
@@ -11,8 +12,6 @@ from modbus_reader.utils.constants import (
 )
 from modbus_reader.utils.utils import load_handler
 from transductor.models import EnergyTransductor
-
-from modbus_reader.save_data import save_data
 
 
 def perform_all_data_collection(collection_type: str) -> None:
