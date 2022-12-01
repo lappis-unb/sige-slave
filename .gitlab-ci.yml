@@ -36,7 +36,7 @@ docker:
 
 test:
   stage: test
-  coverage: '^TOTAL.+?(\d+%)$'
+  coverage: ^TOTAL.+?(\d+%)$
   script:
     - python manage.py test --verbosity=2
     - coverage run manage.py test && coverage report && coverage erase
