@@ -36,7 +36,7 @@ docker:
 
 test:
   stage: test
-  coverage: `/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/`
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
     - python manage.py test --verbosity=2
     - coverage run manage.py test && coverage report && coverage erase
