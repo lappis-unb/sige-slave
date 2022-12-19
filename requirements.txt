@@ -1,4 +1,5 @@
 Django==3.0.*
+pymodbus
 django-environ==0.4.*
 psycopg2-binary==2.8.*
 django-cron==0.5.*
@@ -13,3 +14,4 @@ coverage==6.3.2
 coreapi==2.3.*
 Pygments==2.10.0
 Markdown
+tabulate
