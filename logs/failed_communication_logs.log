@@ -6726,3 +6726,75 @@ Errors:
 		 'super' object has no attribute 'collection_functions'
 
 
+DateTime:	 2022-11-30 15:19:33.290207
+Transductor:	 12@ (172.0.0.1)
+Type:		 Minutely
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:20:03.907672
+Transductor:	 12@ (172.0.0.1)
+Type:		 Quarterly
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:20:03.922116
+Transductor:	 12475@ (172.0.0.11)
+Type:		 Quarterly
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:24:35.009543
+Transductor:	 12475@ (172.0.0.11)
+Type:		 Minutely
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:24:35.019431
+Transductor:	 12@ (172.0.0.1)
+Type:		 Minutely
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:25:05.597922
+Transductor:	 12475@ (172.0.0.11)
+Type:		 Monthly
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:25:05.632006
+Transductor:	 12@ (172.0.0.1)
+Type:		 Monthly
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:27:33.800200
+Transductor:	 12@ (172.0.0.1)
+Type:		 Minutely
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
+DateTime:	 2022-11-30 15:27:33.803943
+Transductor:	 12475@ (172.0.0.11)
+Type:		 Minutely
+Status:		 Failure at sending messages
+Errors:
+		 timed out
+
+
