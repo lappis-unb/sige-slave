@@ -1,5 +1,5 @@
 Django==3.0.*
-pymodbus
+pymodbus==2.5.*
 django-environ==0.4.*
 psycopg2-binary==2.8.*
 django-cron==0.5.*
@@ -10,8 +10,8 @@ retrying==1.3.*
 black==22.3.0
 isort==5.8.*
 pylint-django==2.5.3
-coverage==6.3.2 
+coverage==6.3.2
 coreapi==2.3.*
 Pygments==2.10.0
-Markdown
-tabulate
+Markdown==3.4.*
+tabulate==0.8.*

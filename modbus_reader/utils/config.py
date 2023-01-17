@@ -1,20 +1,20 @@
 devices_config = {
-    'MD30': {
+    "MD30": {
         "protocol": 0,
         "max_reg_request": 100,
-        "path_file_csv": "modbus_reader/maps/md30_tr4020.csv"
+        "path_file_csv": "/smi-slave/modbus_reader/maps/md30_tr4020.csv",
     },
-    'TR4020': {
+    "TR4020": {
         "protocol": 0,
         "max_reg_request": 100,
-        "path_file_csv": "modbus_reader/maps/md30_tr4020.csv"
+        "path_file_csv": "/smi-slave/modbus_reader/maps/md30_tr4020.csv",
     },
-    'Konect': {
+    "Konect": {
         "protocol": 0,
         "max_reg_request": 8,
-        "path_file_csv": "modbus_reader/maps/md30_tr4020.csv"
+        "path_file_csv": "/smi-slave/modbus_reader/maps/md30_tr4020.csv",
     },
-    'test': {
+    "test": {
         "id": 1,
         "model": "MD30",
         "serial_number": "30000484",
@@ -32,5 +32,23 @@ devices_config = {
         "protocol": 0,
         "max_reg_request": 100,
         "path_file_csv": "maps/md30_tr4020.csv",
+    },
+    "test-lappis": {
+        "id": 1,
+        "model": "MD30",
+        "serial_number": "12345678",
+        "ip_address": "164.41.98.12",
+        "port": 1001,
+        "slave_server": "",
+        "geolocation_latitude": 0,
+        "geolocation_longitude": 0,
+        "campus": "",
+        "firmware_version": "1.42",
+        "name": "Lappis 1",
+        "broken": "false",
+        "active": "true",
+        "protocol": 0,
+        "max_reg_request": 100,
+        "path_file_csv": "modbus_reader/maps/md30_tr4020.csv",
     },
 }
