@@ -1,7 +1,5 @@
 from collections import namedtuple
-from datetime import datetime
 from time import time
-from typing import Type
 
 from device import DeviceReader, TransductorDevice
 from register_csv import RegisterCSV
@@ -28,29 +26,25 @@ def test_without_django(configuration, collection_to_perform: str) -> None:
     Returns:
         None
     """
+    
     print("")
-
     start: float = time()
 
-    Device: Type[tuple] = namedtuple("Device", ["ip_address", "port", "model"])
+    Device = namedtuple("Device", ["ip_address", "port", "model", "slave_id", "max_request"])
     transductor = Device(
-        configuration["ip_address"], configuration["port"], configuration["model"]
+        config_file["ip_address"],
+        config_file["port"],
+        config_file["model"],
+        config_file["slave_id"],
+        config_file["max_reg_request"],
     )
     max_request = config_file["max_reg_request"]
 
-    file_reader: RegisterCSV = RegisterCSV(
-        configuration["path_file_csv"], REGISTER_MAP_COLUMNS
-    )
-    transductor_device: TransductorDevice = TransductorDevice(
-        transductor, max_request, file_reader
-    )
-    transductor_reader: DeviceReader = DeviceReader(
-        collection_to_perform, transductor_device
-    )
+    file_reader = RegisterCSV(config_file["path_file_csv"], REGISTER_MAP_COLUMNS)
+    transductor_device = TransductorDevice(transductor, max_request, file_reader)
+    transductor_reader = DeviceReader(collection_to_perform, transductor_device)
 
-    measurements_data: dict[
-        str, datetime
-    ] = transductor_reader.single_data_collection_type()
+    measurements_data = transductor_reader.single_data_collection_type()
     stop: float = time()
 
     print("Transductor information")
@@ -69,13 +63,18 @@ def test_without_django(configuration, collection_to_perform: str) -> None:
     print(f" => collection_type: {collection_to_perform}", "")
 
     print("Collection Data")
-    collection_data = []
-    for measurement, valor in measurements_data.items():
-        collection_data.append([measurement, valor])
-
+    collection_data = [[measurement, valor]for measurement, valor in measurements_data.items()]
+    
+    
     print(tabulate(collection_data, headers=["Measurement", "value"]))
 
+    print("Maximum number of registers in a request")
+    print(f" => max_request : {max_request}")
+
     print("Transductor registers read")
+    print(f" =>    mediadas : {len(p)}")
+
+    print("Blocks registers read")
     print(f" => blocks: {len(transductor_reader.registers_data)}")
 
     print("Time elapsed to perform collection")
@@ -84,8 +83,8 @@ def test_without_django(configuration, collection_to_perform: str) -> None:
 
 if __name__ == "__main__":
     # configuration dictionary
-    config_file = devices_config["test-lappis"]
+    config_file = devices_config["Konect"]
 
     test_without_django(config_file, TRANSDUCTOR_COLLECTION_TYPE_MINUTELY)
-    test_without_django(config_file, TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY)
-    test_without_django(config_file, TRANSDUCTOR_COLLECTION_TYPE_MONTHLY)
+    # test_without_django(config_file, TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY)
+    # test_without_django(config_file, TRANSDUCTOR_COLLECTION_TYPE_MONTHLY)
