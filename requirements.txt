@@ -1,5 +1,5 @@
 Django==3.0.*
-pymodbus==2.5.*
+pymodbus==3.1.*
 django-environ==0.4.*
 psycopg2-binary==2.8.*
 django-cron==0.5.*
