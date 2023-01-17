@@ -1,4 +1,3 @@
-# from django.utils import timezone
 from pymodbus.constants import Endian
 from pymodbus.payload import BinaryPayloadDecoder
 
@@ -15,11 +14,13 @@ class TransductorDevice(object):
     """
     Transductor device class for reading registers from modbus device
     """
+
     def __init__(self, transductor, max_reg_request, file_reader) -> None:
         self.file_reader = file_reader
         self.model = transductor.model
         self.ip_address = transductor.ip_address
         self.port = transductor.port
+        self.slave_id = transductor.slave_id
         self.max_reg_request = max_reg_request
 
     def reset_registers(self) -> None:
@@ -30,7 +31,9 @@ class TransductorDevice(object):
         return self.file_reader.get_registers_by_collection_type(collection_type)
 
     def get_registers_data(self, collection_type, max_reg_request):
-        return self.file_reader.filter_registers_by_collection_type_and_get_requests_blocks(collection_type, max_reg_request)
+        return self.file_reader.filter_registers_by_collection_type_and_get_requests_blocks(
+            collection_type, max_reg_request
+        )
 
 
 class DeviceReader(object):
@@ -38,17 +41,8 @@ class DeviceReader(object):
         self.device = device
         self.collection_type = collection_type
         self.modbus_decoder = ModbusTypeDecoder()
-
-        self.registers_collection_type = device.get_registers_collection_type(
-            collection_type
-        )
-        self.registers_data = device.get_registers_data(
-            collection_type, device.max_reg_request
-        )
-
-        # self.registers["Minutely"] = []
-        # self.registers["Quartely"] = []
-        # self.registers["Monthly"] = []
+        self.registers_collection_type = device.get_registers_collection_type(collection_type)
+        self.registers_data = device.get_registers_data(collection_type, device.max_reg_request)
 
     def single_data_collection_type(self):
         """
@@ -57,24 +51,30 @@ class DeviceReader(object):
 
         measurements_data = {}
         for data in self.registers_data:
+
+            byteorder = data["byteorder"].split("_")
+            if byteorder[0] == "MSB" or "F2":
+                byte_order = Endian.Little
+            else:
+                byte_order = Endian.Big
+
             payload = self._read_registers(
-                self.device.ip_address, self.device.port, data
+                self.device.ip_address, self.device.port, self.device.slave_id, data
             )
             payload_decoder = BinaryPayloadDecoder.fromRegisters(
-                registers=payload, byteorder=Endian.Big, wordorder=Endian.Little
+                registers=payload,
+                byteorder=byte_order,
+                wordorder=Endian.Little,
             )
             decoded_data = self._modbus_decoder(payload_decoder, data)
-            measurements_data.update(decoded_data)
+            measurements_data |= decoded_data
 
-            # adicionar elementos ao dicionario(verificar versão do python)
-            # measurements_data |= decoded_data
+        # transductor_collection_date = remove_format_datetime(measurements_data)
+        # measurements_data["transductor_collection_date"] = transductor_collection_date
 
-        transductor_collection_date = remove_format_datetime(measurements_data)
-
-        measurements_data["transductor_collection_date"] = transductor_collection_date
         return measurements_data
 
-    def _read_registers(self, ip_address: str, port: int, registers_data):
+    def _read_registers(self, ip_address: str, port: int, slave_id: int, registers_data):
         """
         read registers from modbus device
         """
@@ -82,9 +82,16 @@ class DeviceReader(object):
         address = registers_data["start_address"]
         size = registers_data["size"]
 
-        modbus = ModbusClient(ip_address, port)
-        payload = modbus.read_holding_registers(address, size, unit=1)
+        payload = {}
+        modbus = ModbusClient(ip_address, port, slave_id)
+        if registers_data["datamodel"] == "read_input_register":
+            payload = modbus.read_input_registers(address, size, unit=1)
 
+        elif registers_data["datamodel"] == "read_holding_register":
+            payload = modbus.read_holding_registers(address, size, unit=1)
+
+        else:
+            print(f"funcion modbus: {registers_data['datamodel']} not implemented!")
         modbus.disconnect()
         return payload
 
@@ -94,9 +101,7 @@ class DeviceReader(object):
         """
         decoded_payload = {}
         for name_register in registers_data["name_registers"]:
-            decoded_payload[name_register] = round(
-                registers_data.func_decode(payload_decoder), 2
-            )
+            decoded_payload[name_register] = round(registers_data.func_decode(payload_decoder), 2)
             # valor arredondado para 2 casas decimais (validar professor)
 
         return decoded_payload
