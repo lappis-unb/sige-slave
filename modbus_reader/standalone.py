@@ -72,7 +72,7 @@ def test_without_django(configuration, collection_to_perform: str) -> None:
     print(f" => max_request : {max_request}")
 
     print("Transductor registers read")
-    print(f" =>    mediadas : {len(p)}")
+    print(f" =>    mediadas : {len(collection_data)}")
 
     print("Blocks registers read")
     print(f" => blocks: {len(transductor_reader.registers_data)}")

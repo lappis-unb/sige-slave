@@ -17,11 +17,11 @@ PATH_REGISTER_CSV: str = "modbus_reader.register_csv.RegisterCSV"
 PATH_TRANSDUCTOR_DEVICE: str = "modbus_reader.device.TransductorDevice"
 PATH_TRANSDUCTOR_READER: str = "modbus_reader.device.DeviceReader"
 
-REGISTER_MAP_COLUMNS: list[str] = ["register", "address", "size", "type", "group"]
+REGISTER_MAP_COLUMNS = ["register", "address", "size", "type", "group", "byteorder", "datamodel"]
 
 # Modbus reads and writes in "registers". Our registers have 16 bytes
 MODBUS_REGISTER_SIZE: int = 2
-MODBUS_READ_MAX: int = 100
+MODBUS_READ_MAX: int = 125
 
 # Variables with size (bytes) and length (register size)
 LENGTH: int
