@@ -1,7 +1,8 @@
 import logging
 
-from pymodbus.client.sync import ModbusTcpClient, ModbusUdpClient
-from pymodbus.exceptions import ModbusException, NotImplementedException
+from pymodbus.client.tcp import ModbusTcpClient
+from pymodbus.client.udp import ModbusUdpClient
+from pymodbus.constants import Defaults
 
 logger = logging.getLogger(__name__)
 
@@ -12,10 +13,11 @@ class ModbusClient:
     methods for all the current modbus methods.
     """
 
-    def __init__(self, ip_address: str, port: int = 502, protocol: int = 0):
+    def __init__(self, ip_address, port=Defaults.TcpPort, slave_id=Defaults.Slave, protocol=0):
         self.ip_address = ip_address
         self.port = port
         self.protocol = protocol
+        self.slave_id = slave_id
         self.client = self.create_modbus_client()
 
     def create_modbus_client(self):
@@ -55,7 +57,7 @@ class ModbusClient:
 
         payload = {}
         try:
-            response = self.client.read_holding_registers(address, count, unit=1)
+            response = self.client.read_holding_registers(address = address, count=count, slave=self.slave_id)
             payload = response.registers
             logger.info(f"payload: {payload}")
         
@@ -64,12 +66,33 @@ class ModbusClient:
 
         return payload
 
+    def read_input_registers(self, address, count: int, unit: int = 1):
+        """
+        Reads the contents of a contiguous block of input registers in a remote device
+
+        Args:
+            unit(int):  Arguments
+            address: The starting address to read from
+            count (int): The number of registers to read
+            count: The slave unit this request is targeting
+        Returns:
+            Read input Registers Response
+        """
+        payload = {}
+        
+        try:
+            response = self.client.read_input_registers(address = address, count=count, slave=self.slave_id)
+            payload = response.registers
+            logger.info(f"payload: {payload}") 
+        
+        except ModbusException as e:
+            logger.error(e)
+
+        return payload
+
     def read_discrete_inputs(self, address, count, unit):
         raise NotImplementedException("Method not implemented")
-
-    def read_input_registers(self, address, count, unit):
-        raise NotImplementedException("Method not implemented")
-
+    
     def read_coils(self, address, size):
         raise NotImplementedException("Method not implemented")
 
