@@ -15,7 +15,6 @@ class TransductorDevice(object):
     """
     Transductor device class for reading registers from modbus device
     """
-
     def __init__(self, transductor, max_reg_request, file_reader) -> None:
         self.file_reader = file_reader
         self.model = transductor.model

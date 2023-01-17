@@ -58,7 +58,7 @@ class ModbusClient:
             response = self.client.read_holding_registers(address, count, unit=1)
             payload = response.registers
             logger.info(f"payload: {payload}")
-
+        
         except ModbusException as e:
             logger.error(e)
 
