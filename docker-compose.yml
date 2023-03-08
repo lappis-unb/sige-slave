@@ -1,14 +1,10 @@
 version: '3.8'
 services:
-
   slave-db:
     container_name: slave-db
     restart: always
     image: postgres:9.6
     env_file: dev-env
-    networks:
-      smi-network:
-        # ipv4_address: 172.19.0.33
     volumes:
       - pg-data:/var/lib/postgresql/data
 
@@ -17,10 +13,7 @@ services:
     restart: always
     build: .
     env_file: dev-env
-    command: ["sh", "scripts/start.sh"]
-    networks:
-      smi-network:
-        # ipv4_address: 172.19.0.34
+    command: [ "sh", "scripts/start.sh" ]
     ports:
       - 8000:8000
     volumes:
@@ -29,21 +22,10 @@ services:
     depends_on:
       - slave-db
 
-  slave-broker:
-    container_name: slave-broker
-    restart: always
-    image: python:3.8
-    env_file: dev-env
-    working_dir: /slave-broker
-    networks:
-      - smi-network
-    volumes:
-      - ./:/slave-broker/
-    command: /bin/bash -c 'python -u broker.py'
-
 volumes:
   pg-data: {}
   pip_cache:
+
 
 networks:
   smi-network:

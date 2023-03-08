@@ -2,10 +2,10 @@ FROM python:3.10.9-bullseye
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-                        libpq-dev \
-                        cron \
-                        tzdata \
-                        locales
+    libpq-dev \
+    cron \
+    tzdata \
+    locales
 
 RUN sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen pt_BR.UTF-8
