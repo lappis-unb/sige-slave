@@ -7,9 +7,9 @@ COLLECTION_TYPE_QUARTERLY: str = "quarterly"
 COLLECTION_TYPE_MONTHLY: str = "monthly"
 
 # Cronjob definitions
-TRANSDUCTOR_COLLECTION_TYPE_MINUTELY: str = "Minutely"
-TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY: str = "Quarterly"
-TRANSDUCTOR_COLLECTION_TYPE_MONTHLY: str = "Monthly"
+TRANSDUCTOR_COLLECTION_TYPE_MINUTELY: str = "minutely"
+TRANSDUCTOR_COLLECTION_TYPE_QUARTERLY: str = "quarterly"
+TRANSDUCTOR_COLLECTION_TYPE_MONTHLY: str = "monthly"
 MONTH_TO_MINUTES: int = 30 * 24 * 60
 
 # WARNING: these must change if the files, classes or directories are changed

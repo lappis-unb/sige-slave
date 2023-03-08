@@ -31,13 +31,14 @@ def perform_all_data_collection(collection_type: str) -> None:
 
     transductor: EnergyTransductor
     for transductor in EnergyTransductor.objects.all():
-        collection_thread: Thread = Thread(
-            target=single_data_collection,
-            args=(transductor, collection_type),
-        )
+        if not transductor.broken:
+            collection_thread: Thread = Thread(
+                target=single_data_collection,
+                args=(transductor, collection_type),
+            )
 
-        collection_thread.start()
-        threads.append(collection_thread)
+            collection_thread.start()
+            threads.append(collection_thread)
 
     for thread in threads:
         thread.join()
@@ -72,6 +73,9 @@ def single_data_collection(
         None
     """
     config_file = devices_config[transductor.model]
+
+    setattr(transductor, "max_reg_request", config_file["max_reg_request"])
+    setattr(transductor, "slave_id", config_file["slave_id"])
 
     max_reg_request = config_file["max_reg_request"]
 

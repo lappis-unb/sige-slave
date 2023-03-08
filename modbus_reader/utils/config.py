@@ -9,10 +9,10 @@ devices_config = {
         "max_reg_request": 100,
         "path_file_csv": "/smi-slave/modbus_reader/maps/md30_tr4020.csv",
     },
-    'Konect': {
+    "Konect": {
         "id": 1,
         "protocol": 0,
-        "model": "Kron Konnect",
+        "model": "Kron Konect",
         "serial_number": "30000484",
         "max_reg_request": 8,
         "slave_id": 255,
@@ -25,7 +25,9 @@ devices_config = {
         # "ip_address": "164.41.20.239",
         # "ip_address": "164.41.20.241",
         "port": 502,
-        "path_file_csv": "modbus_reader/maps/kron_conect_mmap.csv"
+        "path_file_csv": "/smi-slave/modbus_reader/maps/kron_konect_mmap.csv",
+        # "path_file_csv": "maps/kron_konect_mmap.csv",
+        # "path_file_csv": "kron_konect_mmap.csv",
     },
     "test": {
         "id": 1,

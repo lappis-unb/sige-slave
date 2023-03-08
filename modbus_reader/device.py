@@ -51,13 +51,8 @@ class DeviceReader(object):
 
         measurements_data = {}
         for data in self.registers_data:
-
             byteorder = data["byteorder"].split("_")
-            if byteorder[0] == "MSB" or "F2":
-                byte_order = Endian.Little
-            else:
-                byte_order = Endian.Big
-
+            byte_order = Endian.Little if byteorder[0] in ["MSB", "F2"] else Endian.Big
             payload = self._read_registers(
                 self.device.ip_address, self.device.port, self.device.slave_id, data
             )
