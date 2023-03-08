@@ -104,7 +104,6 @@ class RegisterCSV(object):
             num_reg: the number of registers to read
             type: type of registers in the block
         """
-
         sequential_blocks = []
         current_line = registers[0]
         current_addr: int = current_line["address"]
@@ -168,10 +167,10 @@ class RegisterCSV(object):
         example: collection_type = "minutely"
         """
         registers_collection_type = []
-
         for line in registers_block:
             if line["group"].lower() in [collection_type, COLLECTION_TYPE_DATETIME]:
                 registers_collection_type.append(line)
+
         return registers_collection_type
 
     def _build_registers_data_according_modbus_decoder(self, request_blocks):

@@ -3,6 +3,7 @@ import logging
 from pymodbus.client.tcp import ModbusTcpClient
 from pymodbus.client.udp import ModbusUdpClient
 from pymodbus.constants import Defaults
+from pymodbus.exceptions import ModbusException, NotImplementedException
 
 logger = logging.getLogger(__name__)
 
@@ -57,11 +58,16 @@ class ModbusClient:
 
         payload = {}
         try:
-            response = self.client.read_holding_registers(address = address, count=count, slave=self.slave_id)
+            response = self.client.read_holding_registers(
+                address=address,
+                count=count,
+                slave=self.slave_id,
+            )
+
             payload = response.registers
             logger.info(f"payload: {payload}")
-        
-        except ModbusException as e:
+
+        except ModbusExceptions as e:
             logger.error(e)
 
         return payload
@@ -79,12 +85,14 @@ class ModbusClient:
             Read input Registers Response
         """
         payload = {}
-        
+
         try:
-            response = self.client.read_input_registers(address = address, count=count, slave=self.slave_id)
+            response = self.client.read_input_registers(
+                address=address, count=count, slave=self.slave_id
+            )
             payload = response.registers
-            logger.info(f"payload: {payload}") 
-        
+            logger.info(f"payload: {payload}")
+
         except ModbusException as e:
             logger.error(e)
 
@@ -92,7 +100,7 @@ class ModbusClient:
 
     def read_discrete_inputs(self, address, count, unit):
         raise NotImplementedException("Method not implemented")
-    
+
     def read_coils(self, address, size):
         raise NotImplementedException("Method not implemented")
 

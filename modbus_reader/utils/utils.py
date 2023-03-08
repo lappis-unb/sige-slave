@@ -138,7 +138,6 @@ def load_handler(path: str, *args, **kwargs):
 
 
 def remove_format_datetime(measurements):
-    print(measurements)
     measurements_copy = measurements.copy()
     for measurement, _ in measurements_copy.items():
         if measurement in (
