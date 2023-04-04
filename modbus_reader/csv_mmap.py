@@ -24,7 +24,9 @@ class RegisterCSV(object):
         filter the registers by collection_type and build contiguous blocks with
         fields: initial_address, num_reg, type to be requested
         """
-        registers_collection_type = self.get_registers_by_collection_type(collection_type)
+        registers_collection_type = self.get_registers_by_collection_type(
+            collection_type
+        )
 
         for line in registers_collection_type:
             del line["group"]
@@ -33,7 +35,9 @@ class RegisterCSV(object):
             registers_collection_type, max_reg_request
         )
 
-        return self._build_registers_data_according_modbus_decoder(collection_type_request)
+        return self._build_registers_data_according_modbus_decoder(
+            collection_type_request
+        )
 
     def get_registers_by_collection_type(self, collection_type):
         """
@@ -56,7 +60,7 @@ class RegisterCSV(object):
 
     def _filter_valid_block_by_column_active(self, raw_block: list):
         """
-        filter the valid registers (colomn active) from the raw registers,
+        filter the required columns from the raw registers,
             convert the type registers to the correct type for the modbus device
             convert str to bool and str to int
         """
@@ -65,50 +69,54 @@ class RegisterCSV(object):
         for line in raw_block:
             line["address"] = int(line["address"])
             line["size"] = int(line["size"])
-            line["active"] = str_bool(line["active"])
             line["type"] = type_modbus(line["type"])
 
-            if line["active"]:
-                valid_line = {
-                    column: line[column] for column in line if column in self.csv_map_columns
-                }
-                valid_map_block.append(valid_line)
+            valid_line = {
+                column: line[column] for column in line if column in REQUIRED_HEADERS
+            }
+            valid_map_block.append(valid_line)
+
         return valid_map_block
 
-    def _parser_csv_file(self, path_file: str):
+    def _reader_csv_file(self, path_file: str):
         """
         read the csv file and return a list of dictionaries
+        keys and values converted to lowercase letters and whitespace stripped,
+        only rows with key "active" = "true" are appended to the list of dictionaries.
         """
-        raw_map_block = []
-
+        data = []
         with open(path_file, "r", encoding="utf8") as file_handle:
             csv_reader = DictReader(file_handle, delimiter=",", skipinitialspace=True)
 
-            for line in csv_reader:
-                raw_line = {key.lower().strip(): value.strip() for key, value in line.items()}
-                raw_map_block.append(raw_line)
-        return raw_map_block
+            for row in csv_reader:
+                row = {
+                    key.lower().strip(): value.lower().strip()
+                    for key, value in row.items()
+                }
+                if row.get("active") in ["t", "y", "true", "yes", "1"]:
+                    data.append(row)
+        return data
 
-    def _build_contiguous_blocks_requests_to_device(self, registers, max_reg_request):
+    def _build_contiguous_blocks(self, registers, len_max_block):
         """
-        build contiguous block of the same type to better reduce the
-        number of requests to the device.
+        Build contiguous blocks of the same type to better reduce the number
+        of requests to the device.
 
-        params:
-            registers: list of tuples (address, size, type) - each tuple one register
-            max_reg_request: maximum number of registers in contiguous block
-                to be requested.
+        Arguments:
+        registers -- a list of registers to build contiguous blocks from.
+        len_max_block -- the maximum number of registers in a block.
 
-        return: list of tuples (initial_address, num_reg, type)
-            initial_address: initial address of block
-            num_reg: the number of registers to read
-            type: type of registers in the block
+        Return:
+        A list of contiguous blocks of registers.
         """
+
         sequential_blocks = []
         current_line = registers[0]
         current_addr: int = current_line["address"]
         current_size: int = current_line["size"]
         current_type: str = current_line["type"]
+        current_byteorder: int = current_line["byteorder"]
+        current_datamodel: int = current_line["datamodel"]
 
         start_address: int = current_addr
         size_request: int = current_size
@@ -119,7 +127,7 @@ class RegisterCSV(object):
             is_continuous = next_line["address"] == current_addr + current_size
             is_same_type = next_line["type"].lower() == current_type.lower()
             is_same_size = next_line["size"] == current_size
-            is_low_max_size = register_counter < max_reg_request - 1
+            is_low_max_size = register_counter < len_max_block - 1
 
             if all([is_continuous, is_same_type, is_same_size, is_low_max_size]):
                 size_request += next_line["size"]
@@ -161,19 +169,19 @@ class RegisterCSV(object):
         )
         return sequential_blocks
 
-    def _filter_registers_by_collection_type(self, registers_block, collection_type: str):
+    def _filter_registers_by_data_group(self, registers_block, data_group: str):
         """
-        filter a block valid registers by collection_type
-        example: collection_type = "minutely"
+        filter a block valid registers by data_group
+        example: data_group = "minutely"
         """
-        registers_collection_type = []
+        reg_data_group = []
         for line in registers_block:
-            if line["group"].lower() in [collection_type, COLLECTION_TYPE_DATETIME]:
-                registers_collection_type.append(line)
+            if line["group"].lower() in data_group:
+                reg_data_group.append(line)
 
-        return registers_collection_type
+        return reg_data_group
 
-    def _build_registers_data_according_modbus_decoder(self, request_blocks):
+    def _build_requests_blocks_modbus(self, request_blocks):
         """
         build the registers data to be requested to the device whith function
         decode by type defined in the request_blocks
