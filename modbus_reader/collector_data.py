@@ -8,39 +8,44 @@ from pymodbus.exceptions import ModbusException, NotImplementedException
 logger = logging.getLogger(__name__)
 
 
-class ModbusClient:
-    """
-    provides additional factory methods to create instances of the client and
-    methods for all the current modbus methods.
-    """
-
-    def __init__(self, ip_address, port=Defaults.TcpPort, slave_id=Defaults.Slave, protocol=0):
+class ModbusDataCollector:
+    def __init__(self, ip_address, port, slave_id, method="tcp"):
         self.ip_address = ip_address
         self.port = port
-        self.protocol = protocol
+        self.method = method
         self.slave_id = slave_id
-        self.client = self.create_modbus_client()
+        self.client = None
 
-    def create_modbus_client(self):
-        """Initialize a client instance"""
-        if self.protocol == 0:
+    def _setup_client(self):
+        """Create a client instance"""
+
+        if self.method == "tcp":
             logger.info(f"cliente tcp, host: {self.ip_address}, port: {self.port}")
             client = ModbusTcpClient(self.ip_address, self.port)
-            client.connect()
 
-        elif self.protocol == 1:
+        elif self.method == "udp":
             logger.info(f"cliente udp, host: {self.ip_address},port: {self.port}")
             client = ModbusUdpClient(self.ip_address, self.port)
-            client.connect()
 
         else:
-            client = None
-            logger.error("protocol not implemented")
+            raise ModbusException("Invalid Protocol Comunication")
 
         return client
 
-    def disconnect(self) -> None:
-        """Closes the underlying socket connection"""
+    def _start_modbus_client(self):
+        print("=" * 60)
+        logger.info("Client starting")
+
+        self.client = self._setup_client()
+        self.client.connect()
+
+        if not self.client.connected:
+            raise ModbusException("Client not connected")
+
+        print(f"{self.client} -> connected: {self.client.connected}")
+
+    def _stop_client(self):
+        logger.info("Finished client")
         self.client.close()
 
     def read_holding_registers(self, address, count: int, unit: int = 1):
