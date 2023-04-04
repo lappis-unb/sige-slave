@@ -2,8 +2,9 @@ import logging
 
 from pymodbus.client.tcp import ModbusTcpClient
 from pymodbus.client.udp import ModbusUdpClient
-from pymodbus.constants import Defaults
-from pymodbus.exceptions import ModbusException, NotImplementedException
+from pymodbus.constants import Endian
+from pymodbus.exceptions import ModbusException
+from pymodbus.payload import BinaryPayloadDecoder
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,39 @@ class ModbusDataCollector:
         self.method = method
         self.slave_id = slave_id
         self.client = None
+
+    def start_data_collection(self, register_blocks):
+        """
+        collects data from a Modbus device by reading blocks of registers.
+        """
+
+        self._start_modbus_client()
+        collected_data = {}
+
+        for register_block in register_blocks:
+            byte_order = (
+                Endian.Little
+                if register_block["byteorder"].startswith(("msb", "f2"))
+                else Endian.Big
+            )
+            print(register_block)
+            payload = self._collect_data_block(register_block)
+            if payload is None:
+                print("payload is None")
+                continue
+
+            print(payload)
+            decoder = BinaryPayloadDecoder.fromRegisters(
+                registers=payload,
+                byteorder=byte_order,
+                wordorder=Endian.Little,
+            )
+
+            decoded_data = self._decode_registers_data(decoder, register_block)
+            collected_data |= decoded_data
+
+        self._stop_client()
+        return collected_data
 
     def _setup_client(self):
         """Create a client instance"""
@@ -48,75 +82,52 @@ class ModbusDataCollector:
         logger.info("Finished client")
         self.client.close()
 
-    def read_holding_registers(self, address, count: int, unit: int = 1):
+    def _collect_data_block(self, register_block):
         """
-        Reads the contents of a contiguous block of holding registers in a remote device
-
-        Args:
-            unit(int):  Arguments
-            address: The starting address to read from
-            count (int): The number of registers to read
-            count: The slave unit this request is targeting
-        Returns:
-            Read Holding Registers Response
+        Reads the contents of a contiguous block of holding registers from modbus device
         """
 
-        payload = {}
-        try:
-            response = self.client.read_holding_registers(
-                address=address,
-                count=count,
+        starting_address = register_block["start_address"]
+        size = register_block["size"]
+        datamodel = register_block["datamodel"]
+
+        if datamodel == "read_input_register":
+            response = self.client.read_input_registers(
+                address=starting_address,
+                count=size,
                 slave=self.slave_id,
             )
 
-            payload = response.registers
-            logger.info(f"payload: {payload}")
-
-        except ModbusExceptions as e:
-            logger.error(e)
-
-        return payload
-
-    def read_input_registers(self, address, count: int, unit: int = 1):
-        """
-        Reads the contents of a contiguous block of input registers in a remote device
-
-        Args:
-            unit(int):  Arguments
-            address: The starting address to read from
-            count (int): The number of registers to read
-            count: The slave unit this request is targeting
-        Returns:
-            Read input Registers Response
-        """
-        payload = {}
-
-        try:
-            response = self.client.read_input_registers(
-                address=address, count=count, slave=self.slave_id
+        elif datamodel == "read_holding_register":
+            response = self.client.read_holding_registers(
+                address=starting_address,
+                count=size,
+                slave=self.slave_id,
             )
-            payload = response.registers
-            logger.info(f"payload: {payload}")
 
-        except ModbusException as e:
-            logger.error(e)
+        else:
+            raise NotImplementedError(
+                f"function modbus: {register_block['datamodel']} not implemented!"
+            )
 
-        return payload
+        if response.isError():
+            logger.error("Error reading holding registers")
+            raise ModbusException("Error reading holding registers")
 
-    def read_discrete_inputs(self, address, count, unit):
-        raise NotImplementedException("Method not implemented")
+        return response.registers
 
-    def read_coils(self, address, size):
-        raise NotImplementedException("Method not implemented")
+    def _decode_registers_data(self, decoder, register_block):
+        """
+        convert the various binary data components to their respective values which are
+        stored in a dictionary
 
-    def write_single_coil(self, address, value):
-        raise NotImplementedException("Method not implemented")
+        dictionary with the names of the registers as keys and their respective values
+        """
+        decoded_payload = {}
 
-    def write_single_register(self, address, value):
-        raise NotImplementedException("Method not implemented")
+        for name_register in register_block["name_registers"]:
+            decoded_payload[name_register] = round(
+                register_block.func_decode(decoder), 2
+            )
 
-    def write_multiple_coils(self, address, values):
-        raise NotImplementedException("Method not implemented")
-
-    def write_multiple_registers(self, address, values):
-        raise NotImplementedException("Method not implemented")
+        return decoded_payload
