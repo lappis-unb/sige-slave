@@ -6,6 +6,8 @@ from types import ModuleType
 from django.utils import timezone
 from pymodbus.exceptions import ParameterException
 
+from modbus_reader.utils.constants import ON_PEAK_TIME_END, ON_PEAK_TIME_START
+
 """
     function utilities:
         function to convert a string to a boolean.
@@ -359,3 +361,12 @@ def datetime_string_to_unixtime(date_time_string: str) -> int:
     date_format: datetime = datetime.strptime(date_time_string, "%Y-%m-%d, %H:%M:%S")
 
     return int(datetime.timestamp(date_format))
+
+
+def is_weekday_interval():
+    current_datetime = timezone.now()
+
+    return (
+        current_datetime.time() > ON_PEAK_TIME_START
+        and current_datetime.time() < ON_PEAK_TIME_END
+    )
