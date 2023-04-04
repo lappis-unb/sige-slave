@@ -1,62 +1,49 @@
 from collections import OrderedDict
 from csv import DictReader
 
-try:
-    from modbus_reader.utils.constants import (
-        COLLECTION_TYPE_DATETIME,
-        COLLECTION_TYPE_MINUTELY,
-    )
-    from modbus_reader.utils.utils import ModbusTypeDecoder, str_bool, type_modbus
-except ImportError:
-    from utils.constants import COLLECTION_TYPE_DATETIME, COLLECTION_TYPE_MINUTELY
-    from utils.utils import ModbusTypeDecoder, str_bool, type_modbus
+from modbus_reader.utils.constants import DATA_GROUPS, REQUIRED_HEADERS
+from modbus_reader.utils.helpers import ModbusTypeDecoder, type_modbus
 
 
-class RegisterCSV(object):
-    def __init__(self, path_file, REGISTER_MAP_COLUMNS):
-        self.path_file = path_file
-        self.csv_map_columns = REGISTER_MAP_COLUMNS
+class MemoryMapModbus:
+    minutely = {}
+    quarterly = {}
+    monthly = {}
 
-    def filter_registers_by_collection_type_and_get_requests_blocks(
-        self, collection_type, max_reg_request
-    ):
-        """
-        filter the registers by collection_type and build contiguous blocks with
-        fields: initial_address, num_reg, type to be requested
-        """
-        registers_collection_type = self.get_registers_by_collection_type(
-            collection_type
+    # @classmethod
+    def getitem(self, transductor, atribute):
+        dictionary = getattr(self, atribute)
+        return dictionary.get(transductor)
+
+    # @classmethod
+    def setitem(self, attribute, transductor, memory_map):
+        dictionary = getattr(self, attribute)
+        dictionary[transductor] = memory_map
+
+    def create_store_memory_map(self, transductor, path_csv, len_max_block, data_group):
+        raw_registers = self._reader_csv_file(path_csv)
+        valid_registers = self._filter_valid_block_by_column_active(raw_registers)
+        datagroup_registers = self._filter_registers_by_data_group(
+            valid_registers, data_group
         )
-
-        for line in registers_collection_type:
-            del line["group"]
-
-        collection_type_request = self._build_contiguous_blocks_requests_to_device(
-            registers_collection_type, max_reg_request
+        register_blocks = self._build_contiguous_blocks(
+            datagroup_registers, len_max_block
         )
+        request_blocks = self._build_requests_blocks_modbus(register_blocks)
 
-        return self._build_registers_data_according_modbus_decoder(
-            collection_type_request
-        )
+        memory_map = {
+            "total_register": len(datagroup_registers),
+            "total_blocks": len(request_blocks),
+            "request_blocks": request_blocks,
+        }
 
-    def get_registers_by_collection_type(self, collection_type):
-        """
-        list registers with the columns defined in the map_columns
-        filtered by collection_type (example: collection_type = "minutely")
-        each line is a register (ordered dict)
-        """
+        self.setitem(data_group, transductor, memory_map)
 
-        valid_block = self.get_full_registers_according_defined_columns()
-        return self._filter_registers_by_collection_type(valid_block, collection_type)
-
-    def get_full_registers_according_defined_columns(self):
-        """
-        list registers with the columns defined in the map_columns
-        filtered by collection_type (example: collection_type = "minutely")
-        each line is a register (ordered dict)
-        """
-        raw_block = self._parser_csv_file(self.path_file)
-        return self._filter_valid_block_by_column_active(raw_block)
+    def update_store_memory_map(self, transductor, path_csv, len_max_block):
+        for data_group in DATA_GROUPS:
+            self.create_store_memory_map(
+                transductor, path_csv, len_max_block, data_group
+            )
 
     def _filter_valid_block_by_column_active(self, raw_block: list):
         """
