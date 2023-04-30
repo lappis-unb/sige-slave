@@ -75,19 +75,19 @@ dht_current_c                       ,    122 ,   2 ,DhtIC                       
                                     ,    124 ,   2 ,EnergGerA                          ,float ,           ,       ,            ,                 ,Energia gerada fase A (desde o último reset)
                                     ,    126 ,   2 ,EnergGerB                          ,float ,           ,       ,            ,                 ,Energia gerada fase B (desde o último reset)
                                     ,    128 ,   2 ,EnergGerC                          ,float ,           ,       ,            ,                 ,Energia gerada fase C (desde o último reset)
-                                    ,    130 ,   2 ,EnergGerT                          ,float ,           ,       ,            ,                 ,Energia gerada total (desde o último reset)
+kron konect - active_generate       ,    130 ,   2 ,EnergGerT                          ,float ,           ,       ,            ,                 ,Energia gerada total (desde o último reset)
 consumption_a                       ,    132 ,   2 ,ConsumoA                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase A (desde o último reset)
 consumption_b                       ,    134 ,   2 ,ConsumoB                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase B (desde o último reset)
 consumption_c                       ,    136 ,   2 ,ConsumoC                           ,float ,minutely   ,true   ,            ,                 ,Consumo fase C (desde o último reset)
-total_consumption                   ,    138 ,   2 ,ConsumoT                           ,float ,minutely   ,true   ,            ,                 ,Consumo total (desde o último reset)
+kron konect - active_consumption    ,    138 ,   2 ,ConsumoT                           ,float ,minutely   ,true   ,            ,                 ,Consumo total (desde o último reset)
                                     ,    140 ,   2 ,EnergindA                          ,float ,           ,       ,            ,                 ,Energia indutiva fase A (desde o último reset)
                                     ,    142 ,   2 ,EnergindB                          ,float ,           ,       ,            ,                 ,Energia indutiva fase B (desde o último reset)
                                     ,    144 ,   2 ,EnergindC                          ,float ,           ,       ,            ,                 ,Energia indutiva fase C (desde o último reset)
-                                    ,    146 ,   2 ,EnergindT                          ,float ,           ,       ,            ,                 ,Energia indutiva total (desde o último reset)
+kron konect - reactive_inducti      ,    146 ,   2 ,EnergindT                          ,float ,           ,       ,            ,                 ,Energia indutiva total (desde o último reset)
                                     ,    148 ,   2 ,EnergcapA                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase A (desde o último reset)
                                     ,    150 ,   2 ,EnergcapB                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase B (desde o último reset)
                                     ,    152 ,   2 ,EnergcapC                          ,float ,           ,       ,            ,                 ,Energia capacitiva fase C (desde o último reset)
-                                    ,    154 ,   2 ,EnergcapT                          ,float ,           ,       ,            ,                 ,Energia capacitiva total (desde o último reset)
+kron konect - reactive_capacitive   ,    154 ,   2 ,EnergcapT                          ,float ,           ,       ,            ,                 ,Energia capacitiva total (desde o último reset)
 generated_energy_peak_monthly       ,    156 ,   2 ,EnergGerPontaMesPassado            ,float ,monthly    ,true   ,            ,                 ,Energia gerada no mês anterior no horário de ponta
 generated_energy_off_peak_monthly   ,    158 ,   2 ,EnergGerForaPontaMesPassado        ,float ,monthly    ,true   ,            ,                 ,Energia gerada no mês anterior no horário fora de ponta
                                     ,    160 ,   2 ,EnergGerReservMesPassado           ,float ,monthly    ,       ,            ,                 ,Energia gerada no mês anterior no horário reservado
