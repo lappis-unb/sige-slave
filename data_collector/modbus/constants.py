@@ -2,28 +2,36 @@
 from datetime import time
 from enum import Enum
 
-# These names must be used in the CSV map file in the `group` column
-DATA_GROUPS = ["datetime", "minutely", "quarterly", "monthly"]
-DATA_GROUP_DATETIME = "datetime"
+from django.db import models
+
+
+class DataGroups(models.IntegerChoices):
+    MINUTELY = 1, "minutely"
+    QUARTERLY = 2, "quarterly"
+    MONTHLY = 3, "monthly"
+    DATETIME = 4, "datetime"
+
+
+DATA_GROUPS = ["minutely", "quarterly", "monthly"]
 DATA_GROUP_MINUTELY = "minutely"
 DATA_GROUP_QUARTERLY = "quarterly"
 DATA_GROUP_MONTHLY = "monthly"
+DATA_GROUP_DATETIME = "datetime"
 
-REQUIRED_HEADERS = [
-    "register",
-    "address",
-    "size",
-    "type",
-    "group",
-    "byteorder",
-    "datamodel",
-]
+# These names must be used in the CSV map file in the `group` column
+CSV_SCHEMA = {
+    "attribute": str,
+    "address": int,
+    "size": int,
+    "type": str,
+    "group": str,
+    "byteorder": str,
+    "function": str,
+}
 
 # Modbus reads and writes in "registers". Our registers have 16 bytes
 MODBUS_REGISTER_SIZE: int = 2
 MODBUS_READ_MAX: int = 125
-
-# Format characters have the python struct module;
 
 
 # type - format - size
@@ -41,22 +49,6 @@ class DATATYPE(Enum):
     FLOAT64 = ("d", 4)
 
 
-class Endian:
-    """
-    Big: This indicates that the bytes are in big endian format
-    Little: This indicates that the bytes are in little endian format
-    """
-
-    Auto = "@"
-    Big = ">"
-    Little = "<"
-
-
-# Endianness definitions
-Auto = "@"
-BIG_ENDIAN: str = ">"
-LITTLE_ENDIAN: str = "<"
-
 TABLE_EXCEPTION_CODE: dict[str, str] = {
     "1": "ILLEGAL FUNCTION",
     "2": "ILLEGAL DATA ADDRESS",
@@ -67,16 +59,9 @@ TABLE_EXCEPTION_CODE: dict[str, str] = {
     "8": "MEMORY PARITY ERROR",
 }
 
-dir_type_map: dict[str, str] = {
-    "csv_dir": "CSV Config Directory",
-    "config_dir": "Diver Config Directory",
-}
-
 ON_PEAK_TIME_START = time(18, 00, 00)
 ON_PEAK_TIME_END = time(20, 59, 59)
-
 INTERMEDIATE_TIME_START = time(17, 0, 0)
 INTERMEDIATE_TIME_END = time(21, 59, 59)
-
 OFF_PEAK_TIME_START = time(22, 0, 0)
 OFF_PEAK_TIME_END = time(16, 59, 59)
