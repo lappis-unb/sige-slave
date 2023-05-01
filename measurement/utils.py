@@ -2,8 +2,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from rest_framework.exceptions import APIException
 
-from transductor.models import EnergyTransductor
-from utils import ValidationException
+from transductor.models import Transductor
 
 
 class MeasurementParamsValidator:
@@ -28,7 +27,7 @@ class MeasurementParamsValidator:
             except KeyError:
                 # errors[field[0]] = _('It must have an %s argument' % field[0])
                 pass
-            except ValidationException as e:
+            except Exception as e:
                 errors[field[0]] = e
 
         exception = APIException(
@@ -43,9 +42,9 @@ class MeasurementParamsValidator:
     @staticmethod
     def validate_id(transductor_id):
         try:
-            EnergyTransductor.objects.get(id=transductor_id)
-        except EnergyTransductor.DoesNotExist:
-            raise ValidationException(
+            Transductor.objects.get(id=transductor_id)
+        except Transductor.DoesNotExist:
+            raise Exception(
                 _("This id does not match with any Transductor"),
             )
 
@@ -56,7 +55,7 @@ class MeasurementParamsValidator:
         except ValueError:
             message = "The start_date param must be a valid date in "
             message += "the format YYYY-MM-DD HH:MM:SS"
-            raise ValidationException(
+            raise Exception(
                 _(message),
             )
 
@@ -67,6 +66,6 @@ class MeasurementParamsValidator:
         except ValueError:
             message = "The end_date param must be a valid date in "
             message += "the format YYYY-MM-DD HH:MM:SS"
-            raise ValidationException(
+            raise Exception(
                 _(message),
             )
