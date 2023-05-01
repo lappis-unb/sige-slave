@@ -1,15 +1,15 @@
-# According to the django-cron documentation, you only need to call the `manage.py runcrons` command to run cronjobs
-* * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons >> /smi-slave/logs/cronjobs_execution.log 2>&1
+HOME=/smi-slave/
+ENV_COMMAND="export \$(cat /root/env | xargs)"
 
+# -> minutely - At every minute 
+* * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py collect_data minutely >> /smi-slave/logs/cronjobs_execution.log 2>&1
 
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyCollectCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# -> quartely - At every 15th minute - cronjob será executado às 0, 15, 30 e 45 minutos de cada hora, em todos os dias.
+0,15,30,45 * * * * export $(cat /root/env | xargs) && python /smi-slave/manage.py collect_data quarterly >> /smi-slave/logs/cronjobs_execution.log 2>&1
 
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MinutelyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.QuarterlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.MonthlyDataRescueCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
+# -> monthly - At 00:00 on day-of-month 1 - cronjob será executado no primeiro dia de todos os meses, no horário da meia-noite (00:00).
+0 0 1 * *  export $(cat /root/env | xargs) && python /smi-slave/manage.py collect_data monthly >> logs/cronjobs_execution.log 2>&1
 
-# * * * * * export $(cat /root/env | xargs) && /usr/local/bin/python3 /smi-slave/manage.py runcrons data_reader.cronjob.CorrectDateCronJob >> /smi-slave/logs/cronjobs_execution.log 2>&1
-# An empty line is required at the end of this file for a valid cron file.
+# -> Daily - lograte - cron job será executado diariamente, no horário da meia-noite (00:00)
+0 0 * * * /usr/sbin/logrotate /etc/logrotate.d/smi_slave > /dev/null 2>&1
+# Necessary line at end of file to make cron valid

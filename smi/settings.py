@@ -39,6 +39,7 @@ DJANGO_APPS = [
 ]
 
 EXTERNAL_APPS = [
+    # "django_cron",
     "rest_framework",
 ]
 
@@ -47,6 +48,7 @@ LOCAL_APPS = [
     "transductor",
     "measurement",
     "debouncers",
+    "data_collector",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + LOCAL_APPS
@@ -79,6 +81,26 @@ TEMPLATES = [
     },
 ]
 
+### django-cron configuration
+
+# CRON_CLASSES = [
+#     ## CollectCronJobs
+#     "data_reader.cronjob.MinutelyCollectCronJob",
+#     "data_reader.cronjob.QuarterlyCollectCronJob",
+#     "data_reader.cronjob.MonthlyCollectCronJob",
+#     ## RescueCronJobs
+#     "data_reader.cronjob.MinutelyDataRescueCronJob",
+#     "data_reader.cronjob.QuarterlyDataRescueCronJob",
+#     "data_reader.cronjob.MonthlyDataRescueCronJob",
+#     # Others CronJobs
+#     # "data_reader.cronjob.CorrectDateCronJob", dont exists
+# ]
+
+# delete django-cron logs older than 90 days
+# DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90  # days
+# ALLOW_PARALLEL_RUNS = False
+
+### end django-cron configuration
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -102,12 +124,7 @@ DATABASES = {
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": (
-            "django.contrib.auth.password_validation"
-            ".UserAttributeSimilarityValidator"
-        )
-    },  # noqa
+    {"NAME": ("django.contrib.auth.password_validation" ".UserAttributeSimilarityValidator")},  # noqa
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": ("django.contrib.auth.password_validation" ".CommonPasswordValidator")},
     {"NAME": ("django.contrib.auth.password_validation" ".NumericPasswordValidator")},
