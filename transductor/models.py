@@ -1,85 +1,57 @@
 import datetime
-from typing import List, Tuple
 
-from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 
+from data_collector.modbus.data_reader import ModbusDataReader
+from data_collector.models import MemoryMap
 from debouncers.data_classes import VoltageState
 from debouncers.debouncers import VoltageEventDebouncer
-from utils import is_datetime_similar
+from transductor.utils import is_datetime_similar
 
 
 class Transductor(models.Model):
     """
-    Base class responsible to create an abstraction of a transductor.
-
-    Attributes:
-        serial_number (int): The serie number.
-        ip_address (str): The ip address.
-        broken (bool): Tells if the transductor is working correctly.
-        active (bool): Tells if the transductor can collect data.
-        model (TransductorModel): The transductor model.
-        firmware_version (str): Tells the transductor's firmware
-            version number.
-        installation_date (datetime): Tells the installation date
-            of a transductor
-        physical_location (str): Tells where the transductor is located
-        geolocation_longitude (decimal): Tells geographic location
-            for a transductor
-        geolocation_latitude (decimal): Tells geographic location
-            for a transductor
-        last_clock_battery_change (datetime): Stores the latest update for the
-            transductor's internal clock.
+    Transductor are the electricity measuring equipment connected to the
+    power grid.
     """
 
-    serial_number = models.CharField(
-        max_length=8,
-        unique=True,
-    )
-    ip_address = models.CharField(
-        max_length=15,
-        unique=True,
-        default="0.0.0.0",
-        validators=[
-            RegexValidator(
-                regex="^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$",
-                message="Incorrect IP address format",
-                code="invalid_ip_address",
-            ),
-        ],
-    )
-    port = models.IntegerField(default=1001)
-    model = models.CharField(max_length=50, default="EnergyTransductorModel")
-    broken = models.BooleanField(default=True)
+    id = models.AutoField(primary_key=True)
+    serial_number = models.CharField(max_length=8, unique=True)
+    ip_address = models.GenericIPAddressField(unique=True, protocol="IPv4")
+    port = models.PositiveIntegerField()
+    model = models.CharField(max_length=50, blank=False, null=False)
     active = models.BooleanField(default=True)
+    broken = models.BooleanField(default=False)
     firmware_version = models.CharField(max_length=20)
-    installation_date = models.DateTimeField(blank=True, null=True)
+    installation_date = models.DateTimeField(blank=True, default=timezone.now)
     physical_location = models.CharField(max_length=30, default="")
     quarterly_data_rescued = models.BooleanField(default=False)
     monthly_data_rescued = models.BooleanField(default=False)
     geolocation_longitude = models.DecimalField(max_digits=15, decimal_places=10)
     geolocation_latitude = models.DecimalField(max_digits=15, decimal_places=10)
-    last_clock_battery_change = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        abstract = True
-
-
-class EnergyTransductor(Transductor):
-    """
-    Energy Transductor are the electricity measuring equipment connected to the
-    power grid.
-
-    These devices are constantly making energy measurements and storing them in
-    their internal memory.
-
-    From time to time, the `smi-slave` communicates with this equipment, in order
-    to obtain the collected historical data.
-    """
+    last_clock_battery_change = models.DateTimeField(blank=True, default=timezone.now)
+    memory_map = models.ForeignKey(MemoryMap, on_delete=models.DO_NOTHING, related_name="+")
 
     def __str__(self) -> str:
-        return self.serial_number
+        return f"{self.ip_address} - {self.model}"
+
+    def collect_data(self, data_group, slave_id):
+        register_map = getattr(self.memory_map, data_group)
+
+        collector = ModbusDataReader(
+            ip_address=self.ip_address,
+            port=self.port,
+            slave_id=slave_id,
+        )
+        try:
+            modbus_data = collector.read_datagroup_blocks(register_map)
+            modbus_data["transductor"] = self.id
+            return modbus_data
+
+        except Exception as e:
+            self.set_broken(True)
+            return e
 
     def set_broken(self, new_status: bool) -> bool:
         """
@@ -100,17 +72,16 @@ class EnergyTransductor(Transductor):
         Returns:
             bool: returns the new state of the Transductor
         """
-        from events.models import FailedConnectionTransductorEvent
+        from events.models import Event, FailedConnectionTransductorEvent
 
         if new_status == self.broken:
             return self.broken
 
-        old_status = self.broken
         self.broken = new_status
         self.save(update_fields=["broken"])
 
         # The transductor was working and now is "broken"
-        if old_status is False and new_status is True:
+        if new_status:
             FailedConnectionTransductorEvent.objects.create(transductor=self)
             TimeInterval.objects.create(
                 transductor=self,
@@ -118,7 +89,7 @@ class EnergyTransductor(Transductor):
             )
 
         # The transductor was "broken" and now is working
-        elif old_status is True and new_status is False:
+        else:
             last_open_interval = self.timeintervals.last()
 
             if not last_open_interval:
@@ -170,19 +141,11 @@ class EnergyTransductor(Transductor):
         latest_measurements = queryset[:15]
 
         # List with most recent measurements for a given phase
-        latest_measurements: List[float] = latest_measurements.values_list(
-            measurement_phase,
-            flat=True,
-        )
+        latest_measurements: list[float] = latest_measurements.values_list(measurement_phase, flat=True)
 
         debouncer = VoltageEventDebouncer(measurement_phase)
-
         debouncer.data_history = list(latest_measurements)
-
-        voltage_state, created = self.voltage_phase_states.get_or_create(
-            phase=measurement_phase,
-        )
-
+        voltage_state = self.voltage_phase_states.get_or_create(phase=measurement_phase)
         debouncer.current_voltage_state = voltage_state.current_voltage_state
 
         return debouncer
@@ -204,7 +167,7 @@ class EnergyTransductor(Transductor):
 
     def check_voltage_events(
         self,
-        voltage_state_transition: Tuple[VoltageState, VoltageState],
+        voltage_state_transition: tuple[VoltageState, VoltageState],
         measurement_phase: str,
         measurements_value: float,
     ) -> None:
@@ -213,15 +176,10 @@ class EnergyTransductor(Transductor):
 
         # If the previous state was not VoltageState.NORMAL, it means that there is
         # an open event that needs to be closed
-        if (
-            previous_state != VoltageState.NORMAL.value
-            and previous_state != current_state
-        ):
+        if previous_state not in [VoltageState.NORMAL.value, current_state]:
             event_class = VoltageState.get_target_event_class(previous_state)
 
-            related_unfinished_events = event_class.objects.filter(
-                transductor=self, ended_at=None
-            )
+            related_unfinished_events = event_class.objects.filter(transductor=self, ended_at=None)
 
             last_event = related_unfinished_events.last()
 
@@ -241,18 +199,12 @@ class EnergyTransductor(Transductor):
 
                 last_event.save()
 
-            # BUG => the previous state was not normal and there is no event opened
-            else:
-                pass
-
         # If the current state is not VoltageState.NORMAL, it means that you need
         # to open a new event for the current state.
         if current_state != VoltageState.NORMAL.value:
             event_class = VoltageState.get_target_event_class(current_state)
 
-            event, created = event_class.objects.get_or_create(
-                transductor=self, ended_at=None
-            )
+            event, created = event_class.objects.get_or_create(transductor=self, ended_at=None)
 
             if not event.data:
                 data = {
@@ -279,7 +231,7 @@ class TransductorVoltageState(models.Model):
         ("CriticalLow", "CriticalLow"),
         ("PhaseDown", "PhaseDown"),
     )
-
+    id = models.AutoField(primary_key=True)
     current_voltage_state = models.CharField(
         max_length=14,
         choices=VOLTAGE_STATES,
@@ -287,7 +239,7 @@ class TransductorVoltageState(models.Model):
     )
 
     transductor = models.ForeignKey(
-        EnergyTransductor,
+        Transductor,
         related_name="voltage_phase_states",
         on_delete=models.CASCADE,
     )
@@ -311,12 +263,12 @@ class TransductorVoltageState(models.Model):
 
 
 class TimeInterval(models.Model):
-
+    id = models.AutoField(primary_key=True)
     begin = models.DateTimeField(null=False)
     end = models.DateTimeField(null=True)
 
     transductor = models.ForeignKey(
-        EnergyTransductor,
+        Transductor,
         models.CASCADE,
         related_name="timeintervals",
     )

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EnergyTransductor, TimeInterval, TransductorVoltageState
+from transductor.models import TimeInterval, Transductor, TransductorVoltageState
 
 
 @admin.register(TransductorVoltageState)
@@ -12,5 +12,21 @@ class TransductorVoltageStateAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(EnergyTransductor)
+@admin.register(Transductor)
+class TransductorAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "model",
+        "serial_number",
+        "ip_address",
+        "port",
+        "installation_date",
+        "active",
+        "broken",
+    ]
+    list_display_links = ("id", "model")
+    search_fields = ("id", "model", "serial_number", "ip_address")
+    list_filter = ("ip_address", "model", "active", "broken")
+
+
 admin.site.register(TimeInterval)
