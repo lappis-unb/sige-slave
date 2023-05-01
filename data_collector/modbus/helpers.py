@@ -1,8 +1,9 @@
-import struct
+from csv import DictReader
+from pathlib import Path
 
 from django.utils import timezone
 
-from data_collector.modbus.constants import ON_PEAK_TIME_END, ON_PEAK_TIME_START
+from data_collector.modbus.settings import ON_PEAK_TIME_END, ON_PEAK_TIME_START
 
 
 class ModbusTypeDecoder(object):
@@ -150,14 +151,36 @@ def type_modbus(data_type: str) -> str:
 
 def is_weekday_interval():
     current_datetime = timezone.now()
-    return (
-        current_datetime.time() > ON_PEAK_TIME_START
-        and current_datetime.time() < ON_PEAK_TIME_END
-    )
+    return current_datetime.time() > ON_PEAK_TIME_START and current_datetime.time() < ON_PEAK_TIME_END
 
 
 def map_registers_to_model(register_blocks, model):
-    mapping = {
-        block["register_name"]: block["model_attribute"] for block in register_blocks
-    }
+    mapping = {block["register_name"]: block["model_attribute"] for block in register_blocks}
     setattr(model, "register_mapping", mapping)
+
+
+def reader_csv_file(path_file: Path):
+    csv_data = []
+    with open(path_file, "r", encoding="utf8") as file_handle:
+        csv_reader = DictReader(file_handle, delimiter=",", skipinitialspace=True)
+
+        for row in csv_reader:
+            row = {key.lower().strip(): value.lower().strip() for key, value in row.items()}
+
+            if row.get("active") in ["t", "y", "true", "yes", "1"]:
+                csv_data.append(row)
+    return csv_data
+
+
+def get_now():
+    return timezone.now().strftime("%d/%m/%Y %H:%M:%S")
+
+
+def update_key_attributes(self, modbus_data) -> dict:
+    """
+    Update the key attributes of the provided modbus_data with the appropriate peak/off-peak
+    time and return as a dictionary
+    """
+
+    peak_time = "_peak_time" if is_weekday_interval() else "_off_peak_time"
+    return {attribute + peak_time: value for attribute, value in modbus_data.items()}

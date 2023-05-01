@@ -2,7 +2,10 @@
 from datetime import time
 from enum import Enum
 
+from django.conf import settings
 from django.db import models
+
+CSV_DIR_PATH = settings.BASE_DIR / "data_collector" / "memory_maps"
 
 
 class DataGroups(models.IntegerChoices):
@@ -28,6 +31,13 @@ CSV_SCHEMA = {
     "byteorder": str,
     "function": str,
 }
+
+CONFIG_TRANSDUCTOR = {
+    "tr4020": {"max_block": 100, "slave_id": 1},
+    "md30": {"max_block": 100, "slave_id": 1},
+    "kron_konect": {"max_block": 100, "slave_id": 255},
+}
+
 
 # Modbus reads and writes in "registers". Our registers have 16 bytes
 MODBUS_REGISTER_SIZE: int = 2
