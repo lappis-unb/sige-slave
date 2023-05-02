@@ -2,10 +2,10 @@ from django.utils import timezone
 from rest_framework import mixins, viewsets
 
 from .models import (
-    EnergyTransductor,
     MinutelyMeasurement,
     MonthlyMeasurement,
     QuarterlyMeasurement,
+    Transductor,
 )
 from .serializers import (
     MinutelyMeasurementSerializer,
@@ -48,7 +48,7 @@ class MeasurementViewSet(
         MeasurementParamsValidator.validate_query_params(params)
 
         if transductor_id:
-            transductor = EnergyTransductor.objects.get(id=transductor_id)
+            transductor = Transductor.objects.get(id=transductor_id)
 
             if start_date:
                 self.queryset = self.queryset.filter(
@@ -72,38 +72,50 @@ class MeasurementViewSet(
         return self.queryset
 
 
-class MinutelyMeasurementViewSet(MeasurementViewSet):
-    model = MinutelyMeasurement
+class MinutelyMeasurementViewSet(viewsets.ModelViewSet):
     serializer_class = MinutelyMeasurementSerializer
-    queryset = MinutelyMeasurement.objects.none()
+
+    def get_queryset(self):
+        return MinutelyMeasurement.objects.all()
 
 
-class QuarterlyMeasurementViewSet(MeasurementViewSet):
-    model = QuarterlyMeasurement
+class QuarterlyMeasurementViewSet(viewsets.ModelViewSet):
     serializer_class = QuarterlyMeasurementSerializer
-    queryset = QuarterlyMeasurement.objects.none()
+
+    def get_queryset(self):
+        return QuarterlyMeasurement.objects.all()
 
 
-class MonthlyMeasurementViewSet(MeasurementViewSet):
-    model = MonthlyMeasurement
+class MonthlyMeasurementViewSet(viewsets.ModelViewSet):
     serializer_class = MonthlyMeasurementSerializer
-    queryset = MonthlyMeasurement.objects.none()
+
+    def get_queryset(self):
+        return MonthlyMeasurement.objects.all()
 
 
-class RealTimeMeasurementViewSet(MeasurementViewSet):
-    model = MinutelyMeasurement
+# class QuarterlyMeasurementViewSet(MeasurementViewSet):
+#     model = QuarterlyMeasurement
+#     serializer_class = QuarterlyMeasurementSerializer
+#     queryset = QuarterlyMeasurement.objects.none()
+
+
+# class MonthlyMeasurementViewSet(MeasurementViewSet):
+#     model = MonthlyMeasurement
+#     serializer_class = MonthlyMeasurementSerializer
+#     queryset = MonthlyMeasurement.objects.none()
+
+
+class RealTimeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RealTimeMeasurementSerializer
-    queryset = MinutelyMeasurement.objects.none()
 
     def get_queryset(self):
         last_measurements = []
-
-        transductors = EnergyTransductor.objects.all()
+        transductors = Transductor.objects.all()
 
         for transductor in transductors:
             measurement = (
                 MinutelyMeasurement.objects.filter(transductor=transductor)
-                .order_by("slave_collection_date")
+                .order_by("transductor_collection_date")
                 .last()
             )
             if measurement:

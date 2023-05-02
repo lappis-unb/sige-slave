@@ -15,17 +15,17 @@ from measurement.models import (
     MonthlyMeasurement,
     QuarterlyMeasurement,
 )
-from transductor.models import EnergyTransductor
+from transductor.models import Transductor
 
 
 class EnergyMeasurementTestCase(TestCase):
     def setUp(self):
-        self.transductor = EnergyTransductor.objects.create(
+        self.transductor = Transductor.objects.create(
             serial_number="87654321",
             ip_address="111.111.111.11",
             broken=False,
             active=True,
-            model="EnergyTransductor",
+            model="Transductor",
             firmware_version="12.1.3215",
             physical_location="predio 2 sala 44",
             geolocation_longitude=-24.4556,
@@ -144,12 +144,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MinutelyMeasurement.objects.all())
 
         minutely_en_measurement = MinutelyMeasurement()
-        minutely_en_measurement.slave_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
-        minutely_en_measurement.transductor_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
+        minutely_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        minutely_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         minutely_en_measurement.transductor = self.transductor
         minutely_en_measurement.frequency_a = 666
         minutely_en_measurement.voltage_a = 666
@@ -192,16 +188,12 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_update_minutely_energy_measurement(self):
         minutely_energy_measurement = MinutelyMeasurement()
-        minutely_energy_measurement.transductor = EnergyTransductor.objects.get(
-            serial_number=87654321
-        )
+        minutely_energy_measurement.transductor = Transductor.objects.get(serial_number=87654321)
         minutely_energy_measurement.save()
 
         minutely_energy_measurement.total_power_factor = 100
 
-        self.assertEqual(
-            None, minutely_energy_measurement.save(update_fields=["total_power_factor"])
-        )
+        self.assertEqual(None, minutely_energy_measurement.save(update_fields=["total_power_factor"]))
 
         self.assertTrue(100, minutely_energy_measurement.total_power_factor)
 
@@ -267,10 +259,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertIsInstance(
             last_event,
             PrecariousVoltageEvent,
-            msg=(
-                "The event created should have been of the type "
-                "`PrecariousVoltageEvent`"
-            ),
+            msg=("The event created should have been of the type " "`PrecariousVoltageEvent`"),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -294,10 +283,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertIsInstance(
             last_event,
             CriticalVoltageEvent,
-            msg=(
-                "The event created should have been of the type "
-                "`CriticalVoltageEvent`"
-            ),
+            msg=("The event created should have been of the type " "`CriticalVoltageEvent`"),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -345,10 +331,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertIsInstance(
             last_event,
             PrecariousVoltageEvent,
-            msg=(
-                "The event created should have been of the type "
-                "`PrecariousVoltageEvent`"
-            ),
+            msg=("The event created should have been of the type " "`PrecariousVoltageEvent`"),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -372,10 +355,7 @@ class EnergyMeasurementTestCase(TestCase):
         self.assertIsInstance(
             last_event,
             CriticalVoltageEvent,
-            msg=(
-                "The event created should have been of the type "
-                "`CriticalVoltageEvent`"
-            ),
+            msg=("The event created should have been of the type " "`CriticalVoltageEvent`"),
         )
 
         measurement = MinutelyMeasurement.objects.create(
@@ -390,10 +370,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertTrue(
             len(all_open_events) == 0,
-            msg=(
-                "After the last measurement, with normal values, there should be no "
-                "open events"
-            ),
+            msg=("After the last measurement, with normal values, there should be no " "open events"),
         )
 
     """
@@ -413,12 +390,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(QuarterlyMeasurement.objects.all())
 
         quarterly_en_measurement = QuarterlyMeasurement()
-        quarterly_en_measurement.slave_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
-        quarterly_en_measurement.transductor_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
+        quarterly_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        quarterly_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         quarterly_en_measurement.transductor = self.transductor
         quarterly_en_measurement.generated_energy_peak_time = 31
         quarterly_en_measurement.generated_energy_off_peak_time = 31
@@ -444,18 +417,14 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_update_quarterly_energy_measurement(self):
         quarterly_energy_measurement = QuarterlyMeasurement()
-        quarterly_energy_measurement.transductor = EnergyTransductor.objects.get(
-            serial_number=87654321
-        )
+        quarterly_energy_measurement.transductor = Transductor.objects.get(serial_number=87654321)
         quarterly_energy_measurement.save()
 
         quarterly_energy_measurement.generated_energy_peak_time = 9
 
         self.assertEqual(
             None,
-            quarterly_energy_measurement.save(
-                update_fields=["generated_energy_peak_time"]
-            ),
+            quarterly_energy_measurement.save(update_fields=["generated_energy_peak_time"]),
         )
 
         self.assertTrue(9, quarterly_energy_measurement.generated_energy_peak_time)
@@ -486,12 +455,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
-        monthly_en_measurement.slave_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
-        monthly_en_measurement.transductor_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
+        monthly_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
         monthly_en_measurement.active_max_power_list_peak = []
@@ -509,12 +474,8 @@ class EnergyMeasurementTestCase(TestCase):
         size = len(MonthlyMeasurement.objects.all())
 
         monthly_en_measurement = MonthlyMeasurement()
-        monthly_en_measurement.slave_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
-        monthly_en_measurement.trasnductor_collection_date = timezone.datetime(
-            2019, 2, 5, 14, 0, 0
-        )
+        monthly_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.trasnductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.generated_energy_peak_time = 9
         monthly_en_measurement.generated_energy_off_peak_time = 9
@@ -548,9 +509,7 @@ class EnergyMeasurementTestCase(TestCase):
 
     def test_update_monthly_energy_measurement(self):
         monthly_energy_measurement = MonthlyMeasurement()
-        monthly_energy_measurement.transductor = EnergyTransductor.objects.get(
-            serial_number=87654321
-        )
+        monthly_energy_measurement.transductor = Transductor.objects.get(serial_number=87654321)
         monthly_energy_measurement.active_max_power_list_peak_time = []
         monthly_energy_measurement.active_max_power_list_peak = []
         monthly_energy_measurement.active_max_power_list_off_peak_time = []
@@ -565,9 +524,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         self.assertEqual(
             None,
-            monthly_energy_measurement.save(
-                update_fields=["generated_energy_peak_time"]
-            ),
+            monthly_energy_measurement.save(update_fields=["generated_energy_peak_time"]),
         )
 
         self.assertTrue(9, monthly_energy_measurement.generated_energy_peak_time)
