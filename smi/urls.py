@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework.documentation import include_docs_urls
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from events import urls as events_routes
@@ -14,7 +14,8 @@ router.registry.extend(transductors_routes.router.registry)
 router.registry.extend(events_routes.router.registry)
 
 urlpatterns = [
-    path("docs/", include_docs_urls(title="Slave")),
-    path("admin/", admin.site.urls),
     path("", include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("schema/", SpectacularAPIView.as_view(), name="api-schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="api-schema"), name="api-docs"),
 ]

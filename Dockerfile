@@ -45,7 +45,7 @@ COPY crons/cronjob /etc/cron.d/smi-cron
 RUN chmod 0644 /etc/cron.d/smi-cron && \
     /usr/bin/crontab /etc/cron.d/smi-cron
 
+RUN pip install --upgrade pip 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install dataclasses
 
 CMD cron && tail -f /smi-slave/logs/cronjobs_execution.log

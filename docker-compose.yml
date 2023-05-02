@@ -3,7 +3,7 @@ services:
   slave-db:
     container_name: slave-db
     restart: always
-    image: postgres:9.6
+    image: postgres:14
     env_file: dev-env
     volumes:
       - pg-data:/var/lib/postgresql/data

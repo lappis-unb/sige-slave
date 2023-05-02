@@ -39,8 +39,8 @@ DJANGO_APPS = [
 ]
 
 EXTERNAL_APPS = [
-    # "django_cron",
     "rest_framework",
+    "drf_spectacular",
 ]
 
 LOCAL_APPS = [
@@ -81,39 +81,12 @@ TEMPLATES = [
     },
 ]
 
-### django-cron configuration
-
-# CRON_CLASSES = [
-#     ## CollectCronJobs
-#     "data_reader.cronjob.MinutelyCollectCronJob",
-#     "data_reader.cronjob.QuarterlyCollectCronJob",
-#     "data_reader.cronjob.MonthlyCollectCronJob",
-#     ## RescueCronJobs
-#     "data_reader.cronjob.MinutelyDataRescueCronJob",
-#     "data_reader.cronjob.QuarterlyDataRescueCronJob",
-#     "data_reader.cronjob.MonthlyDataRescueCronJob",
-#     # Others CronJobs
-#     # "data_reader.cronjob.CorrectDateCronJob", dont exists
-# ]
-
-# delete django-cron logs older than 90 days
-# DJANGO_CRON_DELETE_LOGS_OLDER_THAN = 90  # days
-# ALLOW_PARALLEL_RUNS = False
-
-### end django-cron configuration
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#         'LOCATION': '/var/tmp/django_cache',
-#     }
-# }
-
 WSGI_APPLICATION = "smi.wsgi.application"
 
 # Database
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": env("POSTGRES_DB"),
         "USER": env("POSTGRES_USER"),
         "PASSWORD": env("POSTGRES_PASSWORD"),
@@ -138,14 +111,28 @@ USE_L10N = True
 
 # Static files (CSS, JavaScript, Images)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_ROOT = str(BASE_DIR / "media")
+
+STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATIC_URL = "/static/"
+STATICFILES_DIRS = [str(BASE_DIR / "static")]
+
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-
 ## BUSINESS LOGIC VARIABLES
 CONTRACTED_VOLTAGE = float(os.getenv("CONTRACTED_VOLTAGE", 220))
-REST_FRAMEWORK = {"DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema"}
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    #     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    #     "PAGE_SIZE": 10,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "SIGE - Energy Management System",
+    "DESCRIPTION": " SLAVE server - communication with energy transductors and data collection",
+    "VERSION": "1.0.0",
+}
