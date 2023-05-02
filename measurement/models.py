@@ -100,10 +100,11 @@ class ReferenceMeasurement(BaseMeasurement):
 
 
 class QuarterlyMeasurement(BaseMeasurement):
+    is_calculated = models.BooleanField(default=False)
     reference_measurement = models.ForeignKey(
         ReferenceMeasurement,
         related_name="+",
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         blank=True,
     )
 

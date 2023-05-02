@@ -1,5 +1,5 @@
 from django.utils import timezone
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, pagination, viewsets
 
 from .models import (
     MinutelyMeasurement,
@@ -9,14 +9,13 @@ from .models import (
 )
 from .serializers import (
     MinutelyMeasurementSerializer,
+    MonthlyListMeasurementSerializer,
     MonthlyMeasurementSerializer,
+    QuarterlyListMeasurementSerializer,
     QuarterlyMeasurementSerializer,
     RealTimeMeasurementSerializer,
 )
 from .utils import MeasurementParamsValidator
-
-#  this viewset don't inherits from viewsets.ModelViewSet because it
-#  can't have update and create methods so it only inherits from parts of it
 
 
 class MeasurementViewSet(
@@ -74,35 +73,33 @@ class MeasurementViewSet(
 
 class MinutelyMeasurementViewSet(viewsets.ModelViewSet):
     serializer_class = MinutelyMeasurementSerializer
+    # pagination_class = pagination.PageNumberPagination
+    # page_size = 20
 
     def get_queryset(self):
-        return MinutelyMeasurement.objects.all()
+        return MinutelyMeasurement.objects.all().order_by("-id")
 
 
 class QuarterlyMeasurementViewSet(viewsets.ModelViewSet):
-    serializer_class = QuarterlyMeasurementSerializer
+    queryset = QuarterlyMeasurement.objects.all().order_by("-id")
+    # pagination_class = pagination.PageNumberPagination
+    # page_size = 20
 
-    def get_queryset(self):
-        return QuarterlyMeasurement.objects.all()
+    def get_serializer_class(self):
+        if self.action in ["list", "retrive"]:
+            return QuarterlyListMeasurementSerializer
+        return QuarterlyMeasurementSerializer
 
 
 class MonthlyMeasurementViewSet(viewsets.ModelViewSet):
-    serializer_class = MonthlyMeasurementSerializer
+    queryset = MonthlyMeasurement.objects.all().order_by("-id")
+    # pagination_class = pagination.PageNumberPagination
+    # page_size = 20
 
-    def get_queryset(self):
-        return MonthlyMeasurement.objects.all()
-
-
-# class QuarterlyMeasurementViewSet(MeasurementViewSet):
-#     model = QuarterlyMeasurement
-#     serializer_class = QuarterlyMeasurementSerializer
-#     queryset = QuarterlyMeasurement.objects.none()
-
-
-# class MonthlyMeasurementViewSet(MeasurementViewSet):
-#     model = MonthlyMeasurement
-#     serializer_class = MonthlyMeasurementSerializer
-#     queryset = MonthlyMeasurement.objects.none()
+    def get_serializer_class(self):
+        if self.action in ["list", "retrive"]:
+            return MonthlyListMeasurementSerializer
+        return MonthlyMeasurementSerializer
 
 
 class RealTimeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
