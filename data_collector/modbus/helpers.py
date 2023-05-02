@@ -1,4 +1,5 @@
 from csv import DictReader
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from django.utils import timezone
@@ -149,9 +150,19 @@ def type_modbus(data_type: str) -> str:
     return data_type
 
 
-def is_weekday_interval():
-    current_datetime = timezone.now()
-    return current_datetime.time() > ON_PEAK_TIME_START and current_datetime.time() < ON_PEAK_TIME_END
+def is_peak_time(dt_reference: datetime = None) -> bool:
+    if dt_reference is None:
+        dt_reference = timezone.now()
+
+    # Nao considera o minuto final para ajustar ao cronjob:
+    # exemplo coleta: 18h => time = 17:59 => return False
+    #                 21h => time = 20:59 => return True
+    time = (dt_reference - timedelta(minutes=1)).time()
+
+    is_weekday = dt_reference.weekday() < 5  # de segunda a sexta-feira
+    is_peak_time = ON_PEAK_TIME_START <= time <= ON_PEAK_TIME_END
+
+    return is_weekday and is_peak_time
 
 
 def map_registers_to_model(register_blocks, model):
@@ -182,5 +193,5 @@ def update_key_attributes(self, modbus_data) -> dict:
     time and return as a dictionary
     """
 
-    peak_time = "_peak_time" if is_weekday_interval() else "_off_peak_time"
+    peak_time = "_peak_time" if is_peak_time() else "_off_peak_time"
     return {attribute + peak_time: value for attribute, value in modbus_data.items()}
