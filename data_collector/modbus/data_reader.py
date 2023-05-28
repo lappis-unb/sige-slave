@@ -22,7 +22,7 @@ class ModbusDataReader:
 
         self._start_modbus_client()
         collected_data = {}
-
+        
         for register_block in register_blocks:
             byte_order = (
                 Endian.Little
@@ -91,14 +91,10 @@ class ModbusDataReader:
             )
 
         else:
-            raise NotImplementedError(
-                f"function modbus: {register_block['datamodel']} not implemented!"
-            )
+            raise NotImplementedError(f"function modbus: {register_block['datamodel']} not implemented!")
 
         if response.isError():
-            raise ModbusException(
-                f"{self.ip_address} => Error reading holding registers"
-            )
+            raise ModbusException(f"{self.ip_address} => Error reading holding registers")
 
         return response.registers
 

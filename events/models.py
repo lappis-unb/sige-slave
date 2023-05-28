@@ -16,10 +16,8 @@ class Event(models.Model):
         Transductor,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
     )
-    data = models.JSONField()
+    data = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return "%s@%s" % (self.__class__.__name__, self.created_at)
@@ -36,10 +34,7 @@ class VoltageRelatedEvent(Event):
         base_manager_name = "non_polymorphic"
 
     def all_phases_are_none(self):
-        for phase_name, phase_value in self.data.items():
-            if phase_value:
-                return False
-        return True
+        return not any(phase_value for phase_name, phase_value in self.data.items())
 
 
 class FailedConnectionTransductorEvent(Event):

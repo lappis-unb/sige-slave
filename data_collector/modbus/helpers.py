@@ -184,7 +184,7 @@ def reader_csv_file(path_file: Path):
 
 
 def get_now():
-    return timezone.now().strftime("%d/%m/%Y %H:%M:%S")
+    return timezone.now().strftime("%d/%m/%Y  %H:%M:%S")
 
 
 def update_key_attributes(self, modbus_data) -> dict:
