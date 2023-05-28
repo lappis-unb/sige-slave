@@ -7,7 +7,6 @@ from data_collector.modbus.data_reader import ModbusDataReader
 from data_collector.models import MemoryMap
 from debouncers.data_classes import VoltageState
 from debouncers.debouncers import VoltageEventDebouncer
-from transductor.utils import is_datetime_similar
 
 
 class Transductor(models.Model):
@@ -16,7 +15,8 @@ class Transductor(models.Model):
     power grid.
     """
 
-    id = models.AutoField(primary_key=True)
+    # id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)  # SINCRONIZAR ID DO MASTER
     serial_number = models.CharField(max_length=8, unique=True)
     ip_address = models.GenericIPAddressField(unique=True, protocol="IPv4")
     port = models.PositiveIntegerField()
@@ -44,14 +44,18 @@ class Transductor(models.Model):
             port=self.port,
             slave_id=slave_id,
         )
+
+        modbus_data = {"collected": {}, "erros": "", "broken": self.broken}
         try:
-            modbus_data = collector.read_datagroup_blocks(register_map)
-            modbus_data["transductor"] = self.id
-            return modbus_data
+            collected_data = collector.read_datagroup_blocks(register_map)
+            collected_data["transductor"] = self.id
+            modbus_data["collected"] = collected_data
 
         except Exception as e:
-            self.set_broken(True)
-            return e
+            modbus_data["broken"] = self.set_broken(True)
+            modbus_data["errors"] = str(e)
+
+        return modbus_data
 
     def set_broken(self, new_status: bool) -> bool:
         """
@@ -72,15 +76,15 @@ class Transductor(models.Model):
         Returns:
             bool: returns the new state of the Transductor
         """
-        from events.models import Event, FailedConnectionTransductorEvent
+        from events.models import FailedConnectionTransductorEvent
 
         if new_status == self.broken:
             return self.broken
 
         self.broken = new_status
-        self.save(update_fields=["broken"])
+        self.active = not new_status
+        self.save(update_fields=["broken", "active"])
 
-        # The transductor was working and now is "broken"
         if new_status:
             FailedConnectionTransductorEvent.objects.create(transductor=self)
             TimeInterval.objects.create(
@@ -132,12 +136,12 @@ class Transductor(models.Model):
         fifteen_minutes_ago = now - datetime.timedelta(minutes=15)
 
         queryset = self.measurement_minutelymeasurement.filter(
-            transductor_collection_date__lte=now,
-            transductor_collection_date__gte=fifteen_minutes_ago,
+            collection_date__lte=now,
+            collection_date__gte=fifteen_minutes_ago,
         )
 
         # most recent first
-        queryset = queryset.order_by("-transductor_collection_date")
+        queryset = queryset.order_by("-collection_date")
         latest_measurements = queryset[:15]
 
         # List with most recent measurements for a given phase
@@ -277,7 +281,7 @@ class TimeInterval(models.Model):
         self.begin = time + timezone.timedelta(minutes=1)
 
         # Verifies if collected date is inside the recovery interval
-        if self.end < time or is_datetime_similar(self.end, time):
+        if self.end < time:
             self.delete()
             return False
         else:

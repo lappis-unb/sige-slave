@@ -1,25 +1,20 @@
-from django.core.validators import MaxValueValidator
 from django.db import IntegrityError
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from rest_framework.reverse import reverse
 
 from data_collector.modbus.helpers import reader_csv_file
 from data_collector.modbus.settings import CSV_DIR_PATH
 from data_collector.models import MemoryMap
-from transductor.validators import (
-    latitude_validator,
-    longitude_validator,
-    validate_csv_file,
-)
-
-from .models import Transductor
+from transductor.models import Transductor
+from transductor.validators import validate_csv_file
 
 
 class TransductorSerializer(serializers.ModelSerializer):
-    geolocation_latitude = serializers.FloatField(validators=[latitude_validator])
-    geolocation_longitude = serializers.FloatField(validators=[longitude_validator])
-    port = serializers.IntegerField(validators=[MaxValueValidator(65535)])
     memory_map_url = serializers.SerializerMethodField()
+    minutely_measurement_url = serializers.SerializerMethodField()
+    quarterly_measurement_url = serializers.SerializerMethodField()
+    monthly_measurement_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Transductor
@@ -38,12 +33,27 @@ class TransductorSerializer(serializers.ModelSerializer):
             "installation_date",
             "last_clock_battery_change",
             "memory_map_url",
+            "minutely_measurement_url",
+            "quarterly_measurement_url",
+            "monthly_measurement_url",
         )
 
     def get_memory_map_url(self, obj):
+        return self._get_reverse_url("transductor-memorymap", obj)
+
+    def get_minutely_measurement_url(self, obj):
+        return self._get_reverse_url("transductor-minutely", obj)
+
+    def get_quarterly_measurement_url(self, obj):
+        return self._get_reverse_url("transductor-quarterly", obj)
+
+    def get_monthly_measurement_url(self, obj):
+        return self._get_reverse_url("transductor-monthly", obj)
+
+    def _get_reverse_url(self, name, obj):
         request = self.context.get("request")
         if request is not None:
-            return reverse("transductor-memorymap", kwargs={"pk": obj.pk}, request=request)
+            return reverse(name, kwargs={"pk": obj.pk}, request=request)
         return None
 
     def validate(self, attrs):
@@ -58,6 +68,10 @@ class TransductorSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
+        id = validated_data.get("id")  # SINCRONIZAR ID DO MASTER
+        if Transductor.objects.filter(id=id).exists():  # SINCRONIZAR ID DO MASTER
+            raise ValidationError({"id": "Um objeto com este ID já existe."})  # SINCRONIZAR ID DO MASTER
+
         model = validated_data.get("model")
         csv_data = validated_data.pop("csv_data")
 
@@ -71,6 +85,7 @@ class TransductorSerializer(serializers.ModelSerializer):
             raise ValueError(f"An exception of type {type(e).__name__} occurred: {e}")
 
         validated_data["memory_map"] = memory_map
+
         return super().create(validated_data)
 
 

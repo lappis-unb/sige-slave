@@ -4,18 +4,6 @@ from rest_framework import serializers
 from data_collector.modbus.settings import CSV_SCHEMA
 
 
-def latitude_validator(value):
-    if value < -90 or value > 90:
-        msg = _(f"{value} is not a valid latitude")
-        raise serializers.ValidationError(msg, code="invalid_value")
-
-
-def longitude_validator(value):
-    if value < -180 or value > 180:
-        msg = _(f"{value} is not a valid longitude")
-        raise serializers.ValidationError(msg, code="invalid_value")
-
-
 def validate_csv_file(csv_data):
     headers = next(iter(csv_data), {}).keys()
     if not headers:
