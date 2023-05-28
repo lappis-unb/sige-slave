@@ -33,7 +33,7 @@ class Command(BaseCommand):
             thread.join()
 
         elapsed_time = time.perf_counter() - start_time
-        logger.info(f"Command execution time: {elapsed_time:.2f} seconds")
+        logger.info(f"tasks: {elapsed_time:.2f} seconds")
 
     def test_transductor(self, transductor: Transductor) -> None:
         """Tests the connection to a transducer."""

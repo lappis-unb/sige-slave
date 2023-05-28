@@ -1,3 +1,4 @@
+import logging
 import multiprocessing
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,6 +21,8 @@ from measurement.serializers import (
 )
 from transductor.models import Transductor
 
+logger = logging.getLogger("tasks")
+
 
 class Command(BaseCommand):
     """
@@ -34,35 +37,41 @@ class Command(BaseCommand):
 
     def handle(self, data_group, *args, **options):
         start_time = time.perf_counter()
+        logger.info("-" * 70)
+        logger.info(f"Command collect data from transducers  -  {data_group.upper()}")
 
-        self.stdout.write("=" * 70)
-        self.stdout.write(f"{get_now()} - Start Collection: {data_group} ")
-        self.collect_data(data_group)
+        active = Transductor.objects.filter(active=True).count()
+        msg = f"Start Collection - Active Transductors: {active}" if active else "No active Transductors in database"
+        logger.error(msg)
+        # raise CommandError(msg)
+
+        collect = self.collect_data(data_group)
 
         elapsed_time = time.perf_counter() - start_time
-        self.stdout.write(f"{get_now()} - Finished Collection and saving in {elapsed_time:0.2f} seconds.")
+        logger.info(f"[{collect}/{active}] Collects completed and saved database.")
+        logger.info(f"Command execution time: {elapsed_time:0.2f} seconds.")
 
-    def collect_data(self, data_group: str) -> None:
+    def collect_data(self, data_group: str) -> int:
         """
         Collect data from active transductors and save it to the database.
         """
-
         if data_group not in DATA_GROUPS:
-            raise CommandError(f"{get_now()} - Unknown data_group: {data_group}")
+            logger.error(f"Unknown data_group: {data_group}")
+            raise CommandError(f"Unknown data_group: {data_group}")
 
-        transductors = Transductor.objects.filter(broken=False)
-        if not transductors:
-            self.stdout.write(self.style.ERROR(f"{get_now()} - No active Transductors in the database"))
+        transductors = Transductor.objects.filter(active=True)
 
         modbus_data = self.get_data_from_transductors_threads(transductors, data_group)
         self.save_data_to_database(modbus_data, data_group)
+
+        return len(modbus_data)
 
     def get_data_from_transductors_threads(self, transductors, data_group):
         """
         Collect data from each transductor in parallel using multiple processes.
         """
-        modbus_data = []
-        with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() * 2) as executor:
+        modbus_data = []  # TODO: Teste in server perforance num thread in cpu
+        with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() * 4) as executor:
             future_list = []
             for transductor in transductors:
                 model_transductor = transductor.model.lower().strip().replace(" ", "_")
@@ -74,16 +83,21 @@ class Command(BaseCommand):
             for future in as_completed(future_list):
                 try:
                     result = future.result()
-                    modbus_data.append(result)
+                    if result["broken"]:
+                        logger.warning(f"{result['errors']} - set to broken")
+                    else:
+                        modbus_data.append(result["collected"])
+
                 except Exception as e:
-                    raise CommandError(f"{get_now()} - Error: {e}")
+                    logger.error(f"ThreadPoolExecutor Error: {e}")
+                    raise CommandError(f"{get_now()}  -  ThreadPoolExecutor Error: {e}")
+
         return modbus_data
 
     def save_data_to_database(self, modbus_data, data_group) -> None:
         """
         Save the provided modbus_data to the database using the provided serializer class.
         """
-
         serializer_class = self.get_serializer_class(data_group)
         serializer = serializer_class(data=modbus_data, many=True)
 
@@ -96,13 +110,10 @@ class Command(BaseCommand):
                 if not error:
                     valid_data.append(data)
                 else:
-                    self.stdout.write(self.style.ERROR(f"{get_now()} - {error}"))
-                    self.stdout.write(self.style.ERROR(f"\t\t- data: {data} - Set to broken"))
+                    logger.info(self.style.ERROR(f"{get_now()} - {error}"))
 
             if not valid_data:
-                self.stdout.write(
-                    self.style.ERROR(f"{get_now()} - No collection with valid data to save in the database")
-                )
+                logger.info(self.style.ERROR(f"{get_now()}  -  No collection with valid data to save in the database"))
                 return
 
             serializer = serializer_class(data=valid_data, many=True)
@@ -120,4 +131,4 @@ class Command(BaseCommand):
         try:
             return serializer_dict[data_group]
         except KeyError:
-            raise Exception(f"{get_now()} - Unknown serializer data_group")
+            raise Exception(f"{get_now()}  -  Unknown serializer data_group")
