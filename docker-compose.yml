@@ -1,33 +1,54 @@
-version: '3.8'
+version: "3.9"
+
 services:
   slave-db:
     container_name: slave-db
-    restart: always
-    image: postgres:14
+    restart: unless-stopped
+    image: postgres:15.2-bullseye
     env_file: dev-env
     volumes:
       - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5m
+      timeout: 30s
+      retries: 3
+      start_period: 1m
+    networks:
+      - slave-network
 
   slave-api:
     container_name: slave-api
-    restart: always
-    build: .
+    restart: unless-stopped
+    pull_policy: never
     env_file: dev-env
-    command: [ "sh", "scripts/start.sh" ]
+    command: ["sh", "scripts/start-dev.sh"]
+    image: ${IMAGE_NAME:-slave-api}:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        API_KEY: ${API_KEY_CRONITOR}
     ports:
       - 8000:8000
+    networks:
+      - slave-network
+      - sige-network
     volumes:
-      - .:/smi-slave
-      - pip_cache:/usr/local/lib/python3/site-packages
+      - .:/sige-slave
+      - pip_cache:/usr/local/lib/python/site-packages
     depends_on:
       - slave-db
 
 volumes:
-  pg-data: {}
+  pg-data:
+    name: slave-pgdata
   pip_cache:
-
+    name: slave-pip-cache
 
 networks:
-  smi-network:
-    name: smi-network
+  slave-network:
+    name: slave-network
+  sige-network:
     driver: bridge
+    name: sige-network
