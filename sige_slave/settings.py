@@ -1,14 +1,10 @@
-"""
-Django settings for smi project.
-"""
-
 import os
 from pathlib import Path
 
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 LOG_PATH = BASE_DIR / "logs"
 ENVFILE_PATH = BASE_DIR / "dev-env"
 
@@ -22,12 +18,15 @@ SECRET_KEY = env("SLAVE_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 if env("ENVIRONMENT") == "production":
     DEBUG = False
+
 else:
     DEBUG = True
 
-ALLOWED_HOSTS = [env("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = ["*"] if DEBUG else [env("ALLOWED_HOSTS")]
 
-# Application definition
+
+# APPS
+# ---------------------------------------------------------------------------------------------------------------------
 DJANGO_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -41,6 +40,9 @@ DJANGO_APPS = [
 EXTERNAL_APPS = [
     "rest_framework",
     "drf_spectacular",
+    "django_extensions",
+    "django_filters",
+    "debug_toolbar",
 ]
 
 LOCAL_APPS = [
@@ -53,6 +55,9 @@ LOCAL_APPS = [
 
 INSTALLED_APPS = DJANGO_APPS + EXTERNAL_APPS + LOCAL_APPS
 
+
+# MIDDLEWARE
+# ---------------------------------------------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -63,8 +68,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "smi.urls"
 
+# TEMPLATE
+# ---------------------------------------------------------------------------------------------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -81,9 +87,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "smi.wsgi.application"
 
-# Database
+# DATABASES
+# ---------------------------------------------------------------------------------------------------------------------
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -95,7 +101,9 @@ DATABASES = {
     }
 }
 
-# Password validation
+
+# PASSWORDS
+# ---------------------------------------------------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": ("django.contrib.auth.password_validation" ".UserAttributeSimilarityValidator")},  # noqa
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -103,15 +111,38 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": ("django.contrib.auth.password_validation" ".NumericPasswordValidator")},
 ]
 
-# Internationalization
-LANGUAGE_CODE = "pt-br"
+
+# INTERNATIONALIZATION
+# ---------------------------------------------------------------------------------------------------------------------
 TIME_ZONE = "America/Sao_Paulo"
+
+LOCALE_NAME = "pt_br"
+LANGUAGE_CODE = "pt-br"
+LANGUAGES = (
+    ("en", "English"),
+    ("pt-br", "Português"),
+)
+
 USE_I18N = True
 USE_L10N = True
+USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+
+# GENERAL CONFIGURATION
+# ---------------------------------------------------------------------------------------------------------------------
+ROOT_URLCONF = "sige_slave.urls"
+WSGI_APPLICATION = "sige_slave.wsgi.application"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"  # Version 4.2 PKs will be big integers by defaul
+APPEND_SLASH = True
+LOGIN_REDIRECT_URL = "/"
+
+
+# STATIC FILES AND MEDIA
+# ---------------------------------------------------------------------------------------------------------------------
 MEDIA_URL = "/media/"
 MEDIA_ROOT = str(BASE_DIR / "media")
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"]
 
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATIC_URL = "/static/"
@@ -122,17 +153,86 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-## BUSINESS LOGIC VARIABLES
+
+# BUSINESS LOGIC VARIABLES
+# ---------------------------------------------------------------------------------------------------------------------
 CONTRACTED_VOLTAGE = float(os.getenv("CONTRACTED_VOLTAGE", 220))
 
+
+# DJANGO REST FRAMEWORK
+# ---------------------------------------------------------------------------------------------------------------------
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    #     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    #     "PAGE_SIZE": 10,
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 60,
 }
 
+# SPECTACULAR SETTINGS
+# ---------------------------------------------------------------------------------------------------------------------
 SPECTACULAR_SETTINGS = {
     "TITLE": "SIGE - Energy Management System",
     "DESCRIPTION": " SLAVE server - communication with energy transductors and data collection",
     "VERSION": "1.0.0",
+    "DISABLE_ERRORS_AND_WARNINGS": True,
+}
+
+
+# LOGGING
+# ---------------------------------------------------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "simple": {"format": "%(levelname)-8s: %(message)s"},
+        "middle": {"format": "%(module)-12s: [line: %(lineno)-3s] %(message)s"},
+        "verbose": {"format": "%(asctime)s: %(levelname)-8s: %(funcName)s :%(lineno)d %(message)s"},
+    },
+    "handlers": {
+        "rich": {
+            "class": "rich.logging.RichHandler",
+            "formatter": "simple",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_PATH / "debug.log",
+            "maxBytes": 5 * 1024 * 1024,         # 5 MB rotative
+            "formatter": "middle",
+        },
+        "tasks-file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_PATH / "tasks" / "tasks.log",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB rotative
+            "backupCount": 5,  # 5 files de backup de 10 MB cada
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "tasks": {
+            "handlers": ["console", "tasks-file"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
+}
+
+
+# DEBUG TOOLBAR
+# ---------------------------------------------------------------------------------------------------------------------
+MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    "INTERCEPT_REDIRECTS": False,
+    "ALLOWED_HOSTS": ["localhost", "0.0.0.1"],
 }
