@@ -97,11 +97,12 @@ def add_transductor():
 if __name__ == "__main__":
     import django
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "smi.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sige_slave.settings")
     django.setup()
 
-    from transductor.models import EnergyTransductor
     from transductor_model.models import TransductorModel
+
+    from transductor.models import EnergyTransductor
 
     populate()
 

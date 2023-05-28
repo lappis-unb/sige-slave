@@ -33,7 +33,7 @@ class EnergyMeasurementTestCase(TestCase):
             installation_date=datetime.now(),
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
-            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            collection_date
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             frequency_a=8,
@@ -68,7 +68,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
-            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
@@ -82,7 +82,7 @@ class EnergyMeasurementTestCase(TestCase):
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
-            transductor_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             generated_energy_peak_time=8,
@@ -145,7 +145,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         minutely_en_measurement = MinutelyMeasurement()
         minutely_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
-        minutely_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        minutely_en_measurement.collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         minutely_en_measurement.transductor = self.transductor
         minutely_en_measurement.frequency_a = 666
         minutely_en_measurement.voltage_a = 666
@@ -391,7 +391,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         quarterly_en_measurement = QuarterlyMeasurement()
         quarterly_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
-        quarterly_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        quarterly_en_measurement.collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         quarterly_en_measurement.transductor = self.transductor
         quarterly_en_measurement.generated_energy_peak_time = 31
         quarterly_en_measurement.generated_energy_off_peak_time = 31
@@ -456,7 +456,7 @@ class EnergyMeasurementTestCase(TestCase):
 
         monthly_en_measurement = MonthlyMeasurement()
         monthly_en_measurement.slave_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
-        monthly_en_measurement.transductor_collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
+        monthly_en_measurement.collection_date = timezone.datetime(2019, 2, 5, 14, 0, 0)
         monthly_en_measurement.transductor = self.transductor
         monthly_en_measurement.active_max_power_list_peak_time = []
         monthly_en_measurement.active_max_power_list_peak = []

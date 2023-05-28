@@ -308,15 +308,15 @@ class TransductorTestCase(TestCase):
 
         for date in datetimes:
             MinutelyMeasurement.objects.create(
-                transductor_collection_date=date,
+                collection_date=date,
                 slave_collection_date=date,
                 transductor=energy_transductor,
             )
 
-            QuarterlyMeasurement.objects.create(transductor_collection_date=date, transductor=energy_transductor)
+            QuarterlyMeasurement.objects.create(collection_date=date, transductor=energy_transductor)
 
             MonthlyMeasurement.objects.create(
-                transductor_collection_date=date,
+                collection_date=date,
                 transductor=energy_transductor,
                 active_max_power_list_peak_time=[],
                 active_max_power_list_off_peak_time=[],
