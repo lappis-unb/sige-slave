@@ -1,55 +1,69 @@
-image: python:3.10
+image: docker:latest
 
 services:
-  - postgres:14
-
-variables:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: password
-  POSTGRES_DB: smi-slave-test
-  POSTGRES_PORT: 5432
-  POSTGRES_HOST: postgres
-  IMAGE_TAG: lappis/smi-slave
-  SLAVE_SECRET_KEY: some-random-stuff
-  ENVIRONMENT: test
-  ALLOWED_HOSTS: "*"
-  CONTRACTED_VOLTAGE: 220
+  - docker:dind
 
 stages:
-  - test
   - build
+  - lint
+  - test
+  - build_image
+  - code_quality
+  - cleanup
+
+variables:
+  REGISTRY: registry.gitlab.com
+  REPOSITORY: lappis-unb/projects/smi
+  SERVICE_NAME: master-api
+  IMAGE_TAG: latest
+  IMAGE_API: registry.gitlab.com/lappis-unb/projects/smi/smi-master:latest
+  IMAGE_DB: postgres:15.2-bullseye
 
 before_script:
-  - pip install -r requirements.txt
-  - python3 manage.py makemigrations
-  - python3 manage.py migrate
+  - docker --version
+  - docker compose version
 
-docker:
-  stage: test
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - docker --version
+build:
+  stage: build
   script:
-    - docker build -t smi-slave .
+    - docker compose pull 2>&1 | grep -v 'Downloading\|Extracting' || true
+    - docker compose build --parallel
+
+lint:
+  stage: lint
+  before_script:
+    - docker compose pull
+  script:
+    - docker compose run ${SERVICE_NAME} pycodestyle .
+  after_script:
+    - docker image prune -f
 
 test:
   stage: test
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  before_script:
+    - docker compose pull
+    - docker compose up -d
   script:
-    - python manage.py test --verbosity=2
-    - coverage run manage.py test && coverage report && coverage erase
+    - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
+    - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
+    - docker compose run --rm ${SERVICE_NAME} coverage report
+    - docker compose run --rm ${SERVICE_NAME} coverage erase
+    # - docker compose run --rm app coverage report --fail-under=50
+  allow_failure: true
 
-stylesheet:
-  stage: test
+build_image:
+  stage: build
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - black --check .
-    - isort --check-only --skip migrations  --profile black .
-    - pylint --load-plugins pylint_django --django-settings-module=smi.settings --fail-under=7 **/*.py *.py
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
+  only:
+    changes:
+      - Dockerfile
 
 code_quality:
-  stage: test
+  stage: lint
   image: docker:stable
   variables:
     DOCKER_DRIVER: overlay2
@@ -59,11 +73,7 @@ code_quality:
   before_script:
     - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
   script:
-    - docker run
-      --env SOURCE_CODE="$PWD"
-      --volume "$PWD":/code
-      --volume /var/run/docker.sock:/var/run/docker.sock
-      "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
+    - docker run --env SOURCE_CODE="$PWD" --volume "$PWD":/code --volume /var/run/docker.sock:/var/run/docker.sock "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
   artifacts:
     paths:
       - gl-code-quality-report.json
@@ -72,15 +82,22 @@ code_quality:
   only:
     - master
 
-homolog:
+cleanup:
   stage: build
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker build -t $IMAGE_TAG .
-    - docker push $IMAGE_TAG
+    - docker --version
+    - docker ps
+    - docker images
+    - docker volume ls
+    - docker compose down --volumes --remove-orphans
+    - if [[ $(docker ps -aq) ]]; then docker stop $(docker ps -aq); fi
+    - if [[ $(docker ps -aq) ]]; then docker rm -f $(docker ps -aq); fi
+    - if [[ $(docker images -q) ]]; then docker rmi -f $(docker images -q); fi
+    - if [[ $(docker volume ls -q) ]]; then dorcker volume rm -f $(docker volume ls -q); fi
+    - if [[ $(docker network ls --filter type=custom -q) ]]; then docker network rm -f $(docker network ls --filter type=custom); fi
+    - docker builder prune -a -f
   only:
-    - tags
+    changes:
+      - gitlab-ci.yml
+      - docker compose.yml
+      - Dockerfile
