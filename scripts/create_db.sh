@@ -1,3 +1,3 @@
 #!/bin/bash
 
-psql -U postgres -c 'CREATE DATABASE smi-slave-dev;'
+psql -U postgres -c 'CREATE DATABASE sige-slave-dev;'
