@@ -7,7 +7,6 @@ from transductor.models import Transductor
 
 
 class MinutelyMeasurement(models.Model):
-    id = models.AutoField(primary_key=True)
     transductor = models.ForeignKey(Transductor, related_name="minutelys", on_delete=models.CASCADE)
     frequency_a = models.FloatField(default=None, null=True, blank=True)
     frequency_b = models.FloatField(default=None, null=True, blank=True)
@@ -42,7 +41,7 @@ class MinutelyMeasurement(models.Model):
     dht_current_b = models.FloatField(default=None, null=True, blank=True)
     dht_current_c = models.FloatField(default=None, null=True, blank=True)
     slave_collection_date = models.DateTimeField(default=timezone.now, blank=True)
-    transductor_collection_date = models.DateTimeField(default=timezone.now, blank=True)
+    collection_date = models.DateTimeField(default=timezone.now, blank=True)
 
     class Meta:
         verbose_name = "Minutely Measurement"
@@ -74,14 +73,13 @@ class MinutelyMeasurement(models.Model):
 
 
 class BaseMeasurement(models.Model):
-    id = models.AutoField(primary_key=True)
     transductor = models.ForeignKey(Transductor, on_delete=models.CASCADE)
     active_consumption = models.FloatField(null=True, blank=True)
     active_generated = models.FloatField(null=True, blank=True)
     reactive_inductive = models.FloatField(null=True, blank=True)
     reactive_capacitive = models.FloatField(null=True, blank=True)
     slave_collection_date = models.DateTimeField(default=timezone.now, blank=True)
-    transductor_collection_date = models.DateTimeField(default=timezone.now, blank=True)
+    collection_date = models.DateTimeField(default=timezone.now, blank=True)
 
     class Meta:
         abstract = True

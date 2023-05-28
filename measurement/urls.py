@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from .views import (
+from measurement.views import (
     MinutelyMeasurementViewSet,
     MonthlyMeasurementViewSet,
     QuarterlyMeasurementViewSet,

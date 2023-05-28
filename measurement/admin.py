@@ -18,7 +18,7 @@ class ReferenceMeasurementAdmin(admin.ModelAdmin):
         "active_generated",
         "reactive_inductive",
         "reactive_capacitive",
-        "transductor_collection_date",
+        "collection_date",
     ]
     list_display_links = ("id", "transductor")
     list_filter = (
@@ -36,10 +36,11 @@ class MinutelyMeasurementAdmin(admin.ModelAdmin):
         "voltage_a",
         "current_a",
         "active_power_a",
-        "transductor_collection_date",
+        "collection_date",
     ]
     list_display_links = ("id", "transductor")
-    list_filter = ("transductor",)
+    list_filter = ("transductor", "collection_date")
+    date_hierarchy = "collection_date"
 
 
 @admin.register(QuarterlyMeasurement)
@@ -52,10 +53,11 @@ class QuarterlyMeasurementAdmin(admin.ModelAdmin):
         "reactive_inductive",
         "reactive_capacitive",
         "is_calculated",
-        "transductor_collection_date",
+        "collection_date",
     ]
     list_display_links = ("id", "transductor")
-    list_filter = ("transductor", "is_calculated")
+    list_filter = ("transductor", "is_calculated", "collection_date")
+    date_hierarchy = "collection_date"
 
 
 @admin.register(MonthlyMeasurement)
@@ -67,7 +69,8 @@ class MonthlyMeasurementAdmin(admin.ModelAdmin):
         "active_generated",
         "reactive_inductive",
         "reactive_capacitive",
-        "transductor_collection_date",
+        "collection_date",
     ]
     list_display_links = ("id", "transductor")
-    list_filter = ("transductor",)
+    list_filter = ("transductor", "collection_date")
+    date_hierarchy = "collection_date"
