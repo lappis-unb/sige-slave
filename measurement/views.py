@@ -109,7 +109,7 @@ class RealTimeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
         for transductor in transductors:
             measurement = (
                 MinutelyMeasurement.objects.filter(transductor=transductor)
-                .order_by("transductor_collection_date")
+                .order_by("collection_date")
                 .last()
             )
             if measurement:

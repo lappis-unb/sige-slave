@@ -186,14 +186,18 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "simple": {"format": "%(levelname)-8s: %(message)s"},
+        "simple": {"format": "%(module)-12s: %(message)s"},
         "middle": {"format": "%(module)-12s: [line: %(lineno)-3s] %(message)s"},
-        "verbose": {"format": "%(asctime)s: %(levelname)-8s: %(funcName)s :%(lineno)d %(message)s"},
+        "verbose": {
+            "format": "%(asctime)s: %(module)-15s: %(message)s",
+            "datefmt": "%d %b %Y - %H:%M:%S",
+        },
     },
     "handlers": {
         "rich": {
             "class": "rich.logging.RichHandler",
             "formatter": "simple",
+            "rich_tracebacks": True,
         },
         "console": {
             "class": "logging.StreamHandler",
@@ -202,8 +206,8 @@ LOGGING = {
         "file": {
             "class": "logging.handlers.RotatingFileHandler",
             "filename": LOG_PATH / "debug.log",
-            "maxBytes": 5 * 1024 * 1024,         # 5 MB rotative
-            "formatter": "middle",
+            "maxBytes": 5 * 1024 * 1024,  # 5 MB rotative
+            "formatter": "verbose",
         },
         "tasks-file": {
             "class": "logging.handlers.RotatingFileHandler",
@@ -220,7 +224,7 @@ LOGGING = {
             "propagate": True,
         },
         "tasks": {
-            "handlers": ["console", "tasks-file"],
+            "handlers": ["rich", "tasks-file"],
             "level": "DEBUG",
             "propagate": False,
         },
