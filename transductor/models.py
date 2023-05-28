@@ -15,8 +15,8 @@ class Transductor(models.Model):
     power grid.
     """
 
-    # id = models.AutoField(primary_key=True)
-    id = models.IntegerField(primary_key=True)  # SINCRONIZAR ID DO MASTER
+
+    id = models.IntegerField(primary_key=True)
     serial_number = models.CharField(max_length=8, unique=True)
     ip_address = models.GenericIPAddressField(unique=True, protocol="IPv4")
     port = models.PositiveIntegerField()
