@@ -23,12 +23,10 @@ services:
     pull_policy: never
     env_file: dev-env
     command: ["sh", "scripts/start-dev.sh"]
-    image: ${IMAGE_NAME:-slave-api}:${IMAGE_TAG:-latest}
+    image: ${RELEASE_IMAGE:-slave-api}
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        API_KEY: ${API_KEY_CRONITOR}
     ports:
       - 8000:8000
     networks:
