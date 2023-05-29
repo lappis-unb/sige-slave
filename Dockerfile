@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
     postgresql-client \
     locales \
+    gettext \
     iputils-ping \
     net-tools \
     dnsutils \
@@ -45,7 +46,6 @@ RUN mkdir -p /etc/logrotate.d && \
     echo "  notifempty" >> /etc/logrotate.d/sige_slave && \
     echo "  create 0644 root root" >> /etc/logrotate.d/sige_slave && \
     echo "}" >> /etc/logrotate.d/sige_slave
-
 
 # ----------------------------------< cron >-----------------------------------------------
 RUN wget https://cronitor.io/dl/linux_amd64.tar.gz \
