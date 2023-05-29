@@ -21,7 +21,7 @@ from transductor.serializers import (
 
 
 class TransductorViewSet(viewsets.ModelViewSet):
-    queryset = Transductor.objects.all()
+    queryset = Transductor.objects.all().order_by("-id")
     serializer_class = TransductorSerializer
 
     def create(self, request, *args, **kwargs):
@@ -87,10 +87,10 @@ class TransductorViewSet(viewsets.ModelViewSet):
 
 
 class ActiveTransductorsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Transductor.objects.all()
+    queryset = Transductor.objects.all().order_by("-id")
     serializer_class = ActiveTransductorsSerializer
 
 
 class BrokenTransductorsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Transductor.objects.all()
+    queryset = Transductor.objects.all().order_by("-id")
     serializer_class = BrokenTransductorsSerializer

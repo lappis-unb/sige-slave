@@ -56,6 +56,16 @@ class MonthlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
         end_date = request.query_params.get("end_date", None)
         queryset = self.filter_queryset(self.get_queryset(start_date, end_date))
 
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={"start_date": start_date, "end_date": end_date},
+            )
+            return self.get_paginated_response(serializer.data)
+
         serializer = self.get_serializer(
             queryset,
             many=True,
@@ -78,7 +88,7 @@ class MonthlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
 
         if start_date is not None:
             end_date = end_date or timezone.now()
-            qs = QuarterlyMeasurement.object.filter(collection_date__range=[start_date, end_date])
+            qs = QuarterlyMeasurement.objects.filter(collection_date__range=[start_date, end_date])
             qs = qs.values("transductor")
 
         else:

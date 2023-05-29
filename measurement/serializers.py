@@ -303,10 +303,11 @@ class MonthlyListMeasurementSerializer(serializers.Serializer):
     capacitive_power_off_peak_time = serializers.FloatField()
 
     def to_representation(self, instance):
+        print("%" * 150)
         start_date = self.context.get("start_date")
         end_date = self.context.get("end_date")
 
-        if start_date and end_date:
+        if start_date:
             instance["start_date"] = start_date
             instance["end_date"] = end_date
         else:
