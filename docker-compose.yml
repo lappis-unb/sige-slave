@@ -1,55 +1,52 @@
-version: '3.8'
-services:
+version: "3.9"
 
+services:
   slave-db:
     container_name: slave-db
-    restart: always
-    image: postgres:9.6
+    restart: unless-stopped
+    image: postgres:15.2-bullseye
     env_file: dev-env
-    networks:
-      smi-network:
-        ipv4_address: 192.168.0.10
     volumes:
       - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5m
+      timeout: 30s
+      retries: 3
+      start_period: 1m
+    networks:
+      - slave-network
 
   slave-api:
     container_name: slave-api
-    restart: always
-    build: .
+    restart: unless-stopped
+    pull_policy: never
     env_file: dev-env
-    command: ["sh", "scripts/start.sh"]
-    networks:
-      smi-network:
-        ipv4_address: 192.168.0.11
+    command: ["sh", "scripts/start-dev.sh"]
+    image: ${RELEASE_IMAGE:-slave-api}
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - 8000:8000
+    networks:
+      - slave-network
+      - sige-network
     volumes:
-      - .:/smi-slave
-      - pip_cache:/usr/local/lib/python3/site-packages
+      - .:/sige-slave
+      - pip_cache:/usr/local/lib/python/site-packages
     depends_on:
       - slave-db
 
-  slave-broker:
-    container_name: slave-broker
-    restart: always
-    image: python:3.8
-    env_file: dev-env
-    working_dir: /slave-broker
-    networks:
-      - smi-network
-    volumes:
-      - ./:/slave-broker/
-    command: /bin/bash -c 'python -u broker.py'
-
 volumes:
-  pg-data: {}
+  pg-data:
+    name: slave-pgdata
   pip_cache:
+    name: slave-pip-cache
 
 networks:
-  smi-network:
-    name: smi-network
-    ipam:
-        driver: default
-        config:
-            - subnet: "192.168.0.0/24"
-              gateway: "192.168.0.1"
+  slave-network:
+    name: slave-network
+  sige-network:
+    driver: bridge
+    name: sige-network

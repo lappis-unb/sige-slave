@@ -114,10 +114,10 @@ sudo apt-get --assume-yes autoremove
 
 echo "========== SUCESSFULLY INSTALLED ALL NEEDED PKGs =========="
 
-echo "========== Setting SMI-Slave project =========="
+echo "========== Setting sige-Slave project =========="
 
-mkdir -p /smi
-git clone https://gitlab.com/lappis-unb/projects/SMI/smi-slave.git /smi/slave
+mkdir -p /sige
+git clone https://gitlab.com/lappis-unb/projects/sige/smi-slave.git /smi/slave
 
 function_ask_reboot() {
     read -p "Do you want to reboot now? (y|n)    " INPUT

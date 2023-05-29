@@ -1,7 +1,7 @@
 from rest_framework import mixins, viewsets
 from rest_framework.response import Response
 
-from transductor.models import EnergyTransductor
+from transductor.models import Transductor
 
 from .models import (
     CriticalVoltageEvent,
@@ -36,15 +36,12 @@ class VoltageRelatedEventViewSet(
         types = list(self.models.keys())
 
         events = []
-        for transductor in EnergyTransductor.objects.all():
+        for transductor in Transductor.objects.all():
             for type in types:
-                last_event = transductor.events_event.instance_of(
-                    self.models[type]
-                ).last()
+                last_event = transductor.events_event.instance_of(self.models[type]).last()
 
                 if last_event:
-                    data = {}
-                    data["data"] = {}
+                    data = {"data": {}}
                     for measure in last_event.data.keys():
                         data["data"][measure] = last_event.data[measure]
 
@@ -71,18 +68,17 @@ class FailedConnectionTransductorEventViewSet(
         # The period is defined by each minute because the collection for the
         # measurement related is defined by each minute too.
 
-        for transductor in EnergyTransductor.objects.all():
-            last_event = transductor.events_event.instance_of(
-                FailedConnectionTransductorEvent
-            ).last()
+        for transductor in Transductor.objects.all():
+            last_event = transductor.events_event.filter(instance_of=FailedConnectionTransductorEvent).last()
 
             if last_event:
-                data = {}
-                data["data"] = last_event.data
-                data["ip_address"] = last_event.transductor.ip_address
-                data["created_at"] = last_event.created_at
-                data["ended_at"] = last_event.ended_at
-                data["type"] = last_event.__class__.__name__
+                data = {
+                    "data": last_event.data,
+                    "ip_address": last_event.transductor.ip_address,
+                    "created_at": last_event.created_at,
+                    "ended_at": last_event.ended_at,
+                    "type": last_event.__class__.__name__,
+                }
                 events.append(data)
 
         return Response(events, status=200)

@@ -1,26 +1,23 @@
-from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils import timezone
-from polymorphic.models import PolymorphicModel
 
-from transductor.models import EnergyTransductor
+from transductor.models import Transductor
 
 
-class Event(PolymorphicModel):
+class Event(models.Model):
     """
     Defines a new event object
     """
 
+    id = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(null=True, blank=True)
     transductor = models.ForeignKey(
-        EnergyTransductor,
+        Transductor,
         related_name="%(app_label)s_%(class)s",
         on_delete=models.CASCADE,
-        blank=False,
-        null=False,
     )
-    data = JSONField(default=dict)
+    data = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return "%s@%s" % (self.__class__.__name__, self.created_at)
@@ -37,10 +34,7 @@ class VoltageRelatedEvent(Event):
         base_manager_name = "non_polymorphic"
 
     def all_phases_are_none(self):
-        for phase_name, phase_value in self.data.items():
-            if phase_value:
-                return False
-        return True
+        return not any(phase_value for phase_name, phase_value in self.data.items())
 
 
 class FailedConnectionTransductorEvent(Event):

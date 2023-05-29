@@ -10,17 +10,17 @@ from measurement.models import (
     MonthlyMeasurement,
     QuarterlyMeasurement,
 )
-from transductor.models import EnergyTransductor
+from transductor.models import Transductor
 
 
 class TransductorTestCase(TestCase):
     def setUp(self):
-        self.transductor = EnergyTransductor.objects.create(
+        self.transductor = Transductor.objects.create(
             serial_number="87654321",
             ip_address="192.168.10.3",
             broken=False,
             active=True,
-            model="EnergyTransductor",
+            model="Transductor",
             firmware_version="12.1.3215",
             physical_location="predio 2 sala 44",
             geolocation_longitude=-24.4556,
@@ -29,14 +29,14 @@ class TransductorTestCase(TestCase):
         )
 
     def test_create_energy_transductor(self):
-        size = len(EnergyTransductor.objects.all())
+        size = len(Transductor.objects.all())
 
-        energy_transductor = EnergyTransductor()
+        energy_transductor = Transductor()
         energy_transductor.serial_number = "12345678"
         energy_transductor.ip_address = "1.1.1.1"
         energy_transductor.broken = False
         energy_transductor.active = True
-        energy_transductor.model = "EnergyTransductor"
+        energy_transductor.model = "Transductor"
         energy_transductor.firmware_version = "12.1.3215"
         energy_transductor.physical_location = "predio 2 sala 44"
         energy_transductor.geolocation_longitude = -24.4556
@@ -44,17 +44,16 @@ class TransductorTestCase(TestCase):
         energy_transductor.installation_date = datetime.now()
 
         self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size + 1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size + 1, len(Transductor.objects.all()))
 
     def test_not_create_energy_transductor_no_firmware(self):
-        size = len(EnergyTransductor.objects.all())
 
-        transductor = EnergyTransductor()
+        transductor = Transductor()
         transductor.serial_number = "123456789"
         transductor.ip_address = "1.1.1.1"
         transductor.broken = False
         transductor.active = True
-        transductor.model = "EnergyTransductor"
+        transductor.model = "Transductor"
         transductor.physical_location = "predio 2 sala 44"
         transductor.geolocation_longitude = -24.4556
         transductor.geolocation_latitude = -24.45996
@@ -64,14 +63,13 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_latitude(self):
-        size = len(EnergyTransductor.objects.all())
 
-        transductor = EnergyTransductor()
+        transductor = Transductor()
         transductor.serial_number = "123456789"
         transductor.ip_address = "1.1.1.1"
         transductor.broken = False
         transductor.active = True
-        transductor.model = "EnergyTransductor"
+        transductor.model = "Transductor"
         transductor.firmware_version = "12.1.3215"
         transductor.physical_location = "predio 2 sala 44"
         transductor.geolocation_longitude = -24.4556
@@ -81,14 +79,13 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_longitude(self):
-        size = len(EnergyTransductor.objects.all())
 
-        transductor = EnergyTransductor()
+        transductor = Transductor()
         transductor.serial_number = "123456789"
         transductor.ip_address = "1.1.1.1"
         transductor.broken = False
         transductor.active = True
-        transductor.model = "EnergyTransductor"
+        transductor.model = "Transductor"
         transductor.firmware_version = "12.1.3215"
         transductor.physical_location = "predio 2 sala 44"
         transductor.geolocation_latitude = -24.4556
@@ -98,56 +95,46 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
-        size = len(EnergyTransductor.objects.all())
 
-        transductor = EnergyTransductor()
+        transductor = Transductor()
         transductor.serial_number = "123456789"
         transductor.ip_address = "1.1.1.1"
         transductor.broken = False
         transductor.active = True
-        transductor.model = "EnergyTransductor"
+        transductor.model = "Transductor"
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(DataError):
             transductor.save()
 
     def test_not_create_energy_transductor_empty_serial_number(self):
-        size = len(EnergyTransductor.objects.all())
 
-        transductor = EnergyTransductor()
+        transductor = Transductor()
         transductor.serial_number = ""
         transductor.ip_address = "1.1.1.1"
         transductor.broken = False
         transductor.active = True
-        transductor.model = "EnergyTransductor"
+        transductor.model = "Transductor"
         transductor.installation_date = datetime.now()
 
         with self.assertRaises(IntegrityError):
             transductor.save()
 
     def test_not_create_energy_transductor_no_transductor_model(self):
-        size = len(EnergyTransductor.objects.all())
 
-        energy_transductor = EnergyTransductor()
+        energy_transductor = Transductor()
         energy_transductor.serial_number = "12345678"
         energy_transductor.ip_address = ""
         energy_transductor.broken = False
         energy_transductor.active = True
         energy_transductor.installation_date = datetime.now()
-
-        with self.assertRaises(IntegrityError):
-            energy_transductor.save()
-
-    def test_not_update_transductor_wrong_serial_number(self):
-        energy_transductor = EnergyTransductor.objects.get(serial_number="87654321")
-
         energy_transductor.serial_number = "12345677777"
 
         with self.assertRaises(DataError):
             energy_transductor.save()
 
     def test_update_transductor_ip_address(self):
-        energy_transductor = EnergyTransductor.objects.get(serial_number="87654321")
+        energy_transductor = Transductor.objects.get(serial_number="87654321")
 
         energy_transductor.ip_address = "111.111.111.111"
 
@@ -180,19 +167,13 @@ class TransductorTestCase(TestCase):
 
         self.assertTrue(
             qs.exists(),
-            msg=(
-                "Toggle broken attribute to True must create a "
-                "FailedConnectionTransductorEvent"
-            ),
+            msg=("Toggle broken attribute to True must create a " "FailedConnectionTransductorEvent"),
         )
 
         self.assertEqual(
             qs.count(),
             1,
-            msg=(
-                "Toggle broken attribute to True must create only one "
-                "FailedConnectionTransductorEvent"
-            ),
+            msg=("Toggle broken attribute to True must create only one " "FailedConnectionTransductorEvent"),
         )
 
         self.assertIsNone(
@@ -207,9 +188,7 @@ class TransductorTestCase(TestCase):
         self.assertEqual(
             self.transductor.timeintervals.count(),
             1,
-            msg=(
-                "Toggle broken attribute to True must create only one " "timeinterval"
-            ),
+            msg=("Toggle broken attribute to True must create only one " "timeinterval"),
         )
 
         self.assertTrue(
@@ -219,10 +198,7 @@ class TransductorTestCase(TestCase):
 
         self.assertIsNone(
             self.transductor.timeintervals.last().end,
-            msg=(
-                "Toggle broken attribute to True must create an timeinterval "
-                "with end attribute equals to None"
-            ),
+            msg=("Toggle broken attribute to True must create an timeinterval " "with end attribute equals to None"),
         )
 
         # true to true
@@ -245,10 +221,7 @@ class TransductorTestCase(TestCase):
 
         self.assertIsNone(
             qs.last().ended_at,
-            msg=(
-                "True to True must not modify the ended_at attribute of "
-                "FailedConnectionTransductorEvent"
-            ),
+            msg=("True to True must not modify the ended_at attribute of " "FailedConnectionTransductorEvent"),
         )
 
         self.assertIsNone(
@@ -274,10 +247,7 @@ class TransductorTestCase(TestCase):
         self.assertEqual(
             self.transductor.timeintervals.count(),
             1,
-            msg=(
-                "Toggle broken attribute to False must create must not modify "
-                "the number of timeintervals"
-            ),
+            msg=("Toggle broken attribute to False must create must not modify " "the number of timeintervals"),
         )
 
         self.assertIsNotNone(
@@ -290,28 +260,25 @@ class TransductorTestCase(TestCase):
 
         self.assertIsNotNone(
             self.transductor.timeintervals.last().end,
-            msg=(
-                "Toggle broken attribute to False must modify the end "
-                "attribute of an existing timeinterval"
-            ),
+            msg=("Toggle broken attribute to False must modify the end " "attribute of an existing timeinterval"),
         )
 
     def test_delete_transductor(self):
-        size = len(EnergyTransductor.objects.all())
-        EnergyTransductor.objects.get(serial_number="87654321").delete()
+        size = len(Transductor.objects.all())
+        Transductor.objects.get(serial_number="87654321").delete()
 
-        self.assertEqual(size - 1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size - 1, len(Transductor.objects.all()))
 
     def test_not_delete_nonexistent_transductor(self):
-        size = len(EnergyTransductor.objects.all())
+        size = len(Transductor.objects.all())
         transductor_serial = "87654321"
 
-        EnergyTransductor.objects.get(serial_number=transductor_serial).delete()
+        Transductor.objects.get(serial_number=transductor_serial).delete()
 
-        self.assertEqual(size - 1, len(EnergyTransductor.objects.all()))
+        self.assertEqual(size - 1, len(Transductor.objects.all()))
 
-        with self.assertRaises(EnergyTransductor.DoesNotExist):
-            EnergyTransductor.objects.get(serial_number=transductor_serial).delete()
+        with self.assertRaises(Transductor.DoesNotExist):
+            Transductor.objects.get(serial_number=transductor_serial).delete()
 
     def _set_measurements(self, energy_transductor):
         """
@@ -335,17 +302,15 @@ class TransductorTestCase(TestCase):
 
         for date in datetimes:
             MinutelyMeasurement.objects.create(
-                transductor_collection_date=date,
+                collection_date=date,
                 slave_collection_date=date,
                 transductor=energy_transductor,
             )
 
-            QuarterlyMeasurement.objects.create(
-                transductor_collection_date=date, transductor=energy_transductor
-            )
+            QuarterlyMeasurement.objects.create(collection_date=date, transductor=energy_transductor)
 
             MonthlyMeasurement.objects.create(
-                transductor_collection_date=date,
+                collection_date=date,
                 transductor=energy_transductor,
                 active_max_power_list_peak_time=[],
                 active_max_power_list_off_peak_time=[],

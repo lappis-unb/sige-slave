@@ -3,12 +3,12 @@ from datetime import datetime
 from django.test import TestCase
 
 from events.models import Event, FailedConnectionTransductorEvent
-from transductor.models import EnergyTransductor
+from transductor.models import Transductor
 
 
 class EventTestCase(TestCase):
     def setUp(self):
-        self.transductor = EnergyTransductor.objects.create(
+        self.transductor = Transductor.objects.create(
             serial_number="8764321",
             ip_address="111.101.111.11",
             broken=False,
@@ -20,7 +20,7 @@ class EventTestCase(TestCase):
             geolocation_latitude=-24.45996,
             installation_date=datetime.now(),
         )
-        self.transductor2 = EnergyTransductor.objects.create(
+        self.transductor2 = Transductor.objects.create(
             serial_number="8764322",
             ip_address="111.101.111.12",
             broken=False,
@@ -43,10 +43,7 @@ class EventTestCase(TestCase):
 
         self.assertIsNone(
             event.ended_at,
-            msg=(
-                "A connection failure event has been created with an end date other "
-                "than None."
-            ),
+            msg=("A connection failure event has been created with an end date other " "than None."),
         )
 
     def test_connection_event_behavior(self):
@@ -78,10 +75,7 @@ class EventTestCase(TestCase):
 
         self.assertIsNone(
             event.ended_at,
-            msg=(
-                "A connection failure event has been created with an end date other "
-                "than None."
-            ),
+            msg=("A connection failure event has been created with an end date other " "than None."),
         )
 
         self.transductor.set_broken(False)

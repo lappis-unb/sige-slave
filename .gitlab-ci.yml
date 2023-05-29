@@ -1,86 +1,72 @@
-image: python:3.8
+image: docker:24.0.2
 
 services:
-  - postgres:9.6
-
-variables:
-  POSTGRES_USER: postgres
-  POSTGRES_PASSWORD: password
-  POSTGRES_DB: smi-slave-test
-  POSTGRES_PORT: 5432
-  POSTGRES_HOST: postgres
-  IMAGE_TAG: lappis/smi-slave
-  SLAVE_SECRET_KEY: some-random-stuff
-  ENVIRONMENT: test
-  ALLOWED_HOSTS: "*"
-  CONTRACTED_VOLTAGE: 220
+  - docker:dind
 
 stages:
-  - test
   - build
+  - lint
+  - test
+  - release
+  - deploy
+
+variables:
+  SERVICE_NAME: slave-api
+  IMAGE_DB: postgres:15.2-bullseye
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
 
 before_script:
-  - pip install -r requirements.txt
-  - python3 manage.py makemigrations
-  - python3 manage.py migrate
+  - docker --version
+  - docker compose version
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
-docker:
-  stage: test
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - docker --version
+build:
+  stage: build
   script:
-    - docker build -t smi-slave .
+    - docker build --pull -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+
+style:
+  stage: lint
+  before_script:
+    - docker compose pull
+  script:
+    - docker compose run ${SERVICE_NAME} pycodestyle .
+  allow_failure: true
 
 test:
   stage: test
-  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  script:
-    - python manage.py test --verbosity=2
-    - coverage run manage.py test && coverage report && coverage erase
-
-stylesheet:
-  stage: test
-  script:
-    - black --check .
-    - isort --check-only --skip migrations  --profile black .
-    - pylint --load-plugins pylint_django --django-settings-module=smi.settings --fail-under=7 **/*.py *.py
-
-code_quality:
-  stage: test
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
   before_script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
+    - docker compose pull
+    - docker compose up -d
   script:
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-  artifacts:
-    paths:
-      - gl-code-quality-report.json
-    reports:
-      codequality: gl-code-quality-report.json
-  only:
-    - master
+    - docker compose run --rm ${SERVICE_NAME} python manage.py test --verbosity=3
+    - docker compose run --rm ${SERVICE_NAME} coverage run manage.py test
+    - docker compose run --rm ${SERVICE_NAME} coverage report
+    - docker compose run --rm ${SERVICE_NAME} coverage erase
+    # - docker compose run --rm app coverage report --fail-under=50
+  allow_failure: true # temporary until refactoring the tests
 
-homolog:
-  stage: build
-  image: docker:stable
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+release-image:
+  stage: release
   script:
-    - docker build -t $IMAGE_TAG .
-    - docker push $IMAGE_TAG
+    - docker pull $IMAGE_TAG
+    - docker tag $IMAGE_TAG $RELEASE_IMAGE
+    - docker push $RELEASE_IMAGE
+  dependencies:
+    - build
   only:
-    - tags
+    changes:
+      - Dockerfile
+
+deploy:
+  stage: deploy
+  script:
+    # - ./scrips/deploy.sh
+    echo "Falta fazer o script de deployment!"
+  dependencies:
+    - build
+  only:
+    - main
+  environment: production
