@@ -15,7 +15,6 @@ class Transductor(models.Model):
     power grid.
     """
 
-
     id = models.IntegerField(primary_key=True)
     serial_number = models.CharField(max_length=8, unique=True)
     ip_address = models.GenericIPAddressField(unique=True, protocol="IPv4")

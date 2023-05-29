@@ -22,7 +22,7 @@ class ModbusDataReader:
 
         self._start_modbus_client()
         collected_data = {}
-        
+
         for register_block in register_blocks:
             byte_order = (
                 Endian.Little

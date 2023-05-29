@@ -47,7 +47,6 @@ class TransductorTestCase(TestCase):
         self.assertEqual(size + 1, len(Transductor.objects.all()))
 
     def test_not_create_energy_transductor_no_firmware(self):
-        size = len(Transductor.objects.all())
 
         transductor = Transductor()
         transductor.serial_number = "123456789"
@@ -64,7 +63,6 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_latitude(self):
-        size = len(Transductor.objects.all())
 
         transductor = Transductor()
         transductor.serial_number = "123456789"
@@ -81,7 +79,6 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_no_geolocation_longitude(self):
-        size = len(Transductor.objects.all())
 
         transductor = Transductor()
         transductor.serial_number = "123456789"
@@ -98,7 +95,6 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_wrong_serial_number(self):
-        size = len(Transductor.objects.all())
 
         transductor = Transductor()
         transductor.serial_number = "123456789"
@@ -112,7 +108,6 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_empty_serial_number(self):
-        size = len(Transductor.objects.all())
 
         transductor = Transductor()
         transductor.serial_number = ""
@@ -126,7 +121,6 @@ class TransductorTestCase(TestCase):
             transductor.save()
 
     def test_not_create_energy_transductor_no_transductor_model(self):
-        size = len(Transductor.objects.all())
 
         energy_transductor = Transductor()
         energy_transductor.serial_number = "12345678"

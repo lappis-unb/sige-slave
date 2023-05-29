@@ -82,4 +82,3 @@ class FailedConnectionTransductorEventViewSet(
                 events.append(data)
 
         return Response(events, status=200)
-

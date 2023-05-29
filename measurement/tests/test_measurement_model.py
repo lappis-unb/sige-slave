@@ -33,7 +33,6 @@ class EnergyMeasurementTestCase(TestCase):
             installation_date=datetime.now(),
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
-            collection_date
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
             frequency_a=8,
