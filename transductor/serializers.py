@@ -68,9 +68,9 @@ class TransductorSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        id = validated_data.get("id")  # SINCRONIZAR ID DO MASTER
-        if Transductor.objects.filter(id=id).exists():  # SINCRONIZAR ID DO MASTER
-            raise ValidationError({"id": "Um objeto com este ID já existe."})  # SINCRONIZAR ID DO MASTER
+        id = validated_data.get("id")
+        if Transductor.objects.filter(id=id).exists():
+            raise ValidationError({"id": "Um objeto com este ID já existe."})
 
         model = validated_data.get("model")
         csv_data = validated_data.pop("csv_data")
