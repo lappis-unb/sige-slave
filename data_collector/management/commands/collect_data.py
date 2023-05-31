@@ -37,19 +37,19 @@ class Command(BaseCommand):
 
     def handle(self, data_group, *args, **options):
         start_time = time.perf_counter()
-        logger.info("-" * 70)
-        logger.info(f"Command collect data from transducers  -  {data_group.upper()}")
+        logger.info("-" * 65)
+        logger.info(f"# Data collector starded - {data_group.upper()}")
 
         active = Transductor.objects.filter(active=True).count()
-        msg = f"Start Collection - Active Transductors: {active}" if active else "No active Transductors in database"
-        logger.error(msg)
+        msg = f"Active Transductors: {active}" if active else "No active Transductors in database"
+        logger.info(msg)
         # raise CommandError(msg)
 
         collect = self.collect_data(data_group)
 
         elapsed_time = time.perf_counter() - start_time
         logger.info(f"[{collect}/{active}] Collects completed and saved database.")
-        logger.info(f"Command execution time: {elapsed_time:0.2f} seconds.")
+        logger.info(f"Execution time: {elapsed_time:0.2f} seconds.")
 
     def collect_data(self, data_group: str) -> int:
         """
@@ -73,19 +73,24 @@ class Command(BaseCommand):
         modbus_data = []  # TODO: Teste in server perforance num thread in cpu
         with ThreadPoolExecutor(max_workers=multiprocessing.cpu_count() * 4) as executor:
             future_list = []
+            logger.debug("Starting collection:")
             for transductor in transductors:
+                logger.debug(f"Transductor: {transductor.id} - {transductor}")
+
                 model_transductor = transductor.model.lower().strip().replace(" ", "_")
                 slave_id = CONFIG_TRANSDUCTOR.get(model_transductor, {}).get("slave_id", 1)
 
                 future = executor.submit(transductor.collect_data, data_group, slave_id)
                 future_list.append(future)
 
+            logger.debug("Finished collection:")
             for future in as_completed(future_list):
                 try:
                     result = future.result()
                     if result["broken"]:
-                        logger.warning(f"{result['errors']} - set to broken")
+                        logger.error(f"{result['errors']} - set to broken")
                     else:
+                        logger.debug(f"Transductor: {result['collected']['transductor']}")
                         modbus_data.append(result["collected"])
 
                 except Exception as e:
@@ -110,16 +115,22 @@ class Command(BaseCommand):
                 if not error:
                     valid_data.append(data)
                 else:
-                    logger.info(self.style.ERROR(f"{get_now()} - {error}"))
+                    logger.error(f"{get_now()} - {error}")
 
             if not valid_data:
-                logger.info(self.style.ERROR(f"{get_now()}  -  No collection with valid data to save in the database"))
+                logger.warning(f"{get_now()}  -  No collection with valid data to save in the database")
                 return
 
             serializer = serializer_class(data=valid_data, many=True)
             serializer.is_valid(raise_exception=True)
 
         serializer.save()
+
+        if logger.level == logging.DEBUG:
+            data_group = data_group.capitalize()
+            logger.debug(f"Saved {data_group} collection in data to database: {len(serializer.data)}")
+            for data in serializer.data:
+                logger.debug(f"transductor: {data['transductor']} - {data_group}Measurement: {data['id']}")
 
     def get_serializer_class(self, data_group: str):
         serializer_dict = {

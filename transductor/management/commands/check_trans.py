@@ -16,7 +16,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         start_time = time.perf_counter()
-        logger.info("Command - Test all transducers.")
+        logger.info("-" * 65)
+        logger.info("# Command - Test all transducers.")
         broken_transductors = Transductor.objects.filter(broken=True)
 
         if not broken_transductors:
@@ -33,7 +34,7 @@ class Command(BaseCommand):
             thread.join()
 
         elapsed_time = time.perf_counter() - start_time
-        logger.info(f"tasks: {elapsed_time:.2f} seconds")
+        logger.info(f"Execution time: {elapsed_time:.2f} seconds")
 
     def test_transductor(self, transductor: Transductor) -> None:
         """Tests the connection to a transducer."""
@@ -48,7 +49,7 @@ class Command(BaseCommand):
                     self.activate_transductor(transductor)
 
         except ConnectionException:
-            logger.error(f"Failed to connect to transducer at: {ip}:{port}")
+            logger.error(f"Connection FAILED to transducer at: {ip}:{port}")
 
             if transductor.active:
                 self.deactivate_transductor(transductor)

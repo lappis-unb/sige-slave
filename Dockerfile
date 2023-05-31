@@ -24,7 +24,6 @@ RUN pip install --upgrade pip \
 
 COPY . /sige-slave
 
-
 # ----------------------------< locale and timezone >-------------------------------------
 RUN sed -i 's/# pt_BR.UTF-8 UTF-8/pt_BR.UTF-8 UTF-8/' /etc/locale.gen \
     && locale-gen pt_BR.UTF-8 \

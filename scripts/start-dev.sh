@@ -11,8 +11,6 @@ B='\033[0;34m'   # blue
 W='\033[0;37m'   # white
 E='\033[0m'      # end
 
-
-
 DB_HOST="$POSTGRES_HOST"
 DB_USERNAME="$POSTGRES_USER"
 DB_PASSWORD="$POSTGRES_PASSWORD"
@@ -29,6 +27,10 @@ until PGPASSWORD=$DB_PASSWORD psql -h "$DB_HOST" -U "$DB_USERNAME" -c '\q'; do
 done
 echo "${G}Postgres is ready!"
 
+echo "${C}____________________________________________________________________________________________________________________________${E}"
+echo "${C}=> CHECK INTEGRITY (check)                                                                                                  ${E}"
+python manage.py check
+          
 echo "${C}____________________________________________________________________________________________________________________________${E}"
 echo "${C}=> MAKING MIGRATIONS                                                                                                        ${E}"
 python manage.py makemigrations
