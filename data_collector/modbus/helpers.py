@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.utils import timezone
 
-from data_collector.modbus.settings import ON_PEAK_TIME_END, ON_PEAK_TIME_START
+from data_collector.modbus.settings import ON_PEAK_TIME_END, ON_PEAK_TIME_START, SIGN_TRANSFORMATIONS
 
 
 class ModbusTypeDecoder(object):
@@ -195,3 +195,9 @@ def update_key_attributes(self, modbus_data) -> dict:
 
     peak_time = "_peak_time" if is_peak_time() else "_off_peak_time"
     return {attribute + peak_time: value for attribute, value in modbus_data.items()}
+
+
+def apply_sign_transformations(attribute, value):
+    transform = SIGN_TRANSFORMATIONS.get(attribute, None)
+
+    return transform(value) if transform else value
