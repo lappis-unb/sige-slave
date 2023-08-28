@@ -75,3 +75,11 @@ INTERMEDIATE_TIME_START = time(17, 0, 0)
 INTERMEDIATE_TIME_END = time(21, 59, 59)
 OFF_PEAK_TIME_START = time(22, 0, 0)
 OFF_PEAK_TIME_END = time(16, 59, 59)
+
+
+# kron konect por padrao o active_generated e reactive_capacitive sao valores negativos
+SIGN_TRANSFORMATIONS = {
+    "active_generated": abs,
+    "reactive_capacitive": abs,
+    # outros atributos e suas transformações podem ser adicionados aqui
+}

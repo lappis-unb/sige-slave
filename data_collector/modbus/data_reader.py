@@ -4,7 +4,7 @@ from pymodbus.constants import Endian
 from pymodbus.exceptions import ModbusException
 from pymodbus.payload import BinaryPayloadDecoder
 
-from data_collector.modbus.helpers import ModbusTypeDecoder
+from data_collector.modbus.helpers import ModbusTypeDecoder, apply_sign_transformations
 
 
 class ModbusDataReader:
@@ -24,11 +24,7 @@ class ModbusDataReader:
         collected_data = {}
 
         for register_block in register_blocks:
-            byte_order = (
-                Endian.Little
-                if register_block["byteorder"].startswith(("msb", "f2"))
-                else Endian.Big
-            )
+            byte_order = Endian.Little if register_block["byteorder"].startswith(("msb", "f2")) else Endian.Big
 
             payload = self._read_registers_block(register_block)
             if payload is None:
@@ -107,6 +103,8 @@ class ModbusDataReader:
 
         decoded_value = {}
         for attribute in register_block["attributes"]:
-            decoded_value[attribute] = round(parse_function(decoder), 2)
+            value = round(parse_function(decoder), 2)
+            transformed_value = apply_sign_transformations(attribute, value)
+            decoded_value[attribute] = transformed_value
 
         return decoded_value
