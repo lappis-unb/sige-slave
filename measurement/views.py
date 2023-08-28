@@ -113,16 +113,13 @@ class RealTimeMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = RealTimeMeasurementSerializer
 
     def get_queryset(self):
-        last_measurements = []
+        latest_measurements = []
         transductors = Transductor.objects.all()
 
         for transductor in transductors:
-            measurement = (
-                MinutelyMeasurement.objects.filter(transductor=transductor)
-                .order_by("collection_date")
-                .last()
-            )
-            if measurement:
-                last_measurements.append(measurement)
+            latest_measurement = MinutelyMeasurement.objects.filter(transductor=transductor).order_by("-id").first()
 
-        return last_measurements
+            if latest_measurement:
+                latest_measurements.append(latest_measurement)
+
+        return latest_measurements
