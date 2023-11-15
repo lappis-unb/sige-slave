@@ -14,15 +14,28 @@ from measurement.models import (
     MinutelyMeasurement,
     MonthlyMeasurement,
     QuarterlyMeasurement,
+    ReferenceMeasurement
 )
+from data_collector.modbus.settings import DataGroups
 from transductor.models import Transductor
+from data_collector.models import MemoryMap
 
 
 class EnergyMeasurementTestCase(TestCase):
     def setUp(self):
+        self.memory_map = MemoryMap.objects.create(
+            id=1,
+            model_transductor='TR4020',
+            minutely=[],
+            quarterly=[],
+            monthly=[]
+        )
+
         self.transductor = Transductor.objects.create(
+            id=1,
             serial_number="87654321",
             ip_address="111.111.111.11",
+            port='1234',
             broken=False,
             active=True,
             model="Transductor",
@@ -31,6 +44,7 @@ class EnergyMeasurementTestCase(TestCase):
             geolocation_longitude=-24.4556,
             geolocation_latitude=-24.45996,
             installation_date=datetime.now(),
+            memory_map=self.memory_map
         )
         self.minutely_measurement = MinutelyMeasurement.objects.create(
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
@@ -66,64 +80,36 @@ class EnergyMeasurementTestCase(TestCase):
             dht_current_c=8,
         )
 
+        quarterly_reference = ReferenceMeasurement.objects.create(
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            transductor=self.transductor,
+            data_group=DataGroups.QUARTERLY
+        )
+
         self.quarterly_measurement = QuarterlyMeasurement.objects.create(
             collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
-            generated_energy_peak_time=8,
-            generated_energy_off_peak_time=8,
-            consumption_peak_time=8,
-            consumption_off_peak_time=8,
-            inductive_power_peak_time=8,
-            inductive_power_off_peak_time=8,
-            capacitive_power_peak_time=8,
-            capacitive_power_off_peak_time=8,
+            reference_measurement = quarterly_reference
+        )
+
+        monthly_reference = ReferenceMeasurement.objects.create(
+            collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
+            transductor=self.transductor,
+            data_group=DataGroups.MONTHLY
         )
 
         self.monthly_measurement = MonthlyMeasurement.objects.create(
             collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             slave_collection_date=timezone.datetime(2019, 2, 5, 14, 0, 0),
             transductor=self.transductor,
-            generated_energy_peak_time=8,
-            generated_energy_off_peak_time=8,
-            consumption_peak_time=8,
-            consumption_off_peak_time=8,
-            inductive_power_peak_time=8,
-            inductive_power_off_peak_time=8,
-            capacitive_power_peak_time=8,
-            capacitive_power_off_peak_time=8,
             active_max_power_peak_time=8,
             active_max_power_off_peak_time=8,
             reactive_max_power_peak_time=8,
             reactive_max_power_off_peak_time=8,
-            active_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            active_max_power_list_off_peak=[0.0, 0.0, 0.0, 0.0],
-            active_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_peak=[0.0, 0.0, 0.0, 0.0],
-            reactive_max_power_list_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
-            reactive_max_power_list_off_peak=[0.0, 0.0, 0.0, 0.0],
-            reactive_max_power_list_off_peak_time=[
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-                timezone.datetime(2019, 2, 5, 14, 0, 0),
-            ],
+            reference_measurement=monthly_reference
         )
 
     """
