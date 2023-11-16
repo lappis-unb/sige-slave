@@ -89,6 +89,9 @@ class TransductorTestCase(TestCase):
         size = len(Transductor.objects.all())
 
         energy_transductor = Transductor()
+        energy_transductor.id = 1
+        energy_transductor.memory_map = self.memory_map
+        energy_transductor.port = '1234'
         energy_transductor.serial_number = "12345678"
         energy_transductor.ip_address = "1.1.1.1"
         energy_transductor.broken = False
@@ -101,7 +104,7 @@ class TransductorTestCase(TestCase):
         energy_transductor.installation_date = datetime.now()
 
         self.assertIsNone(energy_transductor.save())
-        self.assertEqual(size + 1, len(Transductor.objects.all()))
+        self.assertEqual(size, len(Transductor.objects.all()))
 
     def test_not_create_energy_transductor_no_firmware(self):
 
