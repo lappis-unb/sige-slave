@@ -85,6 +85,43 @@ class TransductorTestCase(TestCase):
             memory_map=self.memory_map
         )
 
+    def test_str_method(self):
+        transductor = Transductor(
+            id=1,
+            serial_number="12345678",
+            ip_address="192.168.10.3",
+            port='1234',
+            broken=False,
+            active=True,
+            model="Transductor",
+            firmware_version="12.1.3215",
+            physical_location="predio 2 sala 44",
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996,
+            installation_date=datetime.now(),
+            memory_map=self.memory_map
+        )
+        self.assertEqual(str(transductor), "192.168.10.3 - Transductor")
+
+    def test_set_broken_method(self):
+            
+            transductor = Transductor()
+            id=1,
+            serial_number="12345678",
+            ip_address="192.168.10.1",
+            port='1234',
+            broken=False,
+            active=True,
+            model="Transductor",
+            firmware_version="12.1.3215",
+            physical_location="predio 2 sala 44",
+            geolocation_longitude=-24.4556,
+            geolocation_latitude=-24.45996,
+            installation_date=datetime.now(),
+            memory_map=self.memory_map
+            transductor.set_broken(True)
+            self.assertTrue(transductor.broken)
+            
     def test_create_energy_transductor(self):
         size = len(Transductor.objects.all())
 

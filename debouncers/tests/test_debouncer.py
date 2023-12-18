@@ -1,7 +1,13 @@
 from django.test import TestCase
+from dataclasses import asdict
 
-from debouncers.data_classes import VoltageState
+from debouncers.data_classes import VoltageBounds, VoltageState
 from debouncers.debouncers import VoltageEventDebouncer
+from events.models import (
+    CriticalVoltageEvent,
+    PrecariousVoltageEvent,
+    PhaseDropEvent,
+)
 
 
 class VoltageEventDebouncerTestCase(TestCase):
@@ -255,3 +261,96 @@ class VoltageEventDebouncerTestCase(TestCase):
                 "current state"
             ),
         )
+    
+    def test_empty_history(self):
+        self.assertEqual(len(self.debouncer.data_history), 0)
+        self.assertEqual(self.debouncer.avg_filter, 0)
+        self.assertEqual(self.debouncer.last_measurement, 0)
+        self.assertEqual(self.debouncer.current_voltage_state, VoltageState.NORMAL.value)
+
+    def test_full_history(self):
+        for _ in range(self.debouncer.history_size):
+            self.debouncer.add_new_measurement(220)
+
+    def test_extreme_values(self):
+        self.debouncer.add_new_measurement(1e10)
+        self.assertEqual(self.debouncer.current_voltage_state, VoltageState.CRITICAL_UPPER.value)
+    
+    def test_continuous_measurements(self):
+        for _ in range(20):
+            self.debouncer.add_new_measurement(220)
+
+    def test_history_size_limit(self):
+        for _ in range(self.debouncer.history_size):
+            self.debouncer.add_new_measurement(220)
+        self.assertEqual(len(self.debouncer.data_history), self.debouncer.history_size)
+        expected_data_history = [220] * self.debouncer.history_size
+        self.assertListEqual(self.debouncer.data_history, expected_data_history)
+    
+    def test_get_target_event_class(self):
+       
+        self.assertEqual(
+            VoltageState.get_target_event_class(VoltageState.CRITICAL_UPPER.value),
+            CriticalVoltageEvent,
+        )
+        self.assertEqual(
+            VoltageState.get_target_event_class(VoltageState.CRITICAL_LOWER.value),
+            CriticalVoltageEvent,
+        )
+        self.assertEqual(
+            VoltageState.get_target_event_class(VoltageState.PRECARIOUS_UPPER.value),
+            PrecariousVoltageEvent,
+        )
+        self.assertEqual(
+            VoltageState.get_target_event_class(VoltageState.PRECARIOUS_LOWER.value),
+            PrecariousVoltageEvent,
+        )
+        self.assertEqual(
+            VoltageState.get_target_event_class(VoltageState.PHASE_DOWN.value),
+            PhaseDropEvent,
+        )
+
+    def test_voltage_bounds_creation(self):
+       
+        upper_bound = 100.0
+        lower_bound = 50.0
+        voltage_bounds = VoltageBounds(upper_bound, lower_bound)
+        
+        self.assertEqual(voltage_bounds.upper_bound, upper_bound)
+        self.assertEqual(voltage_bounds.lower_bound, lower_bound)
+
+    def test_voltage_bounds_as_dict(self):
+       
+        voltage_bounds = VoltageBounds(100.0, 50.0)
+        expected_dict = {"upper_bound": 100.0, "lower_bound": 50.0}
+
+        self.assertDictEqual(asdict(voltage_bounds), expected_dict)
+    
+    def test_hysteresis_application(self):
+
+        self.debouncer.add_new_measurement(measurement_value=220)
+        state_ranges_before = self.debouncer.get_state_ranges()
+        self.debouncer.add_new_measurement(
+            measurement_value=self.debouncer.avg_filter + 0.5
+        )
+
+        state_ranges_after = self.debouncer.get_state_ranges()
+
+        for state in VoltageState:
+            if state != VoltageState.PHASE_DOWN:
+                if state_ranges_before[state.value].upper_bound != float('inf'):
+                    self.assertAlmostEqual(
+                        state_ranges_before[state.value].upper_bound,
+                        state_ranges_after[state.value].upper_bound,
+                        places=2,
+                        msg="The upper bound should have increased due to hysteresis",
+                    )
+
+            if state != VoltageState.CRITICAL_UPPER:
+                if state_ranges_before[state.value].lower_bound != float('-inf'):
+                    self.assertAlmostEqual(
+                        state_ranges_before[state.value].lower_bound,
+                        state_ranges_after[state.value].lower_bound,
+                        places=2,
+                        msg="The lower bound should have decreased due to hysteresis",
+                    )
