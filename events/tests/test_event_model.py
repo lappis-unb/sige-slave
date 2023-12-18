@@ -1,8 +1,10 @@
 from datetime import datetime
 
 from django.test import TestCase
+from django.urls import reverse
 
-from events.models import Event, FailedConnectionTransductorEvent
+
+from events.models import CriticalVoltageEvent, Event, FailedConnectionTransductorEvent, PhaseDropEvent, PrecariousVoltageEvent, VoltageRelatedEvent
 from transductor.models import Transductor
 from data_collector.models import MemoryMap
 
@@ -123,7 +125,7 @@ class EventTestCase(TestCase):
         )
 
         event: Event = FailedConnectionTransductorEvent.objects.last()
-
+    
         self.assertEqual(
             first=self.transductor.ip_address,
             second=event.transductor.ip_address,
@@ -149,3 +151,27 @@ class EventTestCase(TestCase):
                 "communication failure event has not been closed."
             ),
         )
+
+    def test_voltage_related_event(self):
+        voltage_event = VoltageRelatedEvent.objects.create(transductor=self.transductor, data={"voltage_a": None, "voltage_b": None, "voltage_c": None})
+        
+        self.assertTrue(voltage_event.all_phases_are_none(), msg="VoltageRelatedEvent data check failed.")
+
+    def test_event_data_manipulation(self):
+        event = Event.objects.create(transductor=self.transductor, data={"custom_field": "value"})
+        self.assertEqual(event.data.get("custom_field"), "value", msg="Event data manipulation failed.")
+
+    def test_precarious_voltage_event(self):
+        precarious_event = PrecariousVoltageEvent.objects.create(
+            transductor=self.transductor, data={"voltage_a": 100.0, "voltage_b": 105.5, "voltage_c": 110.8}
+        )
+
+    def test_phase_drop_event(self):
+        phase_drop_event = PhaseDropEvent.objects.create(
+            transductor=self.transductor, data={"voltage_a": None, "voltage_b": 95.5, "voltage_c": 100.8}
+        )
+
+    def test_event_with_data_not_null(self):
+        event_with_data = Event.objects.create(transductor=self.transductor, data={"custom_field": "value"})
+
+        self.assertIsNotNone(event_with_data.data, msg="Event data should not be None.")

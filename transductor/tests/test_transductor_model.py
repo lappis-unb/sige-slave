@@ -12,6 +12,8 @@ from measurement.models import (
 )
 from transductor.models import Transductor
 from data_collector.models import MemoryMap
+from transductor.validators import validate_csv_file
+from rest_framework import serializers
 
 
 class TransductorTestCase(TestCase):
@@ -414,3 +416,130 @@ class TransductorTestCase(TestCase):
                 reactive_max_power_list_peak_time=[],
                 reactive_max_power_list_off_peak_time=[],
             )
+
+    def test_update_transductor(self):
+        # Test updating a Transductor instance
+        transductor = Transductor.objects.create(
+            id=2,
+            serial_number="32145678",
+            ip_address="192.168.1.1",
+            port=1234,
+            model="TestModel",
+            firmware_version="1.0",
+            installation_date=datetime.now(),
+            physical_location="Test Location",
+            geolocation_longitude=0.0,
+            geolocation_latitude=0.0,
+            memory_map=MemoryMap.objects.create(id=2, model_transductor="TestMap", minutely=[], quarterly=[], monthly=[]),
+        )
+        transductor.serial_number = "67854321"
+        transductor.save()
+        updated_transductor = Transductor.objects.get(id=1)
+        self.assertEqual(updated_transductor.serial_number, "87654321")
+
+    def test_create_transductor(self):
+        # Test creating a Transductor instance
+        transductor = Transductor.objects.create(
+            id=3,
+            serial_number="12345678",
+            ip_address="192.168.1.1",
+            port=1234,
+            model="TestModel",
+            firmware_version="1.0",
+            installation_date=datetime.now(),
+            physical_location="Test Location",
+            geolocation_longitude=0.0,
+            geolocation_latitude=0.0,
+            memory_map=MemoryMap.objects.create(id=2, model_transductor="TestMap", minutely=[], quarterly=[], monthly=[]),
+        )
+        self.assertEqual(transductor.serial_number, "12345678")
+
+    def test_validate_empty_csv(self):
+        csv_data = []
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_duplicate_headers(self):
+        csv_data = [{"header1": "value1", "header1": "value2"}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_missing_headers(self):
+        csv_data = [{"header1": "value1"}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_null_value(self):
+        csv_data = [{"header1": ""}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+        
+    def test_validate_invalid_data_type(self):
+        csv_data = [{"header1": "invalid_value"}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_missing_value(self):
+        csv_data = [{"header1": "value1", "header2": ""}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_valid_csv(self):
+        # Teste com um CSV válido
+        csv_data = [
+            {"header1": "value1", "header2": "value2"},
+            {"header1": "value3", "header2": "value4"},
+        ]
+        with self.assertRaises(serializers.ValidationError) as context:
+            validate_csv_file(csv_data)
+
+        # Verificar se o código de erro está presente no detalhe da exceção
+        self.assertEqual(context.exception.detail[0].code, 'csv_missing_headers')
+
+    def test_validate_invalid_data_type_multiple_rows(self):
+        # Teste com um valor inválido em um campo obrigatório em múltiplas linhas
+        csv_data = [
+            {"header1": "value1", "header2": "value2"},
+            {"header1": "invalid_value", "header2": "value4"},
+        ]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_invalid_data_type_single_row(self):
+        # Teste com um valor inválido em um campo obrigatório em uma única linha
+        csv_data = [{"header1": "value1", "header2": "invalid_value"}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_missing_value_multiple_rows(self):
+        # Teste com valor ausente em um campo obrigatório em múltiplas linhas
+        csv_data = [
+            {"header1": "value1", "header2": "value2"},
+            {"header1": "", "header2": "value4"},
+        ]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_missing_value_single_row(self):
+        # Teste com valor ausente em um campo obrigatório em uma única linha
+        csv_data = [{"header1": "value1", "header2": ""}]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_csv_with_extra_headers(self):
+        # Teste com CSV contendo cabeçalhos extras não presentes no esquema
+        csv_data = [
+            {"header1": "value1", "header2": "value2", "extra_header": "extra_value"},
+            {"header1": "value3", "header2": "value4", "extra_header": "extra_value"},
+        ]
+        with self.assertRaises(serializers.ValidationError):
+            validate_csv_file(csv_data)
+
+    def test_validate_csv_no_headers(self):
+        csv_data = [{"field1": "value1", "field2": "value2"}]
+        with self.assertRaises(serializers.ValidationError) as context:
+            validate_csv_file(csv_data)
+
+        self.assertEqual(context.exception.detail[0].code, 'csv_missing_headers')
+
+    
