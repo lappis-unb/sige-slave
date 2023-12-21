@@ -35,7 +35,7 @@ class QuarterlyMeasurementViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = QuarterlyMeasurementFilter
 
     def get_serializer_class(self):
-        if self.action in ["list", "retrive"]:
+        if self.action in ["list", "retrieve"]:
             return QuarterlyListMeasurementSerializer
         return QuarterlyMeasurementSerializer
 
