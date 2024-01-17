@@ -3,3 +3,4 @@
 0,15,30,45 * * * * sleep 40 && export $(cat /root/env | xargs) && python /sige-slave/manage.py collect_data quarterly >> /sige-slave/logs/cron_output.log 2>&1
 0 0 1 * * export $(cat /root/env | xargs) && python /sige-slave/manage.py collect_data monthly >> logs/cron_output.log 2>&1
 0 0 1 * * export $(cat /root/env | xargs) && python /usr/sbin/logrotate /etc/logrotate.d/sige_slave > /dev/null 2>&1
+# 0 0 * * * export $(cat /root/env | xargs) && python /sige-slave/manage.py delete_old_measurements >> /sige-slave/logs/cron_output.log 2>&1
